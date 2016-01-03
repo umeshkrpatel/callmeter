@@ -18,15 +18,8 @@
  */
 package de.ub0r.android.callmeter.ui;
 
-import com.google.android.gms.ads.AdListener;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
-
-import com.viewpagerindicator.TitlePageIndicator;
-
 import android.Manifest;
 import android.app.ProgressDialog;
-import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -34,7 +27,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -50,7 +42,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
-import android.widget.Toast;
+
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.viewpagerindicator.TitlePageIndicator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -166,7 +162,7 @@ public final class Plans extends AppCompatActivity implements OnPageChangeListen
                     Fragment f = Plans.this.fadapter.getActiveFragment(Plans.this.pager,
                             Plans.this.fadapter.getHomeFragmentPos());
                     if (f != null && f instanceof PlansFragment) {
-                        ((PlansFragment) f).requery(true);
+                        ((PlansFragment) f).reQuery(true);
                     }
                     break;
                 case MSG_BACKGROUND_PROGRESS_MATCHER:
@@ -329,6 +325,7 @@ public final class Plans extends AppCompatActivity implements OnPageChangeListen
                     }
                     c.close();
                     list.add(-1L); // current time
+                    list.add(-1L); // summary
                     list.add(-1L); // logs
                     positions = list.toArray(new Long[list.size()]);
                     int l = positions.length;
@@ -345,7 +342,8 @@ public final class Plans extends AppCompatActivity implements OnPageChangeListen
             Common.setDateFormat(context);
             final int l = positions.length;
             titles = new String[l];
-            titles[l - 2] = context.getString(R.string.now);
+            titles[l - 3] = context.getString(R.string.now);
+            titles[l - 2] = "Summary";
             titles[l - 1] = context.getString(R.string.logs);
         }
 
@@ -380,7 +378,9 @@ public final class Plans extends AppCompatActivity implements OnPageChangeListen
 
         @Override
         public Fragment getItem(final int position) {
-            if (position == getLogsFragmentPos()) {
+            if (position == getSummaryFragmentPos()) {
+                return new SummaryFragment();
+            } else if (position == getLogsFragmentPos()) {
                 return new LogsFragment();
             } else {
                 return PlansFragment.newInstance(position, positions[position]);
@@ -393,7 +393,7 @@ public final class Plans extends AppCompatActivity implements OnPageChangeListen
          * @return position of home {@link Fragment}
          */
         public int getHomeFragmentPos() {
-            return positions.length - 2;
+            return positions.length - 3;
         }
 
         /**
@@ -401,9 +401,9 @@ public final class Plans extends AppCompatActivity implements OnPageChangeListen
          *
          * @return position of Logs {@link Fragment}
          */
-        public int getLogsFragmentPos() {
-            return positions.length - 1;
-        }
+        public int getLogsFragmentPos() { return positions.length - 1; }
+
+        public int getSummaryFragmentPos() { return positions.length - 2; }
 
         /**
          * {@inheritDoc}
@@ -581,9 +581,9 @@ public final class Plans extends AppCompatActivity implements OnPageChangeListen
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
-        if (prefsNoAds) {
+        /* if (prefsNoAds) {
             menu.removeItem(R.id.item_donate);
-        }
+        } */
         return true;
     }
 
@@ -596,7 +596,7 @@ public final class Plans extends AppCompatActivity implements OnPageChangeListen
             case R.id.item_settings:
                 startActivity(new Intent(this, Preferences.class));
                 return true;
-            case R.id.item_donate:
+            /* case R.id.item_donate:
                 try {
                     startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(
                             "https://play.google.com/store/apps/details?id=de.ub0r.android.donator")));
@@ -606,6 +606,7 @@ public final class Plans extends AppCompatActivity implements OnPageChangeListen
                             Toast.LENGTH_LONG).show();
                 }
                 return true;
+             */
             case R.id.item_logs:
                 showLogsFragment(-1L);
                 return true;
@@ -615,6 +616,11 @@ public final class Plans extends AppCompatActivity implements OnPageChangeListen
                         fadapter.getLogsFragmentPos());
                 if (f != null && f instanceof LogsFragment) {
                     ((LogsFragment) f).setPlanId(-1L);
+                }
+                Fragment f1 = fadapter.getActiveFragment(pager,
+                        fadapter.getSummaryFragmentPos());
+                if (f1 != null && f1 instanceof SummaryFragment) {
+                    ((SummaryFragment) f1).setPlanId(-1L);
                 }
                 return true;
             default:
@@ -656,10 +662,16 @@ public final class Plans extends AppCompatActivity implements OnPageChangeListen
             if (f != null && f instanceof LogsFragment) {
                 ((LogsFragment) f).setAdapter(false);
             }
+        } else if (position == fadapter.getSummaryFragmentPos()) {
+            Fragment f = fadapter.getActiveFragment(pager,
+                    fadapter.getSummaryFragmentPos());
+            if (f != null && f instanceof SummaryFragment) {
+                ((SummaryFragment) f).setAdapter(false);
+            }
         } else {
             Fragment f = fadapter.getActiveFragment(pager, position);
             if (f != null && f instanceof PlansFragment) {
-                ((PlansFragment) f).requery(false);
+                ((PlansFragment) f).reQuery(false);
             }
         }
     }

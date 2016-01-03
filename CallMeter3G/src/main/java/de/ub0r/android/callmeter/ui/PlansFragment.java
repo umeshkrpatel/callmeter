@@ -48,12 +48,13 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.github.mikephil.charting.charts.PieChart;
 
 import java.util.UnknownFormatConversionException;
 
@@ -72,148 +73,38 @@ import de.ub0r.android.logg0r.Log;
 public final class PlansFragment extends ListFragment implements OnClickListener,
         OnItemLongClickListener, LoaderCallbacks<Cursor> {
 
-    /**
-     * Tag for output.
-     */
     private static final String TAG = "PlansFragment";
-
-    /**
-     * Run the dummy?
-     */
     private static boolean doDummy = true;
-
-    /**
-     * Show today stats.
-     */
     private static boolean showToday = false;
-
-    /**
-     * Show total stats.
-     */
     private static boolean showTotal = true;
-
-    /**
-     * Hide zero plans.
-     */
     private static boolean hideZero = false;
-
-    /**
-     * Hide no cost plans.
-     */
     private static boolean hideNoCost = false;
-
-    /**
-     * Ignore query requests.
-     */
     private boolean ignoreQuery = false;
-
-    /**
-     * Unique id for dummy loader.
-     */
     private static final int UID_DUMMY = -3;
 
-    /**
-     * Adapter binding plans to View.
-     *
-     * @author flx
-     */
     private static class PlansAdapter extends ResourceCursorAdapter {
-
-        /**
-         * View holder.
-         *
-         * @author flx
-         */
         private class ViewHolder {
-
-            /**
-             * {@link View}s.
-             */
             View vPeriodLayout, vContent, vSpacer;
-
-            /**
-             * {@link TextView}s.
-             */
             TextView tvBigtitle, tvPeriod, tvBilldayLable, tvTitle, tvData;
-
-            /**
-             * {@link ProgressBar}s.
-             */
             ProgressBar pbPeriod, pbLimitGreen, pbLimitYellow, pbLimitRed;
+            PieChart pcDataChart;
         }
 
-        /**
-         * {@link SharedPreferences}.
-         */
         private final SharedPreferences p;
-
-        /**
-         * {@link Editor}.
-         */
         private final Editor e;
-
-        /**
-         * Does the {@link Editor} needs commit?
-         */
         private boolean isDirty = false;
-
-        /**
-         * Now.
-         */
         private final long now;
-
-        /**
-         * Text sizes.
-         */
         private static int textSize, textSizeBigTitle, textSizeTitle, textSizeSpacer, textSizePBar,
                 textSizePBarBP;
-
-        /**
-         * Separator for the data.
-         */
         private static String delimiter = " | ";
-
-        /**
-         * Selected currency format.
-         */
         private static String currencyFormat = "$%.2f";
-
-        /**
-         * Show hours and days.
-         */
         private static boolean pShowHours = true;
-
-        /**
-         * Show target bill day.
-         */
         private static boolean pShowTargetBillDay = false;
-
-        /**
-         * First/last bill day shown.
-         */
         private static int billDayResId = R.string.billday_;
-
-        /**
-         * Prepaid plan?
-         */
         private static boolean prepaid;
-
-        /**
-         * Visibility for {@link ProgressBar}s.
-         */
         private final int progressBarVisability;
-
-        /**
-         * Need a reload of preferences.
-         */
         private static boolean needReloadPrefs = true;
 
-        /**
-         * Reload preferences.
-         *
-         * @param context {@link Context}
-         * @param force   force reloading
-         */
         static void reloadPreferences(final Context context, final boolean force) {
             if (!force && !needReloadPrefs) {
                 return;
@@ -235,12 +126,6 @@ public final class PlansFragment extends ListFragment implements OnClickListener
             textSizePBarBP = Preferences.getTextsizeProgressBarBP(context);
         }
 
-        /**
-         * Default Constructor.
-         *
-         * @param context {@link Activity}
-         * @param n       now
-         */
         public PlansAdapter(final Activity context, final long n) {
             super(context, R.layout.plans_item, null, true);
             now = n;
@@ -253,9 +138,6 @@ public final class PlansFragment extends ListFragment implements OnClickListener
             }
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public void bindView(final View view, final Context context, final Cursor cursor) {
             ViewHolder holder = (ViewHolder) view.getTag();
@@ -273,6 +155,7 @@ public final class PlansFragment extends ListFragment implements OnClickListener
                 holder.tvBilldayLable = (TextView) view.findViewById(R.id.billday_lable);
                 holder.tvTitle = (TextView) view.findViewById(R.id.normtitle);
                 holder.tvData = (TextView) view.findViewById(R.id.data);
+                holder.pcDataChart = (PieChart) view.findViewById(R.id.data_chart);
                 view.setTag(holder);
             }
 
@@ -364,7 +247,7 @@ public final class PlansFragment extends ListFragment implements OnClickListener
             ProgressBar pbCache = null;
             if (plan.type == DataProvider.TYPE_SPACING) {
                 if (textSizeSpacer > 0) {
-                    final LayoutParams lp = holder.vSpacer.getLayoutParams();
+                    final ViewGroup.LayoutParams lp = holder.vSpacer.getLayoutParams();
                     lp.height = textSizeSpacer;
                     holder.vSpacer.setLayoutParams(lp);
                 }
@@ -372,6 +255,7 @@ public final class PlansFragment extends ListFragment implements OnClickListener
                 holder.tvBigtitle.setVisibility(View.GONE);
                 holder.vContent.setVisibility(View.GONE);
                 holder.vPeriodLayout.setVisibility(View.GONE);
+                holder.pcDataChart.setVisibility(View.GONE);
             } else if (plan.type == DataProvider.TYPE_TITLE) {
                 holder.tvBigtitle.setText(cursor.getString(DataProvider.Plans.INDEX_NAME));
                 if (textSizeBigTitle > 0) {
@@ -381,12 +265,14 @@ public final class PlansFragment extends ListFragment implements OnClickListener
                 holder.vSpacer.setVisibility(View.GONE);
                 holder.vContent.setVisibility(View.GONE);
                 holder.vPeriodLayout.setVisibility(View.GONE);
+                holder.pcDataChart.setVisibility(View.GONE);
             } else if (plan.type == DataProvider.TYPE_BILLPERIOD) {
                 holder.tvBigtitle.setVisibility(View.GONE);
                 holder.vSpacer.setVisibility(View.GONE);
                 holder.vContent.setVisibility(View.GONE);
                 holder.vPeriodLayout.setVisibility(View.VISIBLE);
                 holder.tvBilldayLable.setText(billDayResId);
+                holder.pcDataChart.setVisibility(View.GONE);
                 tvCache = holder.tvPeriod;
                 pbCache = holder.pbPeriod;
             } else {
@@ -394,6 +280,7 @@ public final class PlansFragment extends ListFragment implements OnClickListener
                 holder.vSpacer.setVisibility(View.GONE);
                 holder.vPeriodLayout.setVisibility(View.GONE);
                 holder.vContent.setVisibility(View.VISIBLE);
+                holder.pcDataChart.setVisibility(View.VISIBLE);
                 if (textSizeTitle > 0) {
                     holder.tvTitle.setTextSize(textSizeTitle);
                 }
@@ -443,7 +330,7 @@ public final class PlansFragment extends ListFragment implements OnClickListener
                         pbs = textSizePBar;
                     }
                     if (pbs > 0) {
-                        final LayoutParams lp = pbCache.getLayoutParams();
+                        final ViewGroup.LayoutParams lp = pbCache.getLayoutParams();
                         lp.height = pbs;
                         pbCache.setLayoutParams(lp);
                     }
@@ -459,9 +346,6 @@ public final class PlansFragment extends ListFragment implements OnClickListener
             }
         }
 
-        /**
-         * Save current stats to {@link SharedPreferences}.
-         */
         public void save() {
             if (isDirty) {
                 Log.d(TAG, "e.commit()");
@@ -471,33 +355,10 @@ public final class PlansFragment extends ListFragment implements OnClickListener
         }
     }
 
-    /**
-     * This fragments time stamp.
-     */
     private long now;
-
-    /**
-     * Unique id of this fragment.
-     */
     private int uid;
-
-    /**
-     * Is loader running?
-     */
     private boolean inProgress;
-
-    /**
-     * Handle for view.
-     */
     private View vLoading, vImport;
-
-    /**
-     * Get new {@link PlansFragment}.
-     *
-     * @param uid unique id for this fragment
-     * @param now This fragments current time
-     * @return {@link PlansFragment}
-     */
     public static PlansFragment newInstance(final int uid, final long now) {
         PlansFragment f = new PlansFragment();
         Bundle args = new Bundle();
@@ -507,11 +368,6 @@ public final class PlansFragment extends ListFragment implements OnClickListener
         return f;
     }
 
-    /**
-     * Force reloading preferences.
-     *
-     * @param context {@link Context}
-     */
     static void reloadPreferences(final Context context) {
         PlansAdapter.reloadPreferences(context, true);
         SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(context);
@@ -519,12 +375,8 @@ public final class PlansFragment extends ListFragment implements OnClickListener
         showTotal = p.getBoolean(Preferences.PREFS_SHOWTOTAL, false);
         hideZero = p.getBoolean(Preferences.PREFS_HIDE_ZERO, false);
         hideNoCost = p.getBoolean(Preferences.PREFS_HIDE_NOCOST, false);
-
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -539,18 +391,12 @@ public final class PlansFragment extends ListFragment implements OnClickListener
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onPause() {
         super.onPause();
         ((PlansAdapter) getListAdapter()).save();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
             final Bundle savedInstanceState) {
@@ -561,9 +407,6 @@ public final class PlansFragment extends ListFragment implements OnClickListener
         return v;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -580,9 +423,6 @@ public final class PlansFragment extends ListFragment implements OnClickListener
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onStop() {
         super.onStop();
@@ -591,11 +431,6 @@ public final class PlansFragment extends ListFragment implements OnClickListener
         }
     }
 
-    /**
-     * Set progress indicator.
-     *
-     * @param add add number of running tasks
-     */
     private synchronized void setInProgress(final int add) {
         Log.d(TAG, "setInProgress(", add, ")");
         if (add == 0) {
@@ -609,12 +444,7 @@ public final class PlansFragment extends ListFragment implements OnClickListener
         }
     }
 
-    /**
-     * Re-query database.
-     *
-     * @param forceUpdate force update
-     */
-    public void requery(final boolean forceUpdate) {
+    public void reQuery(final boolean forceUpdate) {
         Log.d(TAG, "requery(", forceUpdate, ")");
         if (!this.ignoreQuery) {
             LoaderManager lm = getLoaderManager();
@@ -653,9 +483,6 @@ public final class PlansFragment extends ListFragment implements OnClickListener
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean onItemLongClick(final AdapterView<?> parent, final View view,
             final int position, final long id) {

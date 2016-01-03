@@ -91,6 +91,10 @@
                     android:gravity="right"
                     android:singleLine="false"/>
         </RelativeLayout>
+        <com.github.mikephil.charting.charts.PieChart
+            android:id="@+id/data_chart"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
         <ProgressBar
                 android:id="@+id/progressbarLimitGreen"
