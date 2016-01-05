@@ -55,80 +55,65 @@ import de.ub0r.android.logg0r.Log;
 public final class StatsAppWidgetProvider extends AppWidgetProvider {
 
     /**
-     * Tag for debug out.
-     */
-    private static final String TAG = "wdgt";
-
-    /**
      * Plan.id for widget.
      */
     public static final String WIDGET_PLANID = "widget_planid_";
-
     /**
      * Hide name for widget.
      */
     static final String WIDGET_HIDETNAME = "widget_hidename_";
-
     /**
      * Show short name for widget.
      */
     static final String WIDGET_SHORTNAME = "widget_shortname_";
-
     /**
      * Show cost for widget.
      */
     static final String WIDGET_COST = "widget_cost_";
-
     /**
      * Show progress of billing period for widget.
      */
     static final String WIDGET_BILLPERIOD = "widget_billp_";
-
     /**
      * Size of the plan name text.
      */
     static final String WIDGET_PLAN_TEXTSIZE = "widget_plan_textsize_";
-
     /**
      * Size of the statistics text.
      */
     static final String WIDGET_STATS_TEXTSIZE = "widget_stats_textsize_";
-
     /**
      * Widget's text color.
      */
     static final String WIDGET_TEXTCOLOR = "widget_textcolor_";
-
     /**
      * Widget's background color.
      */
     static final String WIDGET_BGCOLOR = "widget_bgcolor_";
-
     /**
      * Widget's icon.
      */
     static final String WIDGET_ICON = "widget_icon_";
-
     /**
      * Must widget be small?
      */
     static final String WIDGET_SMALL = "widget_small_";
-
     /**
      * Width of the widget.
      */
     static final int WIDGET_WIDTH = 100;
-
-    /**
-     * Height of progress bars.
-     */
-    private static final int PB_HEIGHT = 4;
-
     /**
      * Round corners.
      */
     static final float WIDGET_RCORNER = 10f;
-
+    /**
+     * Tag for debug out.
+     */
+    private static final String TAG = "wdgt";
+    /**
+     * Height of progress bars.
+     */
+    private static final int PB_HEIGHT = 4;
     /**
      * Red color for progress bars.
      */
@@ -155,33 +140,6 @@ public final class StatsAppWidgetProvider extends AppWidgetProvider {
     private static final int PB_COLOR_GREEN = 0xFF00FF00;
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void onUpdate(final Context context, final AppWidgetManager appWidgetManager,
-            final int[] appWidgetIds) {
-        Log.d(TAG, "onUpdate()");
-        Utils.setLocale(context);
-        Common.setDateFormat(context);
-
-        // Update logs and run rule matcher
-        LogRunnerService.update(context, LogRunnerService.ACTION_RUN_MATCHER);
-
-        updateWidgets(context, appWidgetManager, appWidgetIds);
-    }
-
-    @Override
-    public void onDeleted(final Context context, final int[] appWidgetIds) {
-        Editor e = PreferenceManager.getDefaultSharedPreferences(context).edit();
-        for (int id : appWidgetIds) {
-            Log.d(TAG, "delete widget: ", id);
-            e.remove(WIDGET_PLANID + id);
-        }
-
-        e.commit();
-    }
-
-    /**
      * Update all widgets.
      *
      * @param context          {@link Context}
@@ -189,7 +147,7 @@ public final class StatsAppWidgetProvider extends AppWidgetProvider {
      * @param appWidgetIds     app widget ids
      */
     private static void updateWidgets(final Context context,
-            final AppWidgetManager appWidgetManager, final int[] appWidgetIds) {
+                                      final AppWidgetManager appWidgetManager, final int[] appWidgetIds) {
         SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(context);
 
         for (int id : appWidgetIds) {
@@ -224,7 +182,7 @@ public final class StatsAppWidgetProvider extends AppWidgetProvider {
      * @param appWidgetId      id of widget
      */
     static void updateWidget(final Context context, final AppWidgetManager appWidgetManager,
-            final int appWidgetId) {
+                             final int appWidgetId) {
         Log.d(TAG, "updateWidget(", appWidgetId, ")");
         final SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(context);
         final boolean showTargetBillDay = p
@@ -361,7 +319,7 @@ public final class StatsAppWidgetProvider extends AppWidgetProvider {
      * @return {@link Bitmap}
      */
     private static Bitmap getBackground(final int bgColor, final int bmax, final int bpos,
-            final boolean showBillPeriod, final long limit, final long used) {
+                                        final boolean showBillPeriod, final long limit, final long used) {
         //noinspection SuspiciousNameCombination
         final Bitmap bitmap = Bitmap.createBitmap(WIDGET_WIDTH, WIDGET_WIDTH,
                 Bitmap.Config.ARGB_8888);
@@ -432,5 +390,32 @@ public final class StatsAppWidgetProvider extends AppWidgetProvider {
             canvas.drawBitmap(bitmapPb, copy, copy, null);
         }
         return bitmap;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onUpdate(final Context context, final AppWidgetManager appWidgetManager,
+                         final int[] appWidgetIds) {
+        Log.d(TAG, "onUpdate()");
+        Utils.setLocale(context);
+        Common.setDateFormat(context);
+
+        // Update logs and run rule matcher
+        LogRunnerService.update(context, LogRunnerService.ACTION_RUN_MATCHER);
+
+        updateWidgets(context, appWidgetManager, appWidgetIds);
+    }
+
+    @Override
+    public void onDeleted(final Context context, final int[] appWidgetIds) {
+        Editor e = PreferenceManager.getDefaultSharedPreferences(context).edit();
+        for (int id : appWidgetIds) {
+            Log.d(TAG, "delete widget: ", id);
+            e.remove(WIDGET_PLANID + id);
+        }
+
+        e.commit();
     }
 }

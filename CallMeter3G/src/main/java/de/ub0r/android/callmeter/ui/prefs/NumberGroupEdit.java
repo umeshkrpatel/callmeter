@@ -156,7 +156,7 @@ public final class NumberGroupEdit extends PreferenceActivity implements
      */
     @Override
     protected void onActivityResult(final int requestCode, final int resultCode,
-            final Intent data) {
+                                    final Intent data) {
         if (data == null || data.getData() == null) {
             return;
         }

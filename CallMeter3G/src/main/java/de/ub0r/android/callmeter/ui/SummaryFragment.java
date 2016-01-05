@@ -67,7 +67,9 @@ import de.ub0r.android.logg0r.Log;
 public final class SummaryFragment extends ListFragment implements OnClickListener,
         OnItemLongClickListener, LoaderCallbacks<Cursor> {
 
-    /** Tag for output. */
+    /**
+     * Tag for output.
+     */
     private static final String TAG = "LogsFragment";
 
     /**
@@ -99,152 +101,31 @@ public final class SummaryFragment extends ListFragment implements OnClickListen
      * Prefs: {@link ToggleButton} state for out.
      */
     private static final String PREF_OUT = "_out";
-
+    /**
+     * Unique id for this {@link LogsFragment}s loader.
+     */
+    private static final int LOADER_UID = -2;
     /**
      * {@link ToggleButton}s.
      */
     //private ToggleButton tbCall, tbSMS, tbMMS, tbData, tbIn, tbOut, tbPlan;
     private PieChart pcCallDuration, pcCallCount, pcSmsMms, pcData;
-
     /**
      * Show my number.
      */
     private boolean showMyNumber = false;
-
     /**
      * Show hours and days.
      */
     private boolean showHours = true;
-
     /**
      * Currency format.
      */
     private String cformat;
-
     /**
      * Selected plan id.
      */
     private long planId = -1;
-
-    /**
-     * Unique id for this {@link LogsFragment}s loader.
-     */
-    private static final int LOADER_UID = -2;
-
-    /**
-     * Adapter binding logs to View.
-     *
-     * @author flx
-     */
-    public class SummaryAdapter extends ResourceCursorAdapter {
-
-        /**
-         * View holder.
-         *
-         * @author flx
-         */
-        private class ViewHolder {
-
-            /**
-             * Holder for item's view.
-             */
-            TextView tvName, tvNumber, tvTime, tvDuration;
-
-            ImageView ivType;
-            /**
-             * Hold {@link NameLoader}.
-             */
-            NameLoader loader;
-            long callIn, callOut, smsIn, smsOut, mmsIn, mmsOut, dataIn, dataOut;
-        }
-
-        /**
-         * Column ids.
-         */
-        private int idPlanName, idRuleName;
-
-        /**
-         * Default Constructor.
-         *
-         * @param context {@link Context}
-         */
-        public SummaryAdapter(final Context context) {
-            super(context, R.layout.summary_item, null, true);
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public final Cursor swapCursor(final Cursor cursor) {
-            Cursor c = super.swapCursor(cursor);
-            idPlanName = cursor.getColumnIndex(DataProvider.Plans.NAME);
-            idRuleName = cursor.getColumnIndex(DataProvider.Rules.NAME);
-            return c;
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public final void bindView(final View view, final Context context, final Cursor cursor) {
-            /*
-            ViewHolder holder = (ViewHolder) view.getTag();
-            if (holder == null) {
-                holder = new ViewHolder();
-                holder.tvName = (TextView) view.findViewById(R.id.tvName);
-                holder.tvNumber = (TextView) view.findViewById(R.id.tvNumber);
-                holder.tvTime = (TextView) view.findViewById(R.id.tvTime);
-                holder.tvDuration = (TextView) view.findViewById(R.id.tvDuration);
-                holder.ivType = (ImageView) view.findViewById(R.id.ivType);
-                view.setTag(holder);
-            } else if (holder.loader != null && !holder.loader.isCancelled()) {
-                holder.loader.cancel(true);
-            }
-
-            long [] calls = new long[2];
-            long [] smss = new long[2];
-            long [] mmss = new long[2];
-            long datas = 0;
-            int calli = 0, smsi = 0, mmsi = 0, datai = 0;
-            while(cursor.moveToNext()) {
-                DataProvider.Plans.Plan plan =
-                        new DataProvider.Plans.Plan(cursor);
-                if (plan.name.contains("2") || plan.type < 4 || plan.type > 6) {
-                    continue;
-                } else if (plan.type == 4) {
-                    calls[calli] = (long) plan.atBa;
-                    calli++;
-                } else if (plan.type == 5) {
-                    smss[smsi] = (long) plan.atBa;
-                    smsi++;
-                } else if (plan.type == 6) {
-                    datas = (long) plan.atBa;
-                }
-            }
-
-            /*
-            if (plan.sname.contains("CallsIn")) {
-                holder.tvDuration.setText(String.valueOf(plan.bpBa));
-            } else if (plan.sname.contains("CallsOut")) {
-                holder.callOut++;
-            } else if (plan.sname.contains("SMSIn")) {
-                holder.smsIn++;
-            } else if (plan.sname.contains("SMSOut")) {
-                holder.smsOut++;
-            } else if (plan.sname.contains("MMSIn")) {
-                holder.mmsIn++;
-            } else if (plan.sname.contains("MMSOut")) {
-                holder.mmsOut++;
-            } else if (plan.sname.contains("DATAInOut")) {
-                holder.dataIn++;
-            } else {
-                //holder.dataOut++;
-            }
-            holder.tvName.setText(String.valueOf(holder.callIn));
-            */
-        }
-    }
 
     /**
      * {@inheritDoc}
@@ -280,16 +161,16 @@ public final class SummaryFragment extends ListFragment implements OnClickListen
             setPlanId(planId);
         }
         Cursor cursor = getActivity().getContentResolver().query(DataProvider.Plans.CONTENT_URI_SUM
-                .buildUpon()
-                        //.appendQueryParameter(DataProvider.Plans.PARAM_DATE, String.valueOf(now))
-                .appendQueryParameter(DataProvider.Plans.PARAM_HIDE_ZERO,
-                        String.valueOf(false))
-                .appendQueryParameter(DataProvider.Plans.PARAM_HIDE_NOCOST,
-                        String.valueOf(false))
-                .appendQueryParameter(DataProvider.Plans.PARAM_HIDE_TODAY,
-                        String.valueOf(false))
-                .appendQueryParameter(DataProvider.Plans.PARAM_HIDE_ALLTIME,
-                        String.valueOf(false)).build(), DataProvider.Plans.PROJECTION_SUM,
+                        .buildUpon()
+                                //.appendQueryParameter(DataProvider.Plans.PARAM_DATE, String.valueOf(now))
+                        .appendQueryParameter(DataProvider.Plans.PARAM_HIDE_ZERO,
+                                String.valueOf(false))
+                        .appendQueryParameter(DataProvider.Plans.PARAM_HIDE_NOCOST,
+                                String.valueOf(false))
+                        .appendQueryParameter(DataProvider.Plans.PARAM_HIDE_TODAY,
+                                String.valueOf(false))
+                        .appendQueryParameter(DataProvider.Plans.PARAM_HIDE_ALLTIME,
+                                String.valueOf(false)).build(), DataProvider.Plans.PROJECTION_SUM,
                 null, null, null);
 
         pcCallDuration = (PieChart) v.findViewById(R.id.callDurationChart);
@@ -303,7 +184,7 @@ public final class SummaryFragment extends ListFragment implements OnClickListen
         ArrayList<Entry> entriesData = new ArrayList<Entry>();
 
         int calli = 1, smsi = 1, mmsi = 1, datai = 1;
-        while(cursor.moveToNext()) {
+        while (cursor.moveToNext()) {
             DataProvider.Plans.Plan plan =
                     new DataProvider.Plans.Plan(cursor);
             if (plan.name.contains("2") || plan.type < 4 || plan.type > 6 || plan.atBa <= 0) {
@@ -516,6 +397,121 @@ public final class SummaryFragment extends ListFragment implements OnClickListen
             ((SummaryAdapter) getListAdapter()).swapCursor(null);
         } catch (Exception e) {
             Log.w(TAG, "error removing cursor", e);
+        }
+    }
+
+    /**
+     * Adapter binding logs to View.
+     *
+     * @author flx
+     */
+    public class SummaryAdapter extends ResourceCursorAdapter {
+
+        /**
+         * Column ids.
+         */
+        private int idPlanName, idRuleName;
+
+        /**
+         * Default Constructor.
+         *
+         * @param context {@link Context}
+         */
+        public SummaryAdapter(final Context context) {
+            super(context, R.layout.summary_item, null, true);
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public final Cursor swapCursor(final Cursor cursor) {
+            Cursor c = super.swapCursor(cursor);
+            idPlanName = cursor.getColumnIndex(DataProvider.Plans.NAME);
+            idRuleName = cursor.getColumnIndex(DataProvider.Rules.NAME);
+            return c;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public final void bindView(final View view, final Context context, final Cursor cursor) {
+            /*
+            ViewHolder holder = (ViewHolder) view.getTag();
+            if (holder == null) {
+                holder = new ViewHolder();
+                holder.tvName = (TextView) view.findViewById(R.id.tvName);
+                holder.tvNumber = (TextView) view.findViewById(R.id.tvNumber);
+                holder.tvTime = (TextView) view.findViewById(R.id.tvTime);
+                holder.tvDuration = (TextView) view.findViewById(R.id.tvDuration);
+                holder.ivType = (ImageView) view.findViewById(R.id.ivType);
+                view.setTag(holder);
+            } else if (holder.loader != null && !holder.loader.isCancelled()) {
+                holder.loader.cancel(true);
+            }
+
+            long [] calls = new long[2];
+            long [] smss = new long[2];
+            long [] mmss = new long[2];
+            long datas = 0;
+            int calli = 0, smsi = 0, mmsi = 0, datai = 0;
+            while(cursor.moveToNext()) {
+                DataProvider.Plans.Plan plan =
+                        new DataProvider.Plans.Plan(cursor);
+                if (plan.name.contains("2") || plan.type < 4 || plan.type > 6) {
+                    continue;
+                } else if (plan.type == 4) {
+                    calls[calli] = (long) plan.atBa;
+                    calli++;
+                } else if (plan.type == 5) {
+                    smss[smsi] = (long) plan.atBa;
+                    smsi++;
+                } else if (plan.type == 6) {
+                    datas = (long) plan.atBa;
+                }
+            }
+
+            /*
+            if (plan.sname.contains("CallsIn")) {
+                holder.tvDuration.setText(String.valueOf(plan.bpBa));
+            } else if (plan.sname.contains("CallsOut")) {
+                holder.callOut++;
+            } else if (plan.sname.contains("SMSIn")) {
+                holder.smsIn++;
+            } else if (plan.sname.contains("SMSOut")) {
+                holder.smsOut++;
+            } else if (plan.sname.contains("MMSIn")) {
+                holder.mmsIn++;
+            } else if (plan.sname.contains("MMSOut")) {
+                holder.mmsOut++;
+            } else if (plan.sname.contains("DATAInOut")) {
+                holder.dataIn++;
+            } else {
+                //holder.dataOut++;
+            }
+            holder.tvName.setText(String.valueOf(holder.callIn));
+            */
+        }
+
+        /**
+         * View holder.
+         *
+         * @author flx
+         */
+        private class ViewHolder {
+
+            /**
+             * Holder for item's view.
+             */
+            TextView tvName, tvNumber, tvTime, tvDuration;
+
+            ImageView ivType;
+            /**
+             * Hold {@link NameLoader}.
+             */
+            NameLoader loader;
+            long callIn, callOut, smsIn, smsOut, mmsIn, mmsOut, dataIn, dataOut;
         }
     }
 }

@@ -50,194 +50,119 @@ public final class SimplePreferences extends PreferenceActivity implements
         OnPreferenceChangeListener {
 
     /**
-     * Tag for output.
-     */
-    private static final String TAG = "SimplePreferences";
-
-    /**
      * Preference's name: bill day.
      */
     static final String PREFS_BILLDAY = "sp_billday";
-
     /**
      * Preference's name: bill mode.
      */
     static final String PREFS_BILLMODE = "sp_billmode";
-
     /**
      * Preference's name: bill mode.
      */
     static final String PREFS_BILLMODE_2 = "sp_billmode_2";
-
     /**
      * Preference's name: bill mode.
      */
     static final String PREFS_BILLMODE_VOIP = "sp_billmode_voip";
-
     /**
      * Preference's name: custom bill mode.
      */
     static final String PREFS_CUSTOM_BILLMODE = "sp_custom_billmode";
-
     /**
      * Preference's name: custom bill mode.
      */
     static final String PREFS_CUSTOM_BILLMODE_2 = "sp_custom_billmode_2";
-
     /**
      * Preference's name: custom bill mode.
      */
     static final String PREFS_CUSTOM_BILLMODE_VOIP = "sp_custom_billmode_voip";
-
     /**
      * Preference's name: free minutes.
      */
     static final String PREFS_FREEMIN = "sp_freemin";
-
     /**
      * Preference's name: free minutes.
      */
     static final String PREFS_FREEMIN_2 = "sp_freemin_2";
-
     /**
      * Preference's name: free minutes.
      */
     static final String PREFS_FREEMIN_VOIP = "sp_freemin_voip";
-
     /**
      * Preference's name: free cost per call.
      */
     static final String PREFS_COST_PER_CALL = "sp_cost_per_call";
-
     /**
      * Preference's name: free cost per call.
      */
     static final String PREFS_COST_PER_CALL_2 = "sp_cost_per_call_2";
-
     /**
      * Preference's name: free cost per call.
      */
     static final String PREFS_COST_PER_CALL_VOIP = "sp_cost_per_call_voip";
-
     /**
      * Preference's name: free cost per min.
      */
     static final String PREFS_COST_PER_MIN = "sp_cost_per_min";
-
     /**
      * Preference's name: free cost per min.
      */
     static final String PREFS_COST_PER_MIN_2 = "sp_cost_per_min_2";
-
     /**
      * Preference's name: free cost per min.
      */
     static final String PREFS_COST_PER_MIN_VOIP = "sp_cost_per_min_voip";
-
     /**
      * Preference's name: free sms.
      */
     static final String PREFS_FREESMS = "sp_freesms";
-
     /**
      * Preference's name: free sms.
      */
     static final String PREFS_FREESMS_2 = "sp_freesms_2";
-
     /**
      * Preference's name: free sms.
      */
     static final String PREFS_FREESMS_WEBSMS = "sp_freesms_websms";
-
     /**
      * Preference's name: free cost per sms.
      */
     static final String PREFS_COST_PER_SMS = "sp_cost_per_sms";
-
     /**
      * Preference's name: free cost per sms.
      */
     static final String PREFS_COST_PER_SMS_2 = "sp_cost_per_sms_2";
-
     /**
      * Preference's name: free cost per sms.
      */
     static final String PREFS_COST_PER_SMS_WEBSMS = "sp_cost_per_sms_websms";
-
     /**
      * Preference's name: free mms.
      */
     static final String PREFS_FREEMMS = "sp_freemms";
-
     /**
      * Preference's name: free cost per mms.
      */
     static final String PREFS_COST_PER_MMS = "sp_cost_per_mms";
-
     /**
      * Preference's name: free MiBi.
      */
     static final String PREFS_FREEDATA = "sp_freedata";
-
     /**
      * Preference's name: free cost per MiBi.
      */
     static final String PREFS_COST_PER_MB = "sp_cost_per_mb";
-
+    /**
+     * Tag for output.
+     */
+    private static final String TAG = "SimplePreferences";
     private static final String SELECTION_ID = DataProvider.Plans.ID + "=?";
 
     private static final String SELECTION_TYPE = DataProvider.Plans.TYPE + "=?";
 
-    private void removePreferenceIfPlanMissing(final ContentResolver cr, final PreferenceGroup pg,
-            final String key, final long planId) {
-        Preference p = findPreference(key);
-        if (p == null) {
-            return;
-        }
-        Cursor c = cr.query(DataProvider.Plans.CONTENT_URI, new String[]{DataProvider.Plans.ID},
-                SELECTION_ID, new String[]{String.valueOf(planId)}, null);
-        if (c.getCount() == 0) {
-            pg.removePreference(p);
-        }
-        c.close();
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public void onCreate(final Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Utils.setLocale(this);
-
-        loadPrefs(this);
-        addPreferencesFromResource(R.xml.simple_prefs);
-        findPreference(PREFS_BILLDAY).setOnPreferenceChangeListener(this);
-
-        // remove prefs for dual sim, websms, voip if not available
-        PreferenceGroup pg = (PreferenceGroup) findPreference("container");
-        ContentResolver cr = getContentResolver();
-        removePreferenceIfPlanMissing(cr, pg, "calls_2", 31);
-        removePreferenceIfPlanMissing(cr, pg, "calls_voip", 30);
-        removePreferenceIfPlanMissing(cr, pg, "sms_2", 34);
-        removePreferenceIfPlanMissing(cr, pg, "sms_websms", 29);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        savePrefs(this);
-    }
-
-    @Override
-    public boolean onPreferenceChange(final Preference preference, final Object newValue) {
-        if (preference == null) {
-            return false;
-        }
-        RuleMatcher.unmatch(this);
-        return true;
-    }
-
     private static void loadPrefsCall(final Editor e, final ContentResolver cr, final long planId,
-            final String postfix) {
+                                      final String postfix) {
         Cursor c = cr.query(DataProvider.Plans.CONTENT_URI, DataProvider.Plans.PROJECTION,
                 SELECTION_ID, new String[]{String.valueOf(planId)}, null);
         if (c.moveToFirst()) {
@@ -260,7 +185,7 @@ public final class SimplePreferences extends PreferenceActivity implements
     }
 
     private static void loadPrefsSMS(final Editor e, final ContentResolver cr, final long planId,
-            final String postfix) {
+                                     final String postfix) {
         Cursor c = cr.query(DataProvider.Plans.CONTENT_URI, DataProvider.Plans.PROJECTION,
                 SELECTION_ID, new String[]{String.valueOf(planId)}, null);
         if (c.moveToFirst()) {
@@ -339,7 +264,7 @@ public final class SimplePreferences extends PreferenceActivity implements
     }
 
     private static void savePrefsCall(final SharedPreferences p, final ContentResolver cr,
-            final long planId, final String postfix) {
+                                      final long planId, final String postfix) {
         ContentValues cv = new ContentValues();
         String s = p.getString(PREFS_BILLMODE + postfix, "1/1");
         if (!s.contains("/")) {
@@ -369,7 +294,7 @@ public final class SimplePreferences extends PreferenceActivity implements
     }
 
     private static void savePrefsSMS(final SharedPreferences p, final ContentResolver cr,
-            final long planId, final String postfix) {
+                                     final long planId, final String postfix) {
         ContentValues cv = new ContentValues();
         String s = p.getString(PREFS_FREESMS + postfix, "0");
         int i = Utils.parseInt(s, 0);
@@ -450,5 +375,53 @@ public final class SimplePreferences extends PreferenceActivity implements
         cv.put(DataProvider.Plans.COST_PER_AMOUNT2, f);
         cr.update(DataProvider.Plans.CONTENT_URI, cv, SELECTION_TYPE,
                 new String[]{String.valueOf(DataProvider.TYPE_DATA)});
+    }
+
+    private void removePreferenceIfPlanMissing(final ContentResolver cr, final PreferenceGroup pg,
+                                               final String key, final long planId) {
+        Preference p = findPreference(key);
+        if (p == null) {
+            return;
+        }
+        Cursor c = cr.query(DataProvider.Plans.CONTENT_URI, new String[]{DataProvider.Plans.ID},
+                SELECTION_ID, new String[]{String.valueOf(planId)}, null);
+        if (c.getCount() == 0) {
+            pg.removePreference(p);
+        }
+        c.close();
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    public void onCreate(final Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Utils.setLocale(this);
+
+        loadPrefs(this);
+        addPreferencesFromResource(R.xml.simple_prefs);
+        findPreference(PREFS_BILLDAY).setOnPreferenceChangeListener(this);
+
+        // remove prefs for dual sim, websms, voip if not available
+        PreferenceGroup pg = (PreferenceGroup) findPreference("container");
+        ContentResolver cr = getContentResolver();
+        removePreferenceIfPlanMissing(cr, pg, "calls_2", 31);
+        removePreferenceIfPlanMissing(cr, pg, "calls_voip", 30);
+        removePreferenceIfPlanMissing(cr, pg, "sms_2", 34);
+        removePreferenceIfPlanMissing(cr, pg, "sms_websms", 29);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        savePrefs(this);
+    }
+
+    @Override
+    public boolean onPreferenceChange(final Preference preference, final Object newValue) {
+        if (preference == null) {
+            return false;
+        }
+        RuleMatcher.unmatch(this);
+        return true;
     }
 }

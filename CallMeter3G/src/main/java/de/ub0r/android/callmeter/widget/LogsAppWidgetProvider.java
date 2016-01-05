@@ -59,91 +59,53 @@ import de.ub0r.android.logg0r.Log;
 public final class LogsAppWidgetProvider extends AppWidgetProvider {
 
     /**
-     * Tag for debug out.
-     */
-    private static final String TAG = "wdgt";
-
-    /**
      * Plan.id for widget.
      */
     public static final String WIDGET_PLANID = "logswidget_planid_";
-
     /**
      * Hide name for widget.
      */
     static final String WIDGET_HIDETNAME = "logswidget_hidename_";
-
     /**
      * Show short name for widget.
      */
     static final String WIDGET_SHORTNAME = "logswidget_shortname_";
-
     /**
      * Show cost for widget.
      */
     static final String WIDGET_COST = "logswidget_cost_";
-
     /**
      * Show progress of billing period for widget.
      */
     static final String WIDGET_BILLPERIOD = "logswidget_billp_";
-
     /**
      * Size of the plan name text.
      */
     static final String WIDGET_PLAN_TEXTSIZE = "logswidget_plan_textsize_";
-
     /**
      * Size of the statistics text.
      */
     static final String WIDGET_STATS_TEXTSIZE = "logswidget_stats_textsize_";
-
     /**
      * Widget's text color.
      */
     static final String WIDGET_TEXTCOLOR = "logswidget_textcolor_";
-
     /**
      * Widget's background color.
      */
     static final String WIDGET_BGCOLOR = "logswidget_bgcolor_";
-
     /**
      * Widget's icon.
      */
     static final String WIDGET_ICON = "logswidget_icon_";
-
     /**
      * Must widget be small?
      */
     static final String WIDGET_SMALL = "logswidget_small_";
-
     /**
-     * {@inheritDoc}
+     * Tag for debug out.
      */
-    @Override
-    public void onUpdate(final Context context, final AppWidgetManager appWidgetManager,
-            final int[] appWidgetIds) {
-        Log.d(TAG, "onUpdate()");
-        Utils.setLocale(context);
-        Common.setDateFormat(context);
-
-        // Update logs and run rule matcher
-        LogRunnerService.update(context, LogRunnerService.ACTION_RUN_MATCHER);
-
-        updateWidgets(context, appWidgetManager, appWidgetIds);
-    }
-
-    @Override
-    public void onDeleted(final Context context, final int[] appWidgetIds) {
-        Editor e = PreferenceManager.getDefaultSharedPreferences(context).edit();
-        for (int id : appWidgetIds) {
-            Log.d(TAG, "delete widget: ", id);
-            e.remove(WIDGET_PLANID + id);
-        }
-
-        e.commit();
-    }
+    private static final String TAG = "wdgt";
 
     /**
      * Update all widgets.
@@ -153,7 +115,7 @@ public final class LogsAppWidgetProvider extends AppWidgetProvider {
      * @param appWidgetIds     app widget ids
      */
     private static void updateWidgets(final Context context,
-            final AppWidgetManager appWidgetManager, final int[] appWidgetIds) {
+                                      final AppWidgetManager appWidgetManager, final int[] appWidgetIds) {
         SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(context);
 
         for (int id : appWidgetIds) {
@@ -188,7 +150,7 @@ public final class LogsAppWidgetProvider extends AppWidgetProvider {
      * @param appWidgetId      id of widget
      */
     static void updateWidget(final Context context, final AppWidgetManager appWidgetManager,
-            final int appWidgetId) {
+                             final int appWidgetId) {
         Log.d(TAG, "updateWidget(", appWidgetId, ")");
         final SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(context);
         final boolean showHours = p.getBoolean(Preferences.PREFS_SHOWHOURS, true);
@@ -318,5 +280,32 @@ public final class LogsAppWidgetProvider extends AppWidgetProvider {
         canvas.drawRoundRect(base, StatsAppWidgetProvider.WIDGET_RCORNER,
                 StatsAppWidgetProvider.WIDGET_RCORNER, paint);
         return bitmap;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onUpdate(final Context context, final AppWidgetManager appWidgetManager,
+                         final int[] appWidgetIds) {
+        Log.d(TAG, "onUpdate()");
+        Utils.setLocale(context);
+        Common.setDateFormat(context);
+
+        // Update logs and run rule matcher
+        LogRunnerService.update(context, LogRunnerService.ACTION_RUN_MATCHER);
+
+        updateWidgets(context, appWidgetManager, appWidgetIds);
+    }
+
+    @Override
+    public void onDeleted(final Context context, final int[] appWidgetIds) {
+        Editor e = PreferenceManager.getDefaultSharedPreferences(context).edit();
+        for (int id : appWidgetIds) {
+            Log.d(TAG, "delete widget: ", id);
+            e.remove(WIDGET_PLANID + id);
+        }
+
+        e.commit();
     }
 }

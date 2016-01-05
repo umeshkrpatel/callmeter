@@ -45,31 +45,26 @@ public final class CV2EditTextPreference extends EditTextPreference {
      * Key 2.
      */
     private final String k2;
-
-    /**
-     * Value 2.
-     */
-    private String v2;
-
-    /**
-     * {@link EditText}s in multi mode.
-     */
-    private EditText et1, et2;
-
-    /**
-     * Input type.
-     */
-    private int it = -1;
-
-    /**
-     * Hint.
-     */
-    private int h = -1;
-
     /**
      * Show help.
      */
     private final boolean sh;
+    /**
+     * Value 2.
+     */
+    private String v2;
+    /**
+     * {@link EditText}s in multi mode.
+     */
+    private EditText et1, et2;
+    /**
+     * Input type.
+     */
+    private int it = -1;
+    /**
+     * Hint.
+     */
+    private int h = -1;
 
     /**
      * Default constructor.
@@ -83,8 +78,8 @@ public final class CV2EditTextPreference extends EditTextPreference {
      * @param defValue2  default value 2
      */
     public CV2EditTextPreference(final Context context, final ContentValues values,
-            final String key1, final String key2, final boolean singleMode, final String defValue1,
-            final String defValue2) {
+                                 final String key1, final String key2, final boolean singleMode, final String defValue1,
+                                 final String defValue2) {
         super(context);
         setPersistent(false);
         setKey(key1);

@@ -20,52 +20,27 @@ import de.ub0r.android.logg0r.Log;
 public class AmbilWarnaDialog implements TextWatcher {
 
     private static final String TAG = "AmbilWarnaDialog";
-
-    public interface OnAmbilWarnaListener {
-
-        void onReset(AmbilWarnaDialog dialog);
-
-        void onCancel(AmbilWarnaDialog dialog);
-
-        void onOk(AmbilWarnaDialog dialog, int color);
-    }
-
     AlertDialog dialog;
-
     OnAmbilWarnaListener listener;
-
     View viewHue;
-
     AmbilWarnaKotak viewKotak;
-
     ImageView panah;
-
     View viewWarnaLama;
-
     View viewWarnaBaru;
-
     EditText viewEditText;
-
     ImageView viewKeker;
-
     float satudp;
-
     int warnaLama;
-
     int warnaBaru;
-
     float hue;
-
     float sat;
-
     float val;
-
     float ukuranUiDp = 240.f;
-
     float ukuranUiPx; // diset di constructor
+    float[] tmp01 = new float[3];
 
     public AmbilWarnaDialog(final Context context, final int color,
-            final OnAmbilWarnaListener listener) {
+                            final OnAmbilWarnaListener listener) {
         this.listener = listener;
         this.warnaLama = color;
         this.warnaBaru = color;
@@ -198,44 +173,6 @@ public class AmbilWarnaDialog implements TextWatcher {
 
     }
 
-    @SuppressWarnings("deprecation")
-    protected void letakkanPanah() {
-        float y = this.ukuranUiPx - (this.hue * this.ukuranUiPx / 360.f);
-        if (y == this.ukuranUiPx) {
-            y = 0.f;
-        }
-
-        AbsoluteLayout.LayoutParams layoutParams = (AbsoluteLayout.LayoutParams) this.panah
-                .getLayoutParams();
-        layoutParams.y = (int) (y + 4);
-        this.panah.setLayoutParams(layoutParams);
-    }
-
-    @SuppressWarnings("deprecation")
-    protected void letakkanKeker() {
-        float x = this.sat * this.ukuranUiPx;
-        float y = (1.f - this.val) * this.ukuranUiPx;
-
-        AbsoluteLayout.LayoutParams layoutParams = (AbsoluteLayout.LayoutParams) this.viewKeker
-                .getLayoutParams();
-        layoutParams.x = (int) (x + 3);
-        layoutParams.y = (int) (y + 3);
-        this.viewKeker.setLayoutParams(layoutParams);
-    }
-
-    float[] tmp01 = new float[3];
-
-    private int hitungWarna() {
-        this.tmp01[0] = this.hue;
-        this.tmp01[1] = this.sat;
-        this.tmp01[2] = this.val;
-        return Color.HSVToColor(this.tmp01);
-    }
-
-    public void show() {
-        this.dialog.show();
-    }
-
     public static String colorToString(final int color) {
         StringBuilder sb = new StringBuilder(9);
         sb.append("#");
@@ -266,6 +203,42 @@ public class AmbilWarnaDialog implements TextWatcher {
         return sb.toString();
     }
 
+    @SuppressWarnings("deprecation")
+    protected void letakkanPanah() {
+        float y = this.ukuranUiPx - (this.hue * this.ukuranUiPx / 360.f);
+        if (y == this.ukuranUiPx) {
+            y = 0.f;
+        }
+
+        AbsoluteLayout.LayoutParams layoutParams = (AbsoluteLayout.LayoutParams) this.panah
+                .getLayoutParams();
+        layoutParams.y = (int) (y + 4);
+        this.panah.setLayoutParams(layoutParams);
+    }
+
+    @SuppressWarnings("deprecation")
+    protected void letakkanKeker() {
+        float x = this.sat * this.ukuranUiPx;
+        float y = (1.f - this.val) * this.ukuranUiPx;
+
+        AbsoluteLayout.LayoutParams layoutParams = (AbsoluteLayout.LayoutParams) this.viewKeker
+                .getLayoutParams();
+        layoutParams.x = (int) (x + 3);
+        layoutParams.y = (int) (y + 3);
+        this.viewKeker.setLayoutParams(layoutParams);
+    }
+
+    private int hitungWarna() {
+        this.tmp01[0] = this.hue;
+        this.tmp01[1] = this.sat;
+        this.tmp01[2] = this.val;
+        return Color.HSVToColor(this.tmp01);
+    }
+
+    public void show() {
+        this.dialog.show();
+    }
+
     private void updateEditText() {
         int color = this.hitungWarna();
         String s = colorToString(color);
@@ -276,7 +249,7 @@ public class AmbilWarnaDialog implements TextWatcher {
 
     @Override
     public void onTextChanged(final CharSequence s, final int start, final int before,
-            final int count) {
+                              final int count) {
         String c = s.toString().toLowerCase();
         if (c.length() == 0) {
             this.viewEditText.setText("#");
@@ -311,12 +284,21 @@ public class AmbilWarnaDialog implements TextWatcher {
 
     @Override
     public void beforeTextChanged(final CharSequence s, final int start, final int count,
-            final int after) {
+                                  final int after) {
         // nothing to do
     }
 
     @Override
     public void afterTextChanged(final Editable s) {
         // nothing to do
+    }
+
+    public interface OnAmbilWarnaListener {
+
+        void onReset(AmbilWarnaDialog dialog);
+
+        void onCancel(AmbilWarnaDialog dialog);
+
+        void onOk(AmbilWarnaDialog dialog, int color);
     }
 }

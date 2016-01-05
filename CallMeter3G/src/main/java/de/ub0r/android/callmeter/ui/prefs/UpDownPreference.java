@@ -9,11 +9,6 @@ import de.ub0r.android.callmeter.R;
 
 public class UpDownPreference extends Preference implements OnClickListener {
 
-    static interface OnUpDownClickListener {
-
-        void onUpDownClick(Preference preference, int direction);
-    }
-
     private final OnUpDownClickListener mCallback;
 
     public UpDownPreference(final Context context, final OnUpDownClickListener callback) {
@@ -50,5 +45,10 @@ public class UpDownPreference extends Preference implements OnClickListener {
                 }
                 return;
         }
+    }
+
+    interface OnUpDownClickListener {
+
+        void onUpDownClick(Preference preference, int direction);
     }
 }

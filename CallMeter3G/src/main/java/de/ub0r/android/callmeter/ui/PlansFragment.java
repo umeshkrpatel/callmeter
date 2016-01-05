@@ -74,26 +74,254 @@ public final class PlansFragment extends ListFragment implements OnClickListener
         OnItemLongClickListener, LoaderCallbacks<Cursor> {
 
     private static final String TAG = "PlansFragment";
+    private static final int UID_DUMMY = -3;
     private static boolean doDummy = true;
     private static boolean showToday = false;
     private static boolean showTotal = true;
     private static boolean hideZero = false;
     private static boolean hideNoCost = false;
     private boolean ignoreQuery = false;
-    private static final int UID_DUMMY = -3;
+    private long now;
+    private int uid;
+    private boolean inProgress;
+    private View vLoading, vImport;
 
-    private static class PlansAdapter extends ResourceCursorAdapter {
-        private class ViewHolder {
-            View vPeriodLayout, vContent, vSpacer;
-            TextView tvBigtitle, tvPeriod, tvBilldayLable, tvTitle, tvData;
-            ProgressBar pbPeriod, pbLimitGreen, pbLimitYellow, pbLimitRed;
-            PieChart pcDataChart;
+    public static PlansFragment newInstance(final int uid, final long now) {
+        PlansFragment f = new PlansFragment();
+        Bundle args = new Bundle();
+        args.putLong("now", now);
+        args.putInt("uid", uid);
+        f.setArguments(args);
+        return f;
+    }
+
+    static void reloadPreferences(final Context context) {
+        PlansAdapter.reloadPreferences(context, true);
+        SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(context);
+        showToday = p.getBoolean(Preferences.PREFS_SHOWTODAY, false);
+        showTotal = p.getBoolean(Preferences.PREFS_SHOWTOTAL, false);
+        hideZero = p.getBoolean(Preferences.PREFS_HIDE_ZERO, false);
+        hideNoCost = p.getBoolean(Preferences.PREFS_HIDE_NOCOST, false);
+    }
+
+    @Override
+    public void onCreate(final Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+        Bundle args = getArguments();
+        if (args == null) {
+            now = -1L;
+            uid = -1;
+        } else {
+            now = args.getLong("now", -1L);
+            uid = args.getInt("uid", -1);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        ((PlansAdapter) getListAdapter()).save();
+    }
+
+    @Override
+    public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
+                             final Bundle savedInstanceState) {
+        View v = inflater.inflate(R.layout.plans_fragment, container, false);
+        vLoading = v.findViewById(R.id.loading);
+        vImport = v.findViewById(R.id.import_default);
+        vImport.setOnClickListener(this);
+        return v;
+    }
+
+    @Override
+    public void onActivityCreated(final Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        PlansAdapter adapter = new PlansAdapter(getActivity(), now);
+        setListAdapter(adapter);
+        getListView().setOnItemLongClickListener(this);
+
+        LoaderManager lm = getLoaderManager();
+        if (lm.getLoader(uid) != null) {
+            getLoaderManager().initLoader(uid, null, this);
+        } else if (doDummy && now < 0L) {
+            doDummy = false;
+            getLoaderManager().initLoader(UID_DUMMY, null, this);
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (now < 0L) {
+            doDummy = true;
+        }
+    }
+
+    private synchronized void setInProgress(final int add) {
+        Log.d(TAG, "setInProgress(", add, ")");
+        if (add == 0) {
+            ((Plans) getActivity()).setInProgress(add);
+        } else if (add > 0 && !this.inProgress) {
+            ((Plans) getActivity()).setInProgress(add);
+            inProgress = true;
+        } else if (add < 0) {
+            ((Plans) getActivity()).setInProgress(add);
+            inProgress = false;
+        }
+    }
+
+    public void reQuery(final boolean forceUpdate) {
+        Log.d(TAG, "requery(", forceUpdate, ")");
+        if (!this.ignoreQuery) {
+            LoaderManager lm = getLoaderManager();
+            if (forceUpdate && lm.getLoader(uid) != null) {
+                lm.restartLoader(uid, null, this);
+            } else {
+                lm.initLoader(uid, null, this);
+            }
+        } else {
+            Log.d(TAG, "requery(", forceUpdate, "): ignore");
+        }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_plans, menu);
+    }
+
+    @Override
+    public void onClick(final View v) {
+        switch (v.getId()) {
+            case R.id.import_default:
+                final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(this
+                        .getString(R.string.url_rulesets)));
+                try {
+                    startActivity(intent);
+                } catch (ActivityNotFoundException e) {
+                    Log.e(TAG, "no activity to load url", e);
+                    Toast.makeText(getActivity(),
+                            "no activity to load url: " + intent.getDataString(), Toast.LENGTH_LONG)
+                            .show();
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    @Override
+    public boolean onItemLongClick(final AdapterView<?> parent, final View view,
+                                   final int position, final long id) {
+        final Builder builder = new Builder(getActivity());
+        builder.setItems(R.array.dialog_edit_plan,
+                new android.content.DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(final DialogInterface dialog, final int which) {
+                        switch (which) {
+                            case 0:
+                                Intent intent = new Intent(PlansFragment.this.getActivity(),
+                                        PlanEdit.class);
+                                intent.setData(ContentUris.withAppendedId(
+                                        DataProvider.Plans.CONTENT_URI, id));
+                                PlansFragment.this.getActivity().startActivity(intent);
+                                break;
+                            case 1:
+                                ((Plans) PlansFragment.this.getActivity()).showLogsFragment(id);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                });
+        builder.setNegativeButton(android.R.string.cancel, null);
+        builder.show();
+        return true;
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(final int id, final Bundle args) {
+        Log.d(TAG, "onCreateLoader(", id, ",", args, ")");
+        setInProgress(1);
+        PlansAdapter adapter = (PlansAdapter) getListAdapter();
+        if ((adapter == null || adapter.getCount() == 0) && vLoading != null) {
+            vLoading.setVisibility(View.VISIBLE);
         }
 
-        private final SharedPreferences p;
-        private final Editor e;
-        private boolean isDirty = false;
-        private final long now;
+        if (id == UID_DUMMY) {
+            ignoreQuery = true;
+            final String where = PreferenceManager.getDefaultSharedPreferences(getActivity())
+                    .getString("dummy_where", null);
+            return new CursorLoader(getActivity(), DataProvider.Plans.CONTENT_URI,
+                    DataProvider.Plans.PROJECTION_BASIC, where, null, DataProvider.Plans.ORDER
+                    + " ASC");
+        } else {
+            return new CursorLoader(getActivity(), DataProvider.Plans.CONTENT_URI_SUM
+                    .buildUpon()
+                    .appendQueryParameter(DataProvider.Plans.PARAM_DATE, String.valueOf(now))
+                    .appendQueryParameter(DataProvider.Plans.PARAM_HIDE_ZERO,
+                            String.valueOf(hideZero))
+                    .appendQueryParameter(DataProvider.Plans.PARAM_HIDE_NOCOST,
+                            String.valueOf(hideNoCost))
+                    .appendQueryParameter(DataProvider.Plans.PARAM_HIDE_TODAY,
+                            String.valueOf(!showToday || now >= 0L))
+                    .appendQueryParameter(DataProvider.Plans.PARAM_HIDE_ALLTIME,
+                            String.valueOf(!showTotal)).build(), DataProvider.Plans.PROJECTION_SUM,
+                    null, null, null);
+        }
+    }
+
+    @Override
+    public void onLoadFinished(final Loader<Cursor> loader, final Cursor data) {
+        Log.d(TAG, "onLoadFinished()");
+        if (getActivity() == null) {
+            Log.w(TAG, "ignore loaded data, activity finished");
+            return;
+        }
+        ignoreQuery = false;
+        PlansAdapter adapter = (PlansAdapter) getListAdapter();
+        adapter.save();
+        if (data != null && data.getCount() > 0) {
+            if (now < 0L && data.getColumnIndex(DataProvider.Plans.SUM_COST) > 0) {
+                StringBuilder sb = new StringBuilder(DataProvider.Plans.ID + " in (-1");
+                try {
+                    if (!data.isClosed() && data.moveToFirst()) {
+                        do {
+                            sb.append(",").append(data.getLong(DataProvider.Plans.INDEX_ID));
+                        } while (data.moveToNext());
+                    }
+                    sb.append(")");
+                    PreferenceManager.getDefaultSharedPreferences(getActivity()).edit()
+                            .putString("dummy_where", sb.toString()).commit();
+                } catch (IllegalStateException ex) {
+                    Log.e(TAG, "could not walk through cursor to save shown plans", ex);
+                }
+            }
+            vImport.setVisibility(View.GONE);
+        } else {
+            vImport.setVisibility(View.VISIBLE);
+        }
+        vLoading.setVisibility(View.GONE);
+        try {
+            adapter.swapCursor(data);
+        } catch (IllegalStateException ex) {
+            Log.e(TAG, "could not set cursor to adapter", ex);
+            adapter.swapCursor(null);
+        }
+        setInProgress(-1);
+    }
+
+    @Override
+    public void onLoaderReset(final Loader<Cursor> loader) {
+        Log.d(TAG, "onLoaderReset()");
+        try {
+            ((PlansAdapter) getListAdapter()).swapCursor(null);
+        } catch (Exception e) {
+            Log.w(TAG, "error removing cursor", e);
+        }
+    }
+
+    private static class PlansAdapter extends ResourceCursorAdapter {
         private static int textSize, textSizeBigTitle, textSizeTitle, textSizeSpacer, textSizePBar,
                 textSizePBarBP;
         private static String delimiter = " | ";
@@ -102,8 +330,23 @@ public final class PlansFragment extends ListFragment implements OnClickListener
         private static boolean pShowTargetBillDay = false;
         private static int billDayResId = R.string.billday_;
         private static boolean prepaid;
-        private final int progressBarVisability;
         private static boolean needReloadPrefs = true;
+        private final SharedPreferences p;
+        private final Editor e;
+        private final long now;
+        private final int progressBarVisability;
+        private boolean isDirty = false;
+        public PlansAdapter(final Activity context, final long n) {
+            super(context, R.layout.plans_item, null, true);
+            now = n;
+            p = PreferenceManager.getDefaultSharedPreferences(context);
+            e = p.edit();
+            if (p.getBoolean(Preferences.PREFS_HIDE_PROGRESSBARS, false)) {
+                progressBarVisability = View.GONE;
+            } else {
+                progressBarVisability = View.VISIBLE;
+            }
+        }
 
         static void reloadPreferences(final Context context, final boolean force) {
             if (!force && !needReloadPrefs) {
@@ -124,18 +367,6 @@ public final class PlansFragment extends ListFragment implements OnClickListener
             textSizeSpacer = Preferences.getTextsizeSpacer(context);
             textSizePBar = Preferences.getTextsizeProgressBar(context);
             textSizePBarBP = Preferences.getTextsizeProgressBarBP(context);
-        }
-
-        public PlansAdapter(final Activity context, final long n) {
-            super(context, R.layout.plans_item, null, true);
-            now = n;
-            p = PreferenceManager.getDefaultSharedPreferences(context);
-            e = p.edit();
-            if (p.getBoolean(Preferences.PREFS_HIDE_PROGRESSBARS, false)) {
-                progressBarVisability = View.GONE;
-            } else {
-                progressBarVisability = View.VISIBLE;
-            }
         }
 
         @Override
@@ -353,244 +584,12 @@ public final class PlansFragment extends ListFragment implements OnClickListener
                 isDirty = false;
             }
         }
-    }
 
-    private long now;
-    private int uid;
-    private boolean inProgress;
-    private View vLoading, vImport;
-    public static PlansFragment newInstance(final int uid, final long now) {
-        PlansFragment f = new PlansFragment();
-        Bundle args = new Bundle();
-        args.putLong("now", now);
-        args.putInt("uid", uid);
-        f.setArguments(args);
-        return f;
-    }
-
-    static void reloadPreferences(final Context context) {
-        PlansAdapter.reloadPreferences(context, true);
-        SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(context);
-        showToday = p.getBoolean(Preferences.PREFS_SHOWTODAY, false);
-        showTotal = p.getBoolean(Preferences.PREFS_SHOWTOTAL, false);
-        hideZero = p.getBoolean(Preferences.PREFS_HIDE_ZERO, false);
-        hideNoCost = p.getBoolean(Preferences.PREFS_HIDE_NOCOST, false);
-    }
-
-    @Override
-    public void onCreate(final Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
-        Bundle args = getArguments();
-        if (args == null) {
-            now = -1L;
-            uid = -1;
-        } else {
-            now = args.getLong("now", -1L);
-            uid = args.getInt("uid", -1);
-        }
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        ((PlansAdapter) getListAdapter()).save();
-    }
-
-    @Override
-    public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
-            final Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.plans_fragment, container, false);
-        vLoading = v.findViewById(R.id.loading);
-        vImport = v.findViewById(R.id.import_default);
-        vImport.setOnClickListener(this);
-        return v;
-    }
-
-    @Override
-    public void onActivityCreated(final Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        PlansAdapter adapter = new PlansAdapter(getActivity(), now);
-        setListAdapter(adapter);
-        getListView().setOnItemLongClickListener(this);
-
-        LoaderManager lm = getLoaderManager();
-        if (lm.getLoader(uid) != null) {
-            getLoaderManager().initLoader(uid, null, this);
-        } else if (doDummy && now < 0L) {
-            doDummy = false;
-            getLoaderManager().initLoader(UID_DUMMY, null, this);
-        }
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        if (now < 0L) {
-            doDummy = true;
-        }
-    }
-
-    private synchronized void setInProgress(final int add) {
-        Log.d(TAG, "setInProgress(", add, ")");
-        if (add == 0) {
-            ((Plans) getActivity()).setInProgress(add);
-        } else if (add > 0 && !this.inProgress) {
-            ((Plans) getActivity()).setInProgress(add);
-            inProgress = true;
-        } else if (add < 0) {
-            ((Plans) getActivity()).setInProgress(add);
-            inProgress = false;
-        }
-    }
-
-    public void reQuery(final boolean forceUpdate) {
-        Log.d(TAG, "requery(", forceUpdate, ")");
-        if (!this.ignoreQuery) {
-            LoaderManager lm = getLoaderManager();
-            if (forceUpdate && lm.getLoader(uid) != null) {
-                lm.restartLoader(uid, null, this);
-            } else {
-                lm.initLoader(uid, null, this);
-            }
-        } else {
-            Log.d(TAG, "requery(", forceUpdate, "): ignore");
-        }
-    }
-
-    @Override
-    public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
-        inflater.inflate(R.menu.menu_plans, menu);
-    }
-
-    @Override
-    public void onClick(final View v) {
-        switch (v.getId()) {
-            case R.id.import_default:
-                final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(this
-                        .getString(R.string.url_rulesets)));
-                try {
-                    startActivity(intent);
-                } catch (ActivityNotFoundException e) {
-                    Log.e(TAG, "no activity to load url", e);
-                    Toast.makeText(getActivity(),
-                            "no activity to load url: " + intent.getDataString(), Toast.LENGTH_LONG)
-                            .show();
-                }
-                break;
-            default:
-                break;
-        }
-    }
-
-    @Override
-    public boolean onItemLongClick(final AdapterView<?> parent, final View view,
-            final int position, final long id) {
-        final Builder builder = new Builder(getActivity());
-        builder.setItems(R.array.dialog_edit_plan,
-                new android.content.DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(final DialogInterface dialog, final int which) {
-                        switch (which) {
-                            case 0:
-                                Intent intent = new Intent(PlansFragment.this.getActivity(),
-                                        PlanEdit.class);
-                                intent.setData(ContentUris.withAppendedId(
-                                        DataProvider.Plans.CONTENT_URI, id));
-                                PlansFragment.this.getActivity().startActivity(intent);
-                                break;
-                            case 1:
-                                ((Plans) PlansFragment.this.getActivity()).showLogsFragment(id);
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                });
-        builder.setNegativeButton(android.R.string.cancel, null);
-        builder.show();
-        return true;
-    }
-
-    @Override
-    public Loader<Cursor> onCreateLoader(final int id, final Bundle args) {
-        Log.d(TAG, "onCreateLoader(", id, ",", args, ")");
-        setInProgress(1);
-        PlansAdapter adapter = (PlansAdapter) getListAdapter();
-        if ((adapter == null || adapter.getCount() == 0) && vLoading != null) {
-            vLoading.setVisibility(View.VISIBLE);
-        }
-
-        if (id == UID_DUMMY) {
-            ignoreQuery = true;
-            final String where = PreferenceManager.getDefaultSharedPreferences(getActivity())
-                    .getString("dummy_where", null);
-            return new CursorLoader(getActivity(), DataProvider.Plans.CONTENT_URI,
-                    DataProvider.Plans.PROJECTION_BASIC, where, null, DataProvider.Plans.ORDER
-                    + " ASC");
-        } else {
-            return new CursorLoader(getActivity(), DataProvider.Plans.CONTENT_URI_SUM
-                    .buildUpon()
-                    .appendQueryParameter(DataProvider.Plans.PARAM_DATE, String.valueOf(now))
-                    .appendQueryParameter(DataProvider.Plans.PARAM_HIDE_ZERO,
-                            String.valueOf(hideZero))
-                    .appendQueryParameter(DataProvider.Plans.PARAM_HIDE_NOCOST,
-                            String.valueOf(hideNoCost))
-                    .appendQueryParameter(DataProvider.Plans.PARAM_HIDE_TODAY,
-                            String.valueOf(!showToday || now >= 0L))
-                    .appendQueryParameter(DataProvider.Plans.PARAM_HIDE_ALLTIME,
-                            String.valueOf(!showTotal)).build(), DataProvider.Plans.PROJECTION_SUM,
-                    null, null, null);
-        }
-    }
-
-    @Override
-    public void onLoadFinished(final Loader<Cursor> loader, final Cursor data) {
-        Log.d(TAG, "onLoadFinished()");
-        if (getActivity() == null) {
-            Log.w(TAG, "ignore loaded data, activity finished");
-            return;
-        }
-        ignoreQuery = false;
-        PlansAdapter adapter = (PlansAdapter) getListAdapter();
-        adapter.save();
-        if (data != null && data.getCount() > 0) {
-            if (now < 0L && data.getColumnIndex(DataProvider.Plans.SUM_COST) > 0) {
-                StringBuilder sb = new StringBuilder(DataProvider.Plans.ID + " in (-1");
-                try {
-                    if (!data.isClosed() && data.moveToFirst()) {
-                        do {
-                            sb.append(",").append(data.getLong(DataProvider.Plans.INDEX_ID));
-                        } while (data.moveToNext());
-                    }
-                    sb.append(")");
-                    PreferenceManager.getDefaultSharedPreferences(getActivity()).edit()
-                            .putString("dummy_where", sb.toString()).commit();
-                } catch (IllegalStateException ex) {
-                    Log.e(TAG, "could not walk through cursor to save shown plans", ex);
-                }
-            }
-            vImport.setVisibility(View.GONE);
-        } else {
-            vImport.setVisibility(View.VISIBLE);
-        }
-        vLoading.setVisibility(View.GONE);
-        try {
-            adapter.swapCursor(data);
-        } catch (IllegalStateException ex) {
-            Log.e(TAG, "could not set cursor to adapter", ex);
-            adapter.swapCursor(null);
-        }
-        setInProgress(-1);
-    }
-
-    @Override
-    public void onLoaderReset(final Loader<Cursor> loader) {
-        Log.d(TAG, "onLoaderReset()");
-        try {
-            ((PlansAdapter) getListAdapter()).swapCursor(null);
-        } catch (Exception e) {
-            Log.w(TAG, "error removing cursor", e);
+        private class ViewHolder {
+            View vPeriodLayout, vContent, vSpacer;
+            TextView tvBigtitle, tvPeriod, tvBilldayLable, tvTitle, tvData;
+            ProgressBar pbPeriod, pbLimitGreen, pbLimitYellow, pbLimitRed;
+            PieChart pcDataChart;
         }
     }
 }

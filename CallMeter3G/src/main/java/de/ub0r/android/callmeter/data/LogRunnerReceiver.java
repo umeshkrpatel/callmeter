@@ -44,25 +44,21 @@ import de.ub0r.android.logg0r.Log;
 public final class LogRunnerReceiver extends BroadcastReceiver {
 
     /**
-     * Tag for output.
-     */
-    private static final String TAG = "LogRunnerReceiver";
-
-    /**
      * Time between to update checks.
      */
     static final long DELAY = 30; // 30min
-
     /**
      * Time between to update checks for data.
      */
     static final float DELAY_DATA = 2f; // 2min
-
     /**
      * Factor for time between update checks.
      */
     static final long DELAY_FACTOR = CallMeter.SECONDS_MINUTE * CallMeter.MILLIS;
-
+    /**
+     * Tag for output.
+     */
+    private static final String TAG = "LogRunnerReceiver";
     /**
      * ACTION for publishing information about sent websms.
      */
@@ -152,7 +148,7 @@ public final class LogRunnerReceiver extends BroadcastReceiver {
      * @param connector connector name
      */
     private static void saveWebSMS(final Context context, final String uri, final long mid,
-            final String connector) {
+                                   final String connector) {
         final ContentResolver cr = context.getContentResolver();
         final Cursor c = cr.query(Uri.parse(uri), new String[]{"date"}, null, null, null);
         long date = -1;
@@ -178,7 +174,7 @@ public final class LogRunnerReceiver extends BroadcastReceiver {
      * @param provider provider name
      */
     private static void saveSipCall(final Context context, final String uri, final long cid,
-            final String provider) {
+                                    final String provider) {
         final ContentResolver cr = context.getContentResolver();
         final Cursor c = cr.query(Uri.parse(uri), new String[]{"date"}, null, null, null);
         long date = -1;

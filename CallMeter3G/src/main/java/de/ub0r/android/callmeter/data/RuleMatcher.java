@@ -70,21 +70,395 @@ public final class RuleMatcher {
      * Steps for updating the GUI.
      */
     private static final int PROGRESS_STEPS = 25;
-
+    /**
+     * Internal ar for matchLog().
+     */
+    private static final String WHERE = DataProvider.Logs.ID + " = ?";
     /**
      * Strip leading zeros.
      */
     private static boolean stripLeadingZeros = false;
-
     /**
      * International number prefix.
      */
     private static String intPrefix = "";
-
     /**
      * Concat prefix and number without leading zeros at number.
      */
     private static boolean zeroPrefix = true;
+    /**
+     * List of {@link Rule}s.
+     */
+    private static ArrayList<Rule> rules = null;
+    /**
+     * List of {@link Plan}s.
+     */
+    private static SparseArray<Plan> plans = null;
+
+    /**
+     * Default constructor.
+     */
+    private RuleMatcher() {
+    }
+
+    /**
+     * Load {@link Rule}s and {@link Plan}s.
+     *
+     * @param context {@link Context}
+     */
+    private static void load(final Context context) {
+        Log.d(TAG, "load()");
+        if (rules != null && plans != null) {
+            return;
+        }
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        stripLeadingZeros = prefs.getBoolean(Preferences.PREFS_STRIP_LEADING_ZEROS, false);
+        intPrefix = prefs.getString(Preferences.PREFS_INT_PREFIX, "");
+        zeroPrefix = !intPrefix.equals("+44") && !intPrefix.equals("+49");
+
+        final ContentResolver cr = context.getContentResolver();
+
+        // load rules
+        rules = new ArrayList<Rule>();
+        Cursor cursor = cr.query(DataProvider.Rules.CONTENT_URI, DataProvider.Rules.PROJECTION,
+                DataProvider.Rules.ACTIVE + ">0", null, DataProvider.Rules.ORDER);
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                rules.add(new Rule(cr, cursor, -1));
+            } while (cursor.moveToNext());
+        }
+        if (cursor != null && !cursor.isClosed()) {
+            cursor.close();
+        }
+
+        // load plans
+        plans = new SparseArray<Plan>();
+        cursor = cr.query(DataProvider.Plans.CONTENT_URI, DataProvider.Plans.PROJECTION,
+                DataProvider.Plans.WHERE_REALPLANS, null, null);
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                final int i = cursor.getInt(DataProvider.Plans.INDEX_ID);
+                plans.put(i, new Plan(cr, cursor));
+            } while (cursor.moveToNext());
+        }
+        if (cursor != null && !cursor.isClosed()) {
+            cursor.close();
+        }
+        // update parent references
+        int l = plans.size();
+        for (int i = 0; i < l; i++) {
+            Plan p = plans.valueAt(i);
+            p.parent = plans.get(p.ppid);
+        }
+    }
+
+    /**
+     * Reload Rules and plans.
+     */
+    static void flush() {
+        Log.d(TAG, "flush()");
+        rules = null;
+        plans = null;
+    }
+
+    /**
+     * Unmatch all logs.
+     *
+     * @param context {@link Context}
+     */
+    public static void unmatch(final Context context) {
+        Log.d(TAG, "unmatch()");
+        ContentValues cv = new ContentValues();
+        final ContentResolver cr = context.getContentResolver();
+        cv.put(DataProvider.Logs.PLAN_ID, DataProvider.NO_ID);
+        cv.put(DataProvider.Logs.RULE_ID, DataProvider.NO_ID);
+        // reset all but manually set plans
+        cr.update(DataProvider.Logs.CONTENT_URI, cv, DataProvider.Logs.RULE_ID
+                        + " is null or NOT (" + DataProvider.Logs.RULE_ID + " = "
+                        + DataProvider.NOT_FOUND
+                        + " AND " + DataProvider.Logs.PLAN_ID + " != " + DataProvider.NOT_FOUND
+                        + ")",
+                null
+        );
+        resetAlert(context);
+    }
+
+    public static void resetAlert(final Context context) {
+        Log.d(TAG, "resetAlert()");
+        ContentValues cv = new ContentValues();
+        final ContentResolver cr = context.getContentResolver();
+        cv.put(DataProvider.Plans.NEXT_ALERT, 0);
+        cr.update(DataProvider.Plans.CONTENT_URI, cv, null, null);
+        flush();
+    }
+
+    /**
+     * Match a single log record given as {@link Cursor}.
+     *
+     * @param cr  {@link ContentResolver}
+     * @param ops List of {@link ContentProviderOperation}s
+     * @param log {@link Cursor} representing the log
+     * @return true if a log was matched
+     */
+    private static boolean matchLog(final ContentResolver cr,
+                                    final ArrayList<ContentProviderOperation> ops, final Cursor log) {
+        if (cr == null) {
+            Log.e(TAG, "matchLog(null, ops, log)");
+            return false;
+        }
+        if (log == null) {
+            Log.e(TAG, "matchLog(cr, ops, null)");
+            return false;
+        }
+        final long lid = log.getLong(DataProvider.Logs.INDEX_ID);
+        final int t = log.getInt(DataProvider.Logs.INDEX_TYPE);
+        Log.d(TAG, "matchLog(cr, ", lid, ")");
+        boolean matched = false;
+        if (rules == null) {
+            Log.e(TAG, "rules = null");
+            return false;
+        }
+        if (plans == null) {
+            Log.e(TAG, "plans = null");
+            return false;
+        }
+        for (final Rule r : rules) {
+            if (r == null || !r.match(cr, log) || plans == null) {
+                continue;
+            }
+            Log.d(TAG, "matched rule: ", r.getId());
+            final Plan p = plans.get(r.getPlanId());
+            if (p != null) {
+                final long pid = p.getId();
+                final long rid = r.getId();
+                Log.d(TAG, "found plan: ", pid);
+                p.checkBillday(log);
+                final float ba = p.getBilledAmount(log);
+                final float bc = p.getCost(log, ba);
+                ContentProviderOperation op = ContentProviderOperation
+                        .newUpdate(DataProvider.Logs.CONTENT_URI)
+                        .withValue(DataProvider.Logs.PLAN_ID, pid)
+                        .withValue(DataProvider.Logs.RULE_ID, rid)
+                        .withValue(DataProvider.Logs.BILL_AMOUNT, ba)
+                        .withValue(DataProvider.Logs.COST, bc)
+                        .withValue(DataProvider.Logs.FREE, p.getFree(log, bc))
+                        .withSelection(WHERE, new String[]{String.valueOf(lid)})
+                        .build();
+                p.updatePlan(ba, bc, t);
+                ops.add(op);
+                matched = true;
+                break;
+            }
+        }
+        if (!matched) {
+            ContentProviderOperation op = ContentProviderOperation
+                    .newUpdate(DataProvider.Logs.CONTENT_URI)
+                    .withValue(DataProvider.Logs.PLAN_ID, DataProvider.NOT_FOUND)
+                    .withValue(DataProvider.Logs.RULE_ID, DataProvider.NOT_FOUND)
+                    .withSelection(WHERE, new String[]{String.valueOf(lid)})
+                    .build();
+            ops.add(op);
+        }
+        return matched;
+    }
+
+    /**
+     * Match a single log record.
+     *
+     * @param cr  {@link ContentResolver}
+     * @param lid id of log item
+     * @param pid id of plan
+     */
+    public static void matchLog(final ContentResolver cr, final long lid, final int pid) {
+        if (cr == null) {
+            Log.e(TAG, "matchLog(null, lid, pid)");
+            return;
+        }
+        if (lid < 0L || pid < 0L) {
+            Log.e(TAG, "matchLog(cr, " + lid + "," + pid + ")");
+            return;
+        }
+        Log.d(TAG, "matchLog(cr, ", lid, ",", pid, ")");
+
+        if (plans == null) {
+            Log.e(TAG, "plans = null");
+            return;
+        }
+        final Plan p = plans.get(pid);
+        if (p == null) {
+            Log.e(TAG, "plan=null");
+            return;
+        }
+        final Cursor log = cr.query(DataProvider.Logs.CONTENT_URI, DataProvider.Logs.PROJECTION,
+                DataProvider.Logs.ID + " = ?", new String[]{String.valueOf(lid)}, null);
+        if (log == null) {
+            return;
+        }
+        if (!log.moveToFirst()) {
+            Log.e(TAG, "no log: " + log);
+            log.close();
+            return;
+        }
+        final int t = log.getInt(DataProvider.Logs.INDEX_TYPE);
+        p.checkBillday(log);
+        final ContentValues cv = new ContentValues();
+        cv.put(DataProvider.Logs.PLAN_ID, pid);
+        final float ba = p.getBilledAmount(log);
+        cv.put(DataProvider.Logs.BILL_AMOUNT, ba);
+        final float bc = p.getCost(log, ba);
+        cv.put(DataProvider.Logs.COST, bc);
+        cv.put(DataProvider.Logs.FREE, p.getFree(log, bc));
+        p.updatePlan(ba, bc, t);
+        cr.update(DataProvider.Logs.CONTENT_URI, cv, DataProvider.Logs.ID + " = ?",
+                new String[]{String.valueOf(lid)});
+        log.close();
+    }
+
+    /**
+     * Match all unmatched logs.
+     *
+     * @param context    {@link Context}
+     * @param showStatus post status to dialog/handler
+     * @return true if a log was matched
+     */
+    static synchronized boolean match(final Context context, final boolean showStatus) {
+        Log.d(TAG, "match(ctx, ", showStatus, ")");
+        long start = System.currentTimeMillis();
+        boolean ret = false;
+        load(context);
+        final ContentResolver cr = context.getContentResolver();
+        final Cursor cursor = cr.query(DataProvider.Logs.CONTENT_URI, DataProvider.Logs.PROJECTION,
+                DataProvider.Logs.PLAN_ID + " = " + DataProvider.NO_ID, null,
+                DataProvider.Logs.DATE + " ASC");
+        if (cursor != null && cursor.moveToFirst()) {
+            final int l = cursor.getCount();
+            Handler h;
+            if (showStatus) {
+                h = Plans.getHandler();
+                if (h != null) {
+                    final Message m = h.obtainMessage(Plans.MSG_BACKGROUND_PROGRESS_MATCHER);
+                    m.arg1 = 0;
+                    m.arg2 = l;
+                    m.sendToTarget();
+                }
+            }
+            try {
+                ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+                int i = 1;
+                do {
+                    ret |= matchLog(cr, ops, cursor);
+                    if (i % PROGRESS_STEPS == 0 || (i < PROGRESS_STEPS && i % CallMeter.TEN == 0)) {
+                        h = Plans.getHandler();
+                        if (h != null) {
+                            final Message m = h
+                                    .obtainMessage(Plans.MSG_BACKGROUND_PROGRESS_MATCHER);
+                            m.arg1 = i;
+                            m.arg2 = l;
+                            Log.d(TAG, "send progress: ", i, "/", l);
+                            m.sendToTarget();
+                        } else {
+                            Log.d(TAG, "send progress: ", i, " handler=null");
+                        }
+                        Log.d(TAG, "save logs..");
+                        cr.applyBatch(DataProvider.AUTHORITY, ops);
+                        ops.clear();
+                        Log.d(TAG, "sleeping..");
+                        try {
+                            Thread.sleep(CallMeter.MILLIS);
+                        } catch (InterruptedException e) {
+                            Log.e(TAG, "sleep interrupted", e);
+                        }
+                        Log.d(TAG, "sleep finished");
+                    }
+                    ++i;
+                } while (cursor.moveToNext());
+                if (ops.size() > 0) {
+                    cr.applyBatch(DataProvider.AUTHORITY, ops);
+                }
+            } catch (IllegalStateException e) {
+                Log.e(TAG, "illegal state in RuleMatcher's loop", e);
+            } catch (OperationApplicationException e) {
+                Log.e(TAG, "illegal operation in RuleMatcher's loop", e);
+            } catch (RemoteException e) {
+                Log.e(TAG, "remote exception in RuleMatcher's loop", e);
+            }
+        }
+        try {
+            if (cursor != null && !cursor.isClosed()) {
+                cursor.close();
+            }
+        } catch (IllegalStateException e) {
+            Log.e(TAG, "illegal state while closing cursor", e);
+        }
+
+        if (ret) {
+            final SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(context);
+            final boolean a80 = p.getBoolean(Preferences.PREFS_ALERT80, true);
+            final boolean a100 = p.getBoolean(Preferences.PREFS_ALERT100, true);
+            // check for alerts
+            if ((a80 || a100) && plans != null && plans.size() > 0) {
+                final long now = System.currentTimeMillis();
+                int alert = 0;
+                Plan alertPlan = null;
+                int l = plans.size();
+                for (int i = 0; i < l; i++) {
+                    final Plan plan = plans.valueAt(i);
+                    if (plan == null) {
+                        continue;
+                    }
+                    if (plan.nextAlert > now) {
+                        Log.d(TAG, "%s: skip alert until: %d now=%d", plan, plan.nextAlert, now);
+                        continue;
+                    }
+                    int used = DataProvider.Plans.getUsed(plan.type, plan.limitType,
+                            plan.billedAmount, plan.billedCost);
+                    int usedRate = plan.limit > 0 ?
+                            (int) ((used * CallMeter.HUNDRED) / plan.limit)
+                            : 0;
+                    if (a100 && usedRate >= CallMeter.HUNDRED) {
+                        alert = usedRate;
+                        alertPlan = plan;
+                    } else if (a80 && alert < CallMeter.EIGHTY && usedRate >= CallMeter.EIGHTY) {
+                        alert = usedRate;
+                        alertPlan = plan;
+                    }
+                }
+                if (alert > 0) {
+                    final NotificationManager mNotificationMgr = (NotificationManager) context
+                            .getSystemService(Context.NOTIFICATION_SERVICE);
+                    final String t = String.format(context.getString(R.string.alerts_message),
+                            alertPlan.name, alert);
+                    NotificationCompat.Builder b = new NotificationCompat.Builder(context);
+                    b.setSmallIcon(android.R.drawable.stat_notify_error);
+                    b.setTicker(t);
+                    b.setWhen(now);
+                    b.setContentTitle(context.getString(R.string.alerts_title));
+                    b.setContentText(t);
+                    Intent i = new Intent(context, Plans.class);
+                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    b.setContentIntent(PendingIntent.getActivity(
+                            context, 0, i, PendingIntent.FLAG_CANCEL_CURRENT));
+                    mNotificationMgr.notify(0, b.build());
+                    // set nextAlert to beginning of next day
+                    Calendar cal = Calendar.getInstance();
+                    cal.add(Calendar.DAY_OF_MONTH, 1);
+                    cal.set(Calendar.HOUR_OF_DAY, 0);
+                    cal.set(Calendar.MINUTE, 0);
+                    cal.set(Calendar.SECOND, 0);
+                    cal.set(Calendar.MILLISECOND, 0);
+                    alertPlan.nextAlert = cal.getTimeInMillis();
+                    final ContentValues cv = new ContentValues();
+                    cv.put(DataProvider.Plans.NEXT_ALERT, alertPlan.nextAlert);
+                    cr.update(DataProvider.Plans.CONTENT_URI, cv, DataProvider.Plans.ID + " = ?",
+                            new String[]{String.valueOf(alertPlan.id)});
+                }
+            }
+        }
+        long end = System.currentTimeMillis();
+        Log.i(TAG, "match(): ", end - start, "ms");
+        return ret;
+    }
 
     /**
      * A single Rule.
@@ -94,359 +468,53 @@ public final class RuleMatcher {
     private static class Rule {
 
         /**
-         * Get the {@link NumbersGroup}.
-         *
-         * @param cr   {@link ContentResolver}
-         * @param gids ids of group
-         * @return {@link NumbersGroup}s
+         * Internal var for match().
          */
-        static NumbersGroup[] getNumberGroups(final ContentResolver cr, final String gids) {
-            if (gids == null) {
-                return null;
-            }
-            final String[] split = gids.split(",");
-            ArrayList<NumbersGroup> list = new ArrayList<NumbersGroup>();
-            for (String s : split) {
-                if (s == null || s.length() == 0 || s.equals("-1")) {
-                    continue;
-                }
-                final NumbersGroup ng = new NumbersGroup(cr, Utils.parseLong(s, -1L));
-                if (ng.numbers.size() > 0) {
-                    list.add(ng);
-                }
-            }
-            if (list.size() == 0) {
-                return null;
-            }
-            return list.toArray(new NumbersGroup[list.size()]);
-        }
-
-        /**
-         * Get the {@link HoursGroup}.
-         *
-         * @param cr   {@link ContentResolver}
-         * @param gids id of group
-         * @return {@link HoursGroup}s
-         */
-        static HoursGroup[] getHourGroups(final ContentResolver cr, final String gids) {
-            if (gids == null) {
-                return null;
-            }
-            final String[] split = gids.split(",");
-            ArrayList<HoursGroup> list = new ArrayList<HoursGroup>();
-            for (String s : split) {
-                if (s == null || s.length() == 0 || s.equals("-1")) {
-                    continue;
-                }
-                final HoursGroup ng = new HoursGroup(cr, Utils.parseLong(s, -1L));
-                if (ng.hours.size() > 0) {
-                    list.add(ng);
-                }
-            }
-            if (list.size() == 0) {
-                return null;
-            }
-            return list.toArray(new HoursGroup[list.size()]);
-        }
-
-        /**
-         * Group of numbers.
-         */
-        private static final class NumbersGroup {
-
-            /**
-             * List of numbers.
-             */
-            private final ArrayList<String> numbers = new ArrayList<String>();
-
-            /**
-             * Default Constructor.
-             *
-             * @param cr    {@link ContentResolver}
-             * @param what0 argument
-             */
-            private NumbersGroup(final ContentResolver cr, final long what0) {
-                //noinspection ConstantConditions
-                final Cursor cursor = cr.query(
-                        ContentUris.withAppendedId(DataProvider.Numbers.GROUP_URI, what0),
-                        DataProvider.Numbers.PROJECTION, null, null, null);
-                if (cursor != null && cursor.moveToFirst()) {
-                    final boolean doPrefix = intPrefix.length() > 1;
-                    do {
-                        String s = cursor.getString(DataProvider.Numbers.INDEX_NUMBER);
-                        if (s == null || s.length() == 0) {
-                            continue;
-                        }
-                        if (stripLeadingZeros) {
-                            s = s.replaceFirst("^00*", "");
-                        }
-                        if (doPrefix && !s.startsWith("%")) {
-                            s = national2international(intPrefix, zeroPrefix, s);
-                        }
-                        numbers.add(s);
-                    } while (cursor.moveToNext());
-                }
-                if (cursor != null && !cursor.isClosed()) {
-                    cursor.close();
-                }
-            }
-
-            /**
-             * Convert national number to international. Old format internationals were converted to
-             * new format.
-             *
-             * @param iPrefix default prefix
-             * @param zPrefix concat prefix and number without leading zeros at number
-             * @param number  national number
-             * @return international number
-             */
-            private static String national2international(final String iPrefix,
-                    final boolean zPrefix, final String number) {
-                if (number.length() < NUMBER_MIN_LENGTH && !number.endsWith("%")) {
-                    return number;
-                } else if (number.startsWith("0800") || number.startsWith("00800")) {
-                    return number;
-                } else if (number.startsWith("+")) {
-                    return number;
-                } else if (number.startsWith("00")) {
-                    return "+" + number.substring(2);
-                } else if (number.startsWith("0")) {
-                    return iPrefix + number.substring(1);
-                } else if (iPrefix.length() > 1 && number.startsWith(iPrefix.substring(1))) {
-                    return "+" + number;
-                } else if (zPrefix) {
-                    return iPrefix + number;
-                } else {
-                    return number;
-                }
-            }
-
-            /**
-             * Match a given log.
-             *
-             * @param log {@link Cursor} representing log
-             * @return true if log matches
-             */
-            boolean match(final Cursor log) {
-                String number = log.getString(DataProvider.Logs.INDEX_REMOTE);
-                if (number == null) {
-                    return false;
-                }
-                if (number.length() == 0) {
-                    return false;
-                }
-                Log.d(TAG, "NumbersGroup.match(", number, ")");
-                if (number.length() > 1) {
-                    if (stripLeadingZeros) {
-                        number = number.replaceFirst("^00*", "");
-                    }
-                    if (intPrefix.length() > 1) {
-                        number = national2international(intPrefix, zeroPrefix, number);
-                    }
-                }
-                final int l = numbers.size();
-                for (int i = 0; i < l; i++) {
-                    String n = numbers.get(i);
-                    if (n == null) {
-                        Log.w(TAG, "numbers[", i, "] = null");
-                        return false;
-                    }
-                    int nl = n.length();
-                    if (nl <= 1) {
-                        Log.w(TAG, "#numbers[", i, "] = ", nl);
-                        return false;
-                    }
-
-                    if (n.startsWith("%")) {
-                        if (n.endsWith("%")) {
-                            if (nl == 2) {
-                                Log.w(TAG, "numbers[", i, "] = ", n);
-                                return false;
-                            }
-                            if (number.contains(n.substring(1, nl - 1))) {
-                                Log.d(TAG, "match: ", n);
-                                return true;
-                            }
-                        } else {
-                            if (number.endsWith(n.substring(1))) {
-                                Log.d(TAG, "match: ", n);
-                                return true;
-                            }
-                        }
-                    } else if (n.endsWith("%")) {
-                        if (number.startsWith(n.substring(0, nl - 1))) {
-                            Log.d(TAG, "match: ", n);
-                            return true;
-                        }
-                    } else if (PhoneNumberUtils.compare(number, n)) {
-                        Log.d(TAG, "match: ", n);
-                        return true;
-                    }
-                    Log.v(TAG, "no match: ", n);
-                }
-                return false;
-            }
-        }
-
-        /**
-         * Group of hours.
-         */
-        private static final class HoursGroup {
-
-            /**
-             * List of hours.
-             */
-            private final SparseArray<HashSet<Integer>> hours = new SparseArray<HashSet<Integer>>();
-
-            /**
-             * Entry for monday - sunday.
-             */
-            private static final int ALL_WEEK = 0;
-
-            /**
-             * Entry for monday.
-             */
-            private static final int MON = 1;
-            /** Entry for tuesday. */
-            // private static final int TUE = 2;
-            /** Entry for wednesday. */
-            // private static final int WED = 3;
-            /** Entry for thrusday. */
-            // private static final int THU = 4;
-            /** Entry for friday. */
-            // private static final int FRI = 5;
-
-            /**
-             * Entry for satadurday.
-             */
-            private static final int SAT = 6;
-
-            /**
-             * Entry for sunday.
-             */
-            private static final int SUN = 7;
-
-            /**
-             * Entry for monday - friday.
-             */
-            private static final int MON_FRI = 8;
-
-            /**
-             * Default Constructor.
-             *
-             * @param cr    {@link ContentResolver}
-             * @param what0 argument
-             */
-            private HoursGroup(final ContentResolver cr, final long what0) {
-                //noinspection ConstantConditions
-                final Cursor cursor = cr.query(
-                        ContentUris.withAppendedId(DataProvider.Hours.GROUP_URI, what0),
-                        DataProvider.Hours.PROJECTION, null, null, null);
-                if (cursor != null && cursor.moveToFirst()) {
-                    do {
-                        final int d = cursor.getInt(DataProvider.Hours.INDEX_DAY);
-                        final int h = cursor.getInt(DataProvider.Hours.INDEX_HOUR);
-                        HashSet<Integer> hs = hours.get(d);
-                        if (hs == null) {
-                            hs = new HashSet<Integer>();
-                            hs.add(h);
-                            hours.put(d, hs);
-                        } else {
-                            hs.add(h);
-                        }
-                    } while (cursor.moveToNext());
-                }
-                if (cursor != null && !cursor.isClosed()) {
-                    cursor.close();
-                }
-            }
-
-            /**
-             * Internal var for match().
-             */
-            private static final Calendar CAL = Calendar.getInstance();
-
-            /**
-             * Match a given log.
-             *
-             * @param log {@link Cursor} representing log
-             * @return true if log matches
-             */
-            boolean match(final Cursor log) {
-                long date = log.getLong(DataProvider.Logs.INDEX_DATE);
-                CAL.setTimeInMillis(date);
-                final int d = (CAL.get(Calendar.DAY_OF_WEEK) - Calendar.SUNDAY) % SUN;
-                final int h = CAL.get(Calendar.HOUR_OF_DAY) + 1;
-                int l = hours.size();
-                for (int i = 0; i < l; i++) {
-                    int k = hours.keyAt(i);
-                    if (k == ALL_WEEK || (k == MON_FRI && d < SAT && d >= MON) || k % SUN == d) {
-                        for (int v : hours.get(k)) {
-                            if (v == 0 || v == h) {
-                                return true;
-                            }
-                        }
-                    }
-                }
-                return false;
-            }
-        }
-
+        private static final String[] S1 = new String[1];
         /**
          * Id.
          */
         private final int id;
-
         /**
          * ID of plan referred by this rule.
          */
         private final int planId;
-
         /**
          * Kind of rule.
          */
         private final int what;
-
         /**
          * My own number.
          */
         private final String myNumber;
-
         /**
          * Is roamed?
          */
         private final int roamed;
-
         /**
          * Is direction?
          */
         private final int direction;
-
         /**
          * Match hours?
          */
         private final HoursGroup[] inhours, exhours;
-
         /**
          * Match numbers?
          */
         private final NumbersGroup[] innumbers, exnumbers;
-
         /**
          * Match only if limit is not reached?
          */
         private final boolean limitNotReached;
-
         /**
          * Match only websms.
          */
         private final int iswebsms;
-
         /**
          * Match only specific websms connector.
          */
         private final String iswebsmsConnector;
-
         /**
          * Match only sipcalls.
          */
@@ -512,6 +580,62 @@ public final class RuleMatcher {
         }
 
         /**
+         * Get the {@link NumbersGroup}.
+         *
+         * @param cr   {@link ContentResolver}
+         * @param gids ids of group
+         * @return {@link NumbersGroup}s
+         */
+        static NumbersGroup[] getNumberGroups(final ContentResolver cr, final String gids) {
+            if (gids == null) {
+                return null;
+            }
+            final String[] split = gids.split(",");
+            ArrayList<NumbersGroup> list = new ArrayList<NumbersGroup>();
+            for (String s : split) {
+                if (s == null || s.length() == 0 || s.equals("-1")) {
+                    continue;
+                }
+                final NumbersGroup ng = new NumbersGroup(cr, Utils.parseLong(s, -1L));
+                if (ng.numbers.size() > 0) {
+                    list.add(ng);
+                }
+            }
+            if (list.size() == 0) {
+                return null;
+            }
+            return list.toArray(new NumbersGroup[list.size()]);
+        }
+
+        /**
+         * Get the {@link HoursGroup}.
+         *
+         * @param cr   {@link ContentResolver}
+         * @param gids id of group
+         * @return {@link HoursGroup}s
+         */
+        static HoursGroup[] getHourGroups(final ContentResolver cr, final String gids) {
+            if (gids == null) {
+                return null;
+            }
+            final String[] split = gids.split(",");
+            ArrayList<HoursGroup> list = new ArrayList<HoursGroup>();
+            for (String s : split) {
+                if (s == null || s.length() == 0 || s.equals("-1")) {
+                    continue;
+                }
+                final HoursGroup ng = new HoursGroup(cr, Utils.parseLong(s, -1L));
+                if (ng.hours.size() > 0) {
+                    list.add(ng);
+                }
+            }
+            if (list.size() == 0) {
+                return null;
+            }
+            return list.toArray(new HoursGroup[list.size()]);
+        }
+
+        /**
          * @return {@link Rule}'s id
          */
         int getId() {
@@ -524,11 +648,6 @@ public final class RuleMatcher {
         int getPlanId() {
             return planId;
         }
-
-        /**
-         * Internal var for match().
-         */
-        private static final String[] S1 = new String[1];
 
         /**
          * Math a log.
@@ -714,6 +833,243 @@ public final class RuleMatcher {
             Log.d(TAG, "ret after exnumbers: ", ret);
             return ret;
         }
+
+        /**
+         * Group of numbers.
+         */
+        private static final class NumbersGroup {
+
+            /**
+             * List of numbers.
+             */
+            private final ArrayList<String> numbers = new ArrayList<String>();
+
+            /**
+             * Default Constructor.
+             *
+             * @param cr    {@link ContentResolver}
+             * @param what0 argument
+             */
+            private NumbersGroup(final ContentResolver cr, final long what0) {
+                //noinspection ConstantConditions
+                final Cursor cursor = cr.query(
+                        ContentUris.withAppendedId(DataProvider.Numbers.GROUP_URI, what0),
+                        DataProvider.Numbers.PROJECTION, null, null, null);
+                if (cursor != null && cursor.moveToFirst()) {
+                    final boolean doPrefix = intPrefix.length() > 1;
+                    do {
+                        String s = cursor.getString(DataProvider.Numbers.INDEX_NUMBER);
+                        if (s == null || s.length() == 0) {
+                            continue;
+                        }
+                        if (stripLeadingZeros) {
+                            s = s.replaceFirst("^00*", "");
+                        }
+                        if (doPrefix && !s.startsWith("%")) {
+                            s = national2international(intPrefix, zeroPrefix, s);
+                        }
+                        numbers.add(s);
+                    } while (cursor.moveToNext());
+                }
+                if (cursor != null && !cursor.isClosed()) {
+                    cursor.close();
+                }
+            }
+
+            /**
+             * Convert national number to international. Old format internationals were converted to
+             * new format.
+             *
+             * @param iPrefix default prefix
+             * @param zPrefix concat prefix and number without leading zeros at number
+             * @param number  national number
+             * @return international number
+             */
+            private static String national2international(final String iPrefix,
+                                                         final boolean zPrefix, final String number) {
+                if (number.length() < NUMBER_MIN_LENGTH && !number.endsWith("%")) {
+                    return number;
+                } else if (number.startsWith("0800") || number.startsWith("00800")) {
+                    return number;
+                } else if (number.startsWith("+")) {
+                    return number;
+                } else if (number.startsWith("00")) {
+                    return "+" + number.substring(2);
+                } else if (number.startsWith("0")) {
+                    return iPrefix + number.substring(1);
+                } else if (iPrefix.length() > 1 && number.startsWith(iPrefix.substring(1))) {
+                    return "+" + number;
+                } else if (zPrefix) {
+                    return iPrefix + number;
+                } else {
+                    return number;
+                }
+            }
+
+            /**
+             * Match a given log.
+             *
+             * @param log {@link Cursor} representing log
+             * @return true if log matches
+             */
+            boolean match(final Cursor log) {
+                String number = log.getString(DataProvider.Logs.INDEX_REMOTE);
+                if (number == null) {
+                    return false;
+                }
+                if (number.length() == 0) {
+                    return false;
+                }
+                Log.d(TAG, "NumbersGroup.match(", number, ")");
+                if (number.length() > 1) {
+                    if (stripLeadingZeros) {
+                        number = number.replaceFirst("^00*", "");
+                    }
+                    if (intPrefix.length() > 1) {
+                        number = national2international(intPrefix, zeroPrefix, number);
+                    }
+                }
+                final int l = numbers.size();
+                for (int i = 0; i < l; i++) {
+                    String n = numbers.get(i);
+                    if (n == null) {
+                        Log.w(TAG, "numbers[", i, "] = null");
+                        return false;
+                    }
+                    int nl = n.length();
+                    if (nl <= 1) {
+                        Log.w(TAG, "#numbers[", i, "] = ", nl);
+                        return false;
+                    }
+
+                    if (n.startsWith("%")) {
+                        if (n.endsWith("%")) {
+                            if (nl == 2) {
+                                Log.w(TAG, "numbers[", i, "] = ", n);
+                                return false;
+                            }
+                            if (number.contains(n.substring(1, nl - 1))) {
+                                Log.d(TAG, "match: ", n);
+                                return true;
+                            }
+                        } else {
+                            if (number.endsWith(n.substring(1))) {
+                                Log.d(TAG, "match: ", n);
+                                return true;
+                            }
+                        }
+                    } else if (n.endsWith("%")) {
+                        if (number.startsWith(n.substring(0, nl - 1))) {
+                            Log.d(TAG, "match: ", n);
+                            return true;
+                        }
+                    } else if (PhoneNumberUtils.compare(number, n)) {
+                        Log.d(TAG, "match: ", n);
+                        return true;
+                    }
+                    Log.v(TAG, "no match: ", n);
+                }
+                return false;
+            }
+        }
+
+        /**
+         * Group of hours.
+         */
+        private static final class HoursGroup {
+
+            /**
+             * Entry for monday - sunday.
+             */
+            private static final int ALL_WEEK = 0;
+            /**
+             * Entry for monday.
+             */
+            private static final int MON = 1;
+            /**
+             * Entry for satadurday.
+             */
+            private static final int SAT = 6;
+            /** Entry for tuesday. */
+            // private static final int TUE = 2;
+            /** Entry for wednesday. */
+            // private static final int WED = 3;
+            /** Entry for thrusday. */
+            // private static final int THU = 4;
+            /** Entry for friday. */
+            // private static final int FRI = 5;
+            /**
+             * Entry for sunday.
+             */
+            private static final int SUN = 7;
+            /**
+             * Entry for monday - friday.
+             */
+            private static final int MON_FRI = 8;
+            /**
+             * Internal var for match().
+             */
+            private static final Calendar CAL = Calendar.getInstance();
+            /**
+             * List of hours.
+             */
+            private final SparseArray<HashSet<Integer>> hours = new SparseArray<HashSet<Integer>>();
+
+            /**
+             * Default Constructor.
+             *
+             * @param cr    {@link ContentResolver}
+             * @param what0 argument
+             */
+            private HoursGroup(final ContentResolver cr, final long what0) {
+                //noinspection ConstantConditions
+                final Cursor cursor = cr.query(
+                        ContentUris.withAppendedId(DataProvider.Hours.GROUP_URI, what0),
+                        DataProvider.Hours.PROJECTION, null, null, null);
+                if (cursor != null && cursor.moveToFirst()) {
+                    do {
+                        final int d = cursor.getInt(DataProvider.Hours.INDEX_DAY);
+                        final int h = cursor.getInt(DataProvider.Hours.INDEX_HOUR);
+                        HashSet<Integer> hs = hours.get(d);
+                        if (hs == null) {
+                            hs = new HashSet<Integer>();
+                            hs.add(h);
+                            hours.put(d, hs);
+                        } else {
+                            hs.add(h);
+                        }
+                    } while (cursor.moveToNext());
+                }
+                if (cursor != null && !cursor.isClosed()) {
+                    cursor.close();
+                }
+            }
+
+            /**
+             * Match a given log.
+             *
+             * @param log {@link Cursor} representing log
+             * @return true if log matches
+             */
+            boolean match(final Cursor log) {
+                long date = log.getLong(DataProvider.Logs.INDEX_DATE);
+                CAL.setTimeInMillis(date);
+                final int d = (CAL.get(Calendar.DAY_OF_WEEK) - Calendar.SUNDAY) % SUN;
+                final int h = CAL.get(Calendar.HOUR_OF_DAY) + 1;
+                int l = hours.size();
+                for (int i = 0; i < l; i++) {
+                    int k = hours.keyAt(i);
+                    if (k == ALL_WEEK || (k == MON_FRI && d < SAT && d >= MON) || k % SUN == d) {
+                        for (int v : hours.get(k)) {
+                            if (v == 0 || v == h) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                return false;
+            }
+        }
     }
 
     /**
@@ -802,41 +1158,34 @@ public final class RuleMatcher {
          * Parent plan id.
          */
         private final int ppid;
-
-        /**
-         * PArent plan. Set in RuleMatcher.load().
-         */
-        private Plan parent = null;
-
-        /**
-         * Time of next alert.
-         */
-        private long nextAlert = 0;
-
-        /**
-         * Last valid billday.
-         */
-        private Calendar currentBillday = null;
-
-        /**
-         * Time of nextBillday.
-         */
-        private long nextBillday = -1L;
-
-        /**
-         * Amount billed this period.
-         */
-        private float billedAmount = 0f;
-
-        /**
-         * Cost billed this period.
-         */
-        private float billedCost = 0f;
-
         /**
          * {@link ContentResolver}.
          */
         private final ContentResolver cResolver;
+        /**
+         * PArent plan. Set in RuleMatcher.load().
+         */
+        private Plan parent = null;
+        /**
+         * Time of next alert.
+         */
+        private long nextAlert = 0;
+        /**
+         * Last valid billday.
+         */
+        private Calendar currentBillday = null;
+        /**
+         * Time of nextBillday.
+         */
+        private long nextBillday = -1L;
+        /**
+         * Amount billed this period.
+         */
+        private float billedAmount = 0f;
+        /**
+         * Cost billed this period.
+         */
+        private float billedCost = 0f;
 
         /**
          * Load a {@link Plan}.
@@ -1247,385 +1596,5 @@ public final class RuleMatcher {
         public String toString() {
             return "RuleMatcher.Plan: " + name;
         }
-    }
-
-    /**
-     * List of {@link Rule}s.
-     */
-    private static ArrayList<Rule> rules = null;
-
-    /**
-     * List of {@link Plan}s.
-     */
-    private static SparseArray<Plan> plans = null;
-
-    /**
-     * Default constructor.
-     */
-    private RuleMatcher() {
-    }
-
-    /**
-     * Load {@link Rule}s and {@link Plan}s.
-     *
-     * @param context {@link Context}
-     */
-    private static void load(final Context context) {
-        Log.d(TAG, "load()");
-        if (rules != null && plans != null) {
-            return;
-        }
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        stripLeadingZeros = prefs.getBoolean(Preferences.PREFS_STRIP_LEADING_ZEROS, false);
-        intPrefix = prefs.getString(Preferences.PREFS_INT_PREFIX, "");
-        zeroPrefix = !intPrefix.equals("+44") && !intPrefix.equals("+49");
-
-        final ContentResolver cr = context.getContentResolver();
-
-        // load rules
-        rules = new ArrayList<Rule>();
-        Cursor cursor = cr.query(DataProvider.Rules.CONTENT_URI, DataProvider.Rules.PROJECTION,
-                DataProvider.Rules.ACTIVE + ">0", null, DataProvider.Rules.ORDER);
-        if (cursor != null && cursor.moveToFirst()) {
-            do {
-                rules.add(new Rule(cr, cursor, -1));
-            } while (cursor.moveToNext());
-        }
-        if (cursor != null && !cursor.isClosed()) {
-            cursor.close();
-        }
-
-        // load plans
-        plans = new SparseArray<Plan>();
-        cursor = cr.query(DataProvider.Plans.CONTENT_URI, DataProvider.Plans.PROJECTION,
-                DataProvider.Plans.WHERE_REALPLANS, null, null);
-        if (cursor != null && cursor.moveToFirst()) {
-            do {
-                final int i = cursor.getInt(DataProvider.Plans.INDEX_ID);
-                plans.put(i, new Plan(cr, cursor));
-            } while (cursor.moveToNext());
-        }
-        if (cursor != null && !cursor.isClosed()) {
-            cursor.close();
-        }
-        // update parent references
-        int l = plans.size();
-        for (int i = 0; i < l; i++) {
-            Plan p = plans.valueAt(i);
-            p.parent = plans.get(p.ppid);
-        }
-    }
-
-    /**
-     * Reload Rules and plans.
-     */
-    static void flush() {
-        Log.d(TAG, "flush()");
-        rules = null;
-        plans = null;
-    }
-
-    /**
-     * Unmatch all logs.
-     *
-     * @param context {@link Context}
-     */
-    public static void unmatch(final Context context) {
-        Log.d(TAG, "unmatch()");
-        ContentValues cv = new ContentValues();
-        final ContentResolver cr = context.getContentResolver();
-        cv.put(DataProvider.Logs.PLAN_ID, DataProvider.NO_ID);
-        cv.put(DataProvider.Logs.RULE_ID, DataProvider.NO_ID);
-        // reset all but manually set plans
-        cr.update(DataProvider.Logs.CONTENT_URI, cv, DataProvider.Logs.RULE_ID
-                        + " is null or NOT (" + DataProvider.Logs.RULE_ID + " = "
-                        + DataProvider.NOT_FOUND
-                        + " AND " + DataProvider.Logs.PLAN_ID + " != " + DataProvider.NOT_FOUND
-                        + ")",
-                null
-        );
-        resetAlert(context);
-    }
-
-    public static void resetAlert(final Context context) {
-        Log.d(TAG, "resetAlert()");
-        ContentValues cv = new ContentValues();
-        final ContentResolver cr = context.getContentResolver();
-        cv.put(DataProvider.Plans.NEXT_ALERT, 0);
-        cr.update(DataProvider.Plans.CONTENT_URI, cv, null, null);
-        flush();
-    }
-
-    /**
-     * Internal ar for matchLog().
-     */
-    private static final String WHERE = DataProvider.Logs.ID + " = ?";
-
-    /**
-     * Match a single log record given as {@link Cursor}.
-     *
-     * @param cr  {@link ContentResolver}
-     * @param ops List of {@link ContentProviderOperation}s
-     * @param log {@link Cursor} representing the log
-     * @return true if a log was matched
-     */
-    private static boolean matchLog(final ContentResolver cr,
-            final ArrayList<ContentProviderOperation> ops, final Cursor log) {
-        if (cr == null) {
-            Log.e(TAG, "matchLog(null, ops, log)");
-            return false;
-        }
-        if (log == null) {
-            Log.e(TAG, "matchLog(cr, ops, null)");
-            return false;
-        }
-        final long lid = log.getLong(DataProvider.Logs.INDEX_ID);
-        final int t = log.getInt(DataProvider.Logs.INDEX_TYPE);
-        Log.d(TAG, "matchLog(cr, ", lid, ")");
-        boolean matched = false;
-        if (rules == null) {
-            Log.e(TAG, "rules = null");
-            return false;
-        }
-        if (plans == null) {
-            Log.e(TAG, "plans = null");
-            return false;
-        }
-        for (final Rule r : rules) {
-            if (r == null || !r.match(cr, log) || plans == null) {
-                continue;
-            }
-            Log.d(TAG, "matched rule: ", r.getId());
-            final Plan p = plans.get(r.getPlanId());
-            if (p != null) {
-                final long pid = p.getId();
-                final long rid = r.getId();
-                Log.d(TAG, "found plan: ", pid);
-                p.checkBillday(log);
-                final float ba = p.getBilledAmount(log);
-                final float bc = p.getCost(log, ba);
-                ContentProviderOperation op = ContentProviderOperation
-                        .newUpdate(DataProvider.Logs.CONTENT_URI)
-                        .withValue(DataProvider.Logs.PLAN_ID, pid)
-                        .withValue(DataProvider.Logs.RULE_ID, rid)
-                        .withValue(DataProvider.Logs.BILL_AMOUNT, ba)
-                        .withValue(DataProvider.Logs.COST, bc)
-                        .withValue(DataProvider.Logs.FREE, p.getFree(log, bc))
-                        .withSelection(WHERE, new String[]{String.valueOf(lid)})
-                        .build();
-                p.updatePlan(ba, bc, t);
-                ops.add(op);
-                matched = true;
-                break;
-            }
-        }
-        if (!matched) {
-            ContentProviderOperation op = ContentProviderOperation
-                    .newUpdate(DataProvider.Logs.CONTENT_URI)
-                    .withValue(DataProvider.Logs.PLAN_ID, DataProvider.NOT_FOUND)
-                    .withValue(DataProvider.Logs.RULE_ID, DataProvider.NOT_FOUND)
-                    .withSelection(WHERE, new String[]{String.valueOf(lid)})
-                    .build();
-            ops.add(op);
-        }
-        return matched;
-    }
-
-    /**
-     * Match a single log record.
-     *
-     * @param cr  {@link ContentResolver}
-     * @param lid id of log item
-     * @param pid id of plan
-     */
-    public static void matchLog(final ContentResolver cr, final long lid, final int pid) {
-        if (cr == null) {
-            Log.e(TAG, "matchLog(null, lid, pid)");
-            return;
-        }
-        if (lid < 0L || pid < 0L) {
-            Log.e(TAG, "matchLog(cr, " + lid + "," + pid + ")");
-            return;
-        }
-        Log.d(TAG, "matchLog(cr, ", lid, ",", pid, ")");
-
-        if (plans == null) {
-            Log.e(TAG, "plans = null");
-            return;
-        }
-        final Plan p = plans.get(pid);
-        if (p == null) {
-            Log.e(TAG, "plan=null");
-            return;
-        }
-        final Cursor log = cr.query(DataProvider.Logs.CONTENT_URI, DataProvider.Logs.PROJECTION,
-                DataProvider.Logs.ID + " = ?", new String[]{String.valueOf(lid)}, null);
-        if (log == null) {
-            return;
-        }
-        if (!log.moveToFirst()) {
-            Log.e(TAG, "no log: " + log);
-            log.close();
-            return;
-        }
-        final int t = log.getInt(DataProvider.Logs.INDEX_TYPE);
-        p.checkBillday(log);
-        final ContentValues cv = new ContentValues();
-        cv.put(DataProvider.Logs.PLAN_ID, pid);
-        final float ba = p.getBilledAmount(log);
-        cv.put(DataProvider.Logs.BILL_AMOUNT, ba);
-        final float bc = p.getCost(log, ba);
-        cv.put(DataProvider.Logs.COST, bc);
-        cv.put(DataProvider.Logs.FREE, p.getFree(log, bc));
-        p.updatePlan(ba, bc, t);
-        cr.update(DataProvider.Logs.CONTENT_URI, cv, DataProvider.Logs.ID + " = ?",
-                new String[]{String.valueOf(lid)});
-        log.close();
-    }
-
-    /**
-     * Match all unmatched logs.
-     *
-     * @param context    {@link Context}
-     * @param showStatus post status to dialog/handler
-     * @return true if a log was matched
-     */
-    static synchronized boolean match(final Context context, final boolean showStatus) {
-        Log.d(TAG, "match(ctx, ", showStatus, ")");
-        long start = System.currentTimeMillis();
-        boolean ret = false;
-        load(context);
-        final ContentResolver cr = context.getContentResolver();
-        final Cursor cursor = cr.query(DataProvider.Logs.CONTENT_URI, DataProvider.Logs.PROJECTION,
-                DataProvider.Logs.PLAN_ID + " = " + DataProvider.NO_ID, null,
-                DataProvider.Logs.DATE + " ASC");
-        if (cursor != null && cursor.moveToFirst()) {
-            final int l = cursor.getCount();
-            Handler h;
-            if (showStatus) {
-                h = Plans.getHandler();
-                if (h != null) {
-                    final Message m = h.obtainMessage(Plans.MSG_BACKGROUND_PROGRESS_MATCHER);
-                    m.arg1 = 0;
-                    m.arg2 = l;
-                    m.sendToTarget();
-                }
-            }
-            try {
-                ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
-                int i = 1;
-                do {
-                    ret |= matchLog(cr, ops, cursor);
-                    if (i % PROGRESS_STEPS == 0 || (i < PROGRESS_STEPS && i % CallMeter.TEN == 0)) {
-                        h = Plans.getHandler();
-                        if (h != null) {
-                            final Message m = h
-                                    .obtainMessage(Plans.MSG_BACKGROUND_PROGRESS_MATCHER);
-                            m.arg1 = i;
-                            m.arg2 = l;
-                            Log.d(TAG, "send progress: ", i, "/", l);
-                            m.sendToTarget();
-                        } else {
-                            Log.d(TAG, "send progress: ", i, " handler=null");
-                        }
-                        Log.d(TAG, "save logs..");
-                        cr.applyBatch(DataProvider.AUTHORITY, ops);
-                        ops.clear();
-                        Log.d(TAG, "sleeping..");
-                        try {
-                            Thread.sleep(CallMeter.MILLIS);
-                        } catch (InterruptedException e) {
-                            Log.e(TAG, "sleep interrupted", e);
-                        }
-                        Log.d(TAG, "sleep finished");
-                    }
-                    ++i;
-                } while (cursor.moveToNext());
-                if (ops.size() > 0) {
-                    cr.applyBatch(DataProvider.AUTHORITY, ops);
-                }
-            } catch (IllegalStateException e) {
-                Log.e(TAG, "illegal state in RuleMatcher's loop", e);
-            } catch (OperationApplicationException e) {
-                Log.e(TAG, "illegal operation in RuleMatcher's loop", e);
-            } catch (RemoteException e) {
-                Log.e(TAG, "remote exception in RuleMatcher's loop", e);
-            }
-        }
-        try {
-            if (cursor != null && !cursor.isClosed()) {
-                cursor.close();
-            }
-        } catch (IllegalStateException e) {
-            Log.e(TAG, "illegal state while closing cursor", e);
-        }
-
-        if (ret) {
-            final SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(context);
-            final boolean a80 = p.getBoolean(Preferences.PREFS_ALERT80, true);
-            final boolean a100 = p.getBoolean(Preferences.PREFS_ALERT100, true);
-            // check for alerts
-            if ((a80 || a100) && plans != null && plans.size() > 0) {
-                final long now = System.currentTimeMillis();
-                int alert = 0;
-                Plan alertPlan = null;
-                int l = plans.size();
-                for (int i = 0; i < l; i++) {
-                    final Plan plan = plans.valueAt(i);
-                    if (plan == null) {
-                        continue;
-                    }
-                    if (plan.nextAlert > now) {
-                        Log.d(TAG, "%s: skip alert until: %d now=%d", plan, plan.nextAlert, now);
-                        continue;
-                    }
-                    int used = DataProvider.Plans.getUsed(plan.type, plan.limitType,
-                            plan.billedAmount, plan.billedCost);
-                    int usedRate = plan.limit > 0 ?
-                            (int) ((used * CallMeter.HUNDRED) / plan.limit)
-                            : 0;
-                    if (a100 && usedRate >= CallMeter.HUNDRED) {
-                        alert = usedRate;
-                        alertPlan = plan;
-                    } else if (a80 && alert < CallMeter.EIGHTY && usedRate >= CallMeter.EIGHTY) {
-                        alert = usedRate;
-                        alertPlan = plan;
-                    }
-                }
-                if (alert > 0) {
-                    final NotificationManager mNotificationMgr = (NotificationManager) context
-                            .getSystemService(Context.NOTIFICATION_SERVICE);
-                    final String t = String.format(context.getString(R.string.alerts_message),
-                            alertPlan.name, alert);
-                    NotificationCompat.Builder b = new NotificationCompat.Builder(context);
-                    b.setSmallIcon(android.R.drawable.stat_notify_error);
-                    b.setTicker(t);
-                    b.setWhen(now);
-                    b.setContentTitle(context.getString(R.string.alerts_title));
-                    b.setContentText(t);
-                    Intent i = new Intent(context, Plans.class);
-                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    b.setContentIntent(PendingIntent.getActivity(
-                            context, 0, i, PendingIntent.FLAG_CANCEL_CURRENT));
-                    mNotificationMgr.notify(0, b.build());
-                    // set nextAlert to beginning of next day
-                    Calendar cal = Calendar.getInstance();
-                    cal.add(Calendar.DAY_OF_MONTH, 1);
-                    cal.set(Calendar.HOUR_OF_DAY, 0);
-                    cal.set(Calendar.MINUTE, 0);
-                    cal.set(Calendar.SECOND, 0);
-                    cal.set(Calendar.MILLISECOND, 0);
-                    alertPlan.nextAlert = cal.getTimeInMillis();
-                    final ContentValues cv = new ContentValues();
-                    cv.put(DataProvider.Plans.NEXT_ALERT, alertPlan.nextAlert);
-                    cr.update(DataProvider.Plans.CONTENT_URI, cv, DataProvider.Plans.ID + " = ?",
-                            new String[]{String.valueOf(alertPlan.id)});
-                }
-            }
-        }
-        long end = System.currentTimeMillis();
-        Log.i(TAG, "match(): ", end - start, "ms");
-        return ret;
     }
 }

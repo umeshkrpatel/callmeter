@@ -20,48 +20,15 @@ import java.util.ArrayList;
 import de.ub0r.android.callmeter.data.DataProvider;
 
 public class ChartFormat {
+    public static final int[] CHART_COLORS = {
+            Color.rgb(255, 102, 0), Color.rgb(192, 255, 140), Color.rgb(255, 247, 140)
+    };
     /*
      * Handle to empty DataSet
      */
     public static float INVALID = (-1.0f);
-
     public static ArrayList<Integer> COLORS = null;
-
     public static ArrayList<Integer> GRAY_COLOR = null;
-
-    public static final int[] CHART_COLORS = {
-            Color.rgb(255, 102, 0), Color.rgb(192, 255, 140), Color.rgb(255, 247, 140)
-    };
-
-    public static class TimeFormatter implements ValueFormatter {
-
-        @Override
-        public String getFormattedValue(float v, Entry e, int i, ViewPortHandler h) {
-            if (v == INVALID)
-                return "";
-            return Common.formatAmount(DataProvider.TYPE_CALL, v, true);
-        }
-    }
-
-    public static class ByteFormatter implements ValueFormatter {
-
-        @Override
-        public String getFormattedValue(float v, Entry e, int i, ViewPortHandler h) {
-            if (v == INVALID)
-                return "";
-            return Common.formatAmount(DataProvider.TYPE_DATA, v, false);
-        }
-    }
-
-    public static class CountFormatter implements ValueFormatter {
-
-        @Override
-        public String getFormattedValue(float v, Entry e, int i, ViewPortHandler h) {
-            if (v == INVALID)
-                return "";
-            return Common.formatAmount(DataProvider.TYPE_SMS, v, false);
-        }
-    }
 
     public static void SetupPieChart(PieChart pieChart, ArrayList<Entry> entries, String centerText, ValueFormatter format) {
         pieChart.setDescription("");
@@ -112,7 +79,7 @@ public class ChartFormat {
 
     public static ArrayList<Integer> GetColorSet(boolean isGray) {
         if (isGray) {
-            if (GRAY_COLOR==null) {
+            if (GRAY_COLOR == null) {
                 GRAY_COLOR = new ArrayList<Integer>();
                 GRAY_COLOR.add(Color.rgb(205, 201, 201));
             }
@@ -125,7 +92,7 @@ public class ChartFormat {
         COLORS = new ArrayList<Integer>();
 
         for (int c : CHART_COLORS)
-                COLORS.add(c);
+            COLORS.add(c);
 
         // 3*
         //for (int c : ColorTemplate.VORDIPLOM_COLORS)
@@ -164,5 +131,35 @@ public class ChartFormat {
             strings.add(" ");
         }
         return strings;
+    }
+
+    public static class TimeFormatter implements ValueFormatter {
+
+        @Override
+        public String getFormattedValue(float v, Entry e, int i, ViewPortHandler h) {
+            if (v == INVALID)
+                return "";
+            return Common.formatAmount(DataProvider.TYPE_CALL, v, true);
+        }
+    }
+
+    public static class ByteFormatter implements ValueFormatter {
+
+        @Override
+        public String getFormattedValue(float v, Entry e, int i, ViewPortHandler h) {
+            if (v == INVALID)
+                return "";
+            return Common.formatAmount(DataProvider.TYPE_DATA, v, false);
+        }
+    }
+
+    public static class CountFormatter implements ValueFormatter {
+
+        @Override
+        public String getFormattedValue(float v, Entry e, int i, ViewPortHandler h) {
+            if (v == INVALID)
+                return "";
+            return Common.formatAmount(DataProvider.TYPE_SMS, v, false);
+        }
     }
 }

@@ -1,13 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--    Copyright (C) 2009-2015 Felix Bechstein -->
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--    Copyright (C) 2009-2015 Felix Bechstein --><!--
 		This file is part of Call Meter 3G. This program is free software; you
 		can redistribute it and/or modify it under the terms of the GNU
 		General Public License as published by the Free Software Foundation;
 		either version 3 of the License, or (at your option) any later
 		version.
--->
-<!--
+--><!--
 		This program is distributed in the hope that it will be useful, but
 		WITHOUT ANY WARRANTY; without even the implied warranty of
 		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
@@ -40,8 +37,8 @@
                 android:id="@+id/callCountChart"
                 android:layout_width="120dp"
                 android:layout_height="120dp"
-                android:layout_marginRight="10dp"
-                android:layout_gravity="bottom|right"/>
+                android:layout_gravity="bottom|right"
+                android:layout_marginRight="10dp" />
         </LinearLayout>
 
         <LinearLayout
@@ -58,13 +55,13 @@
             <View
                 android:layout_width="1dp"
                 android:layout_height="match_parent"
-                android:background="@android:color/darker_gray"/>
+                android:background="@android:color/darker_gray" />
 
             <com.github.mikephil.charting.charts.PieChart
                 android:id="@+id/dataChart"
                 android:layout_width="fill_parent"
                 android:layout_height="150dp"
-                android:layout_weight="1"/>
+                android:layout_weight="1" />
         </LinearLayout>
     </LinearLayout>
 
@@ -78,6 +75,6 @@
         android:choiceMode="singleChoice"
         android:drawSelectorOnTop="false"
         android:fastScrollEnabled="true"
-        android:scrollingCache="true"/>
+        android:scrollingCache="true" />
 
 </RelativeLayout>

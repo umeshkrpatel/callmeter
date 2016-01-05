@@ -111,7 +111,7 @@ public final class AddLogActivity extends AppCompatActivity implements OnClickLi
         spType.setOnItemSelectedListener(new OnItemSelectedListener() {
             @Override
             public void onItemSelected(final AdapterView<?> parent, final View view,
-                    final int position, final long id) {
+                                       final int position, final long id) {
                 switch (position) {
                     case DataProvider.Rules.WHAT_CALL:
                         AddLogActivity.this.etLength.setHint(R.string.length_hint_call);
@@ -250,7 +250,7 @@ public final class AddLogActivity extends AppCompatActivity implements OnClickLi
 
     @Override
     public void onDateSet(final DatePicker view, final int year, final int monthOfYear,
-            final int dayOfMonth) {
+                          final int dayOfMonth) {
         cal.set(Calendar.YEAR, year);
         cal.set(Calendar.MONTH, monthOfYear);
         cal.set(Calendar.DAY_OF_MONTH, dayOfMonth);

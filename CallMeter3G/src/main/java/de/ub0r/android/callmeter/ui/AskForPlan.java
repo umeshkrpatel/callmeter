@@ -51,25 +51,21 @@ import de.ub0r.android.logg0r.Log;
 public final class AskForPlan extends Activity implements OnClickListener, OnDismissListener {
 
     /**
-     * Tag for output.
-     */
-    private static final String TAG = "AskForPlan";
-
-    /**
      * Extra providing id of call.
      */
     public static final String EXTRA_ID = "id";
-
     /**
      * Extra providing date of call.
      */
     public static final String EXTRA_DATE = "date";
-
     /**
      * Extra providing amount of call.
      */
     public static final String EXTRA_AMOUNT = "amount";
-
+    /**
+     * Tag for output.
+     */
+    private static final String TAG = "AskForPlan";
     /**
      * Ids of plans' {@link Button}s.
      */

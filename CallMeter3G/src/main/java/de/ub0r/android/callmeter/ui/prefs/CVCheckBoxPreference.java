@@ -40,7 +40,7 @@ public final class CVCheckBoxPreference extends CheckBoxPreference {
      * @param key     key
      */
     public CVCheckBoxPreference(final Context context, final ContentValues values,
-            final String key) {
+                                final String key) {
         super(context);
         setPersistent(false);
         setKey(key);

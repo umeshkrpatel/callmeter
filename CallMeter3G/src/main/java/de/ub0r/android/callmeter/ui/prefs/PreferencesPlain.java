@@ -19,9 +19,6 @@
 package de.ub0r.android.callmeter.ui.prefs;
 
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -37,6 +34,9 @@ import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.widget.Toast;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -212,7 +212,6 @@ public final class PreferencesPlain extends PreferenceActivity implements
                 }
             }
 
-            ;
         }.execute((Void) null);
     }
 

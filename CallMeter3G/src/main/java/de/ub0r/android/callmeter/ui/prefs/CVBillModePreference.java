@@ -47,7 +47,7 @@ public final class CVBillModePreference extends ListPreference {
      * @param key     key
      */
     public CVBillModePreference(final Context context, final ContentValues values,
-            final String key) {
+                                final String key) {
         super(context);
         ctx = context;
         setPersistent(false);
@@ -110,7 +110,7 @@ public final class CVBillModePreference extends ListPreference {
                 b.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(final DialogInterface paramDialogInterface,
-                            final int paramInt) {
+                                        final int paramInt) {
                         CVBillModePreference.this.setValue(ov);
                     }
                 });

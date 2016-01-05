@@ -38,82 +38,55 @@ import de.ub0r.android.logg0r.Log;
  */
 public final class CallMeter extends Application {
 
-    private static final String TAG = "CallMeter";
-
     /**
      * Minimum date.
      */
     public static final long MIN_DATE = 10000000000L;
-
     /**
      * Milliseconds per seconds.
      */
     public static final long MILLIS = 1000L;
-
     /**
      * 80.
      */
     public static final int EIGHTY = 80;
-
     /**
      * 100.
      */
     public static final int HUNDRED = 100;
-
     /**
      * Seconds of a minute.
      */
     public static final int SECONDS_MINUTE = 60;
-
     /**
      * Seconds of a hour.
      */
     public static final int SECONDS_HOUR = 60 * SECONDS_MINUTE;
-
     /**
      * Seconds of a day.
      */
     public static final int SECONDS_DAY = 24 * SECONDS_HOUR;
-
     /**
      * 10.
      */
     public static final int TEN = 10;
-
     /**
      * Bytes: kB.
      */
     public static final long BYTE_KB = 1024L;
-
     /**
      * Bytes: MB.
      */
     public static final long BYTE_MB = BYTE_KB * BYTE_KB;
-
     /**
      * Bytes: GB.
      */
     public static final long BYTE_GB = BYTE_MB * BYTE_KB;
-
     /**
      * Bytes: TB.
      */
     public static final long BYTE_TB = BYTE_GB * BYTE_KB;
-
-    @Override
-    public void onCreate() {
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.GINGERBREAD_MR1) {
-            // fix AsyncTask for some old devices + broken gms
-            // http://stackoverflow.com/a/27239869/2331953
-            try {
-                Class.forName("android.os.AsyncTask");
-            } catch (Throwable ignore) {
-            }
-        }
-
-        super.onCreate();
-        Utils.setLocale(this);
-    }
+    private static final String TAG = "CallMeter";
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static void setActivitySubtitle(final Activity a, final String t) {
@@ -139,8 +112,8 @@ public final class CallMeter extends Application {
     }
 
     public static boolean requestPermission(final Activity activity, final String permission,
-            final int requestCode, final int message,
-            final DialogInterface.OnClickListener onCancelListener) {
+                                            final int requestCode, final int message,
+                                            final DialogInterface.OnClickListener onCancelListener) {
         Log.i(TAG, "requesting permission: " + permission);
         if (!hasPermission(activity, permission)) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(activity, permission)) {
@@ -153,7 +126,7 @@ public final class CallMeter extends Application {
                                 new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(final DialogInterface dialogInterface,
-                                            final int i) {
+                                                        final int i) {
                                         ActivityCompat.requestPermissions(activity,
                                                 new String[]{permission}, requestCode);
                                     }
@@ -166,5 +139,20 @@ public final class CallMeter extends Application {
         } else {
             return true;
         }
+    }
+
+    @Override
+    public void onCreate() {
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.GINGERBREAD_MR1) {
+            // fix AsyncTask for some old devices + broken gms
+            // http://stackoverflow.com/a/27239869/2331953
+            try {
+                Class.forName("android.os.AsyncTask");
+            } catch (Throwable ignore) {
+            }
+        }
+
+        super.onCreate();
+        Utils.setLocale(this);
     }
 }

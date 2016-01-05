@@ -287,7 +287,7 @@ public final class RuleEdit extends PreferenceActivity implements UpdateListener
                                 new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(final DialogInterface dialog,
-                                            final int which) {
+                                                        final int which) {
                                         // pref.setText(mynumber);
                                         RuleEdit.this.values.put(pref.getKey(), mynumber);
                                         RuleEdit.this.onUpdateValue(pref);

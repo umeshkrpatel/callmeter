@@ -62,6 +62,22 @@ public class NameLoader extends AsyncTask<Void, Void, String> {
     private final String f;
 
     /**
+     * Default constructor.
+     *
+     * @param context {@link Context}
+     * @param number  phone number
+     * @param format  format to format the {@link String} with
+     * @param view    {@link TextView} to set the result on
+     */
+    public NameLoader(final Context context, final String number, final String format,
+                      final TextView view) {
+        ctx = context;
+        num = number;
+        f = format;
+        tv = view;
+    }
+
+    /**
      * Get name for number synchronously.
      *
      * @param context {@link Context}
@@ -82,22 +98,6 @@ public class NameLoader extends AsyncTask<Void, Void, String> {
             NameCache.getInstance().put(number, result);
             return String.format(format, result);
         }
-    }
-
-    /**
-     * Default constructor.
-     *
-     * @param context {@link Context}
-     * @param number  phone number
-     * @param format  format to format the {@link String} with
-     * @param view    {@link TextView} to set the result on
-     */
-    public NameLoader(final Context context, final String number, final String format,
-            final TextView view) {
-        ctx = context;
-        num = number;
-        f = format;
-        tv = view;
     }
 
     @Override

@@ -215,7 +215,7 @@ public final class Plans extends PreferenceActivity
                                             new DialogInterface.OnClickListener() {
                                                 @Override
                                                 public void onClick(final DialogInterface dialog,
-                                                        final int which) {
+                                                                    final int which) {
                                                     Plans.this
                                                             .getContentResolver()
                                                             .delete(ContentUris.withAppendedId(

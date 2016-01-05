@@ -70,35 +70,29 @@ import de.ub0r.android.logg0r.Log;
 public final class Plans extends AppCompatActivity implements OnPageChangeListener {
 
     /**
-     * Tag for output.
-     */
-    private static final String TAG = "Plans";
-
-    /**
      * {@link Message} for {@link Handler}: start background: LogMatcher.
      */
     public static final int MSG_BACKGROUND_START_MATCHER = 1;
-
     /**
      * {@link Message} for {@link Handler}: stop background: LogMatcher.
      */
     public static final int MSG_BACKGROUND_STOP_MATCHER = 2;
-
     /**
      * {@link Message} for {@link Handler}: start background: LogRunner.
      */
     public static final int MSG_BACKGROUND_START_RUNNER = 3;
-
     /**
      * {@link Message} for {@link Handler}: stop background: LogRunner.
      */
     public static final int MSG_BACKGROUND_STOP_RUNNER = 4;
-
     /**
      * {@link Message} for {@link Handler}: progress: LogMatcher.
      */
     public static final int MSG_BACKGROUND_PROGRESS_MATCHER = 5;
-
+    /**
+     * Tag for output.
+     */
+    private static final String TAG = "Plans";
     private static final int PERMISSION_REQUEST_READ_CALL_LOG = 1;
     private static final int PERMISSION_REQUEST_READ_SMS = 2;
     private static final int PERMISSION_REQUEST_READ_CONTACTS = 3;
@@ -112,19 +106,23 @@ public final class Plans extends AppCompatActivity implements OnPageChangeListen
      * Display ads?
      */
     private static boolean prefsNoAds;
-
+    /**
+     * {@link Handler} for outside.
+     */
+    private static Handler currentHandler = null;
     /**
      * {@link ViewPager}.
      */
     private ViewPager pager;
-
     /**
      * {@link PlansFragmentAdapter}.
      */
     private PlansFragmentAdapter fadapter;
-
     private AdView mAdView;
-
+    /**
+     * Number of background tasks.
+     */
+    private int progressCount = 0;
     /**
      * {@link Handler} for handling messages from background process.
      */
@@ -234,191 +232,12 @@ public final class Plans extends AppCompatActivity implements OnPageChangeListen
     };
 
     /**
-     * Number of background tasks.
-     */
-    private int progressCount = 0;
-
-    /**
-     * {@link Handler} for outside.
-     */
-    private static Handler currentHandler = null;
-
-    /**
-     * Show all {@link PlansFragment}s.
+     * Get the current {@link Handler}.
      *
-     * @author flx
+     * @return {@link Handler}.
      */
-    private static class PlansFragmentAdapter extends FragmentPagerAdapter {
-
-        /**
-         * {@link FragmentManager} .
-         */
-        private final FragmentManager mFragmentManager;
-
-        /**
-         * List of positions.
-         */
-        private final Long[] positions;
-
-        /**
-         * List of bill days.
-         */
-        private final Long[] billDays;
-
-        /**
-         * List of titles.
-         */
-        private final String[] titles;
-
-        /**
-         * {@link Context}.
-         */
-        private final Context ctx;
-
-        /**
-         * Default constructor.
-         *
-         * @param context {@link Context}
-         * @param fm      {@link FragmentManager}
-         */
-        public PlansFragmentAdapter(final Context context, final FragmentManager fm) {
-            super(fm);
-            mFragmentManager = fm;
-            ctx = context;
-            ContentResolver cr = context.getContentResolver();
-            Cursor c = cr.query(DataProvider.Logs.CONTENT_URI,
-                    new String[]{DataProvider.Logs.DATE}, null, null, DataProvider.Logs.DATE
-                            + " ASC LIMIT 1");
-            if (c == null || !c.moveToFirst()) {
-                positions = new Long[]{-1L, -1L};
-                billDays = positions;
-                if (c != null && !c.isClosed()) {
-                    c.close();
-                }
-            } else {
-                final long minDate = c.getLong(0);
-                c.close();
-                c = cr.query(
-                        DataProvider.Plans.CONTENT_URI,
-                        DataProvider.Plans.PROJECTION,
-                        DataProvider.Plans.TYPE + "=? and " + DataProvider.Plans.BILLPERIOD + "!=?",
-                        new String[]{String.valueOf(DataProvider.TYPE_BILLPERIOD),
-                                String.valueOf(DataProvider.BILLPERIOD_INFINITE)},
-                        DataProvider.Plans.ORDER + " LIMIT 1");
-                if (minDate < 0L || c == null || !c.moveToFirst()) {
-                    positions = new Long[]{-1L, -1L};
-                    billDays = positions;
-                    if (c != null) {
-                        c.close();
-                    }
-                } else {
-                    ArrayList<Long> list = new ArrayList<>();
-                    int bptype = c.getInt(DataProvider.Plans.INDEX_BILLPERIOD);
-                    ArrayList<Long> bps = DataProvider.Plans.getBillDays(bptype,
-                            c.getLong(DataProvider.Plans.INDEX_BILLDAY), minDate, -1);
-                    if (bps != null) {
-                        Log.d(TAG, "bill periods: ", bps.size());
-                        if (!bps.isEmpty()) {
-                            bps.remove(bps.size() - 1);
-                            list.addAll(bps);
-                        }
-                    }
-                    c.close();
-                    list.add(-1L); // current time
-                    list.add(-1L); // summary
-                    list.add(-1L); // logs
-                    positions = list.toArray(new Long[list.size()]);
-                    int l = positions.length;
-                    Arrays.sort(positions, 0, l - 2);
-
-                    billDays = new Long[l];
-                    for (int i = 0; i < l - 1; i++) {
-                        long pos = positions[i];
-                        billDays[i] = DataProvider.Plans.getBillDay(bptype, pos + 1L, pos,
-                                false).getTimeInMillis();
-                    }
-                }
-            }
-            Common.setDateFormat(context);
-            final int l = positions.length;
-            titles = new String[l];
-            titles[l - 3] = context.getString(R.string.now);
-            titles[l - 2] = "Summary";
-            titles[l - 1] = context.getString(R.string.logs);
-        }
-
-        /**
-         * Get an active fragment.
-         *
-         * @param container {@link ViewPager}
-         * @param position  position in container
-         * @return null if no fragment was initialized
-         */
-        public Fragment getActiveFragment(final ViewPager container, final int position) {
-            String name = makeFragmentName(container.getId(), position);
-            return mFragmentManager.findFragmentByTag(name);
-        }
-
-        /**
-         * Get a {@link Fragment}'s name.
-         *
-         * @param viewId container view
-         * @param index  position
-         * @return name of {@link Fragment}
-         */
-        private static String makeFragmentName(final int viewId, final int index) {
-            // this might change in underlying method!
-            return "android:switcher:" + viewId + ":" + index;
-        }
-
-        @Override
-        public int getCount() {
-            return positions.length;
-        }
-
-        @Override
-        public Fragment getItem(final int position) {
-            if (position == getSummaryFragmentPos()) {
-                return new SummaryFragment();
-            } else if (position == getLogsFragmentPos()) {
-                return new LogsFragment();
-            } else {
-                return PlansFragment.newInstance(position, positions[position]);
-            }
-        }
-
-        /**
-         * Get position of home {@link Fragment}.
-         *
-         * @return position of home {@link Fragment}
-         */
-        public int getHomeFragmentPos() {
-            return positions.length - 3;
-        }
-
-        /**
-         * Get position of Logs {@link Fragment}.
-         *
-         * @return position of Logs {@link Fragment}
-         */
-        public int getLogsFragmentPos() { return positions.length - 1; }
-
-        public int getSummaryFragmentPos() { return positions.length - 2; }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public CharSequence getPageTitle(final int position) {
-            String ret;
-            if (titles[position] == null) {
-                ret = Common.formatDate(ctx, billDays[position]);
-                titles[position] = ret;
-            } else {
-                ret = titles[position];
-            }
-            return ret;
-        }
+    public static Handler getHandler() {
+        return currentHandler;
     }
 
     @Override
@@ -544,15 +363,6 @@ public final class Plans extends AppCompatActivity implements OnPageChangeListen
         super.onPause();
     }
 
-    /**
-     * Get the current {@link Handler}.
-     *
-     * @return {@link Handler}.
-     */
-    public static Handler getHandler() {
-        return currentHandler;
-    }
-
     @Override
     public void onRequestPermissionsResult(
             final int requestCode,
@@ -645,7 +455,7 @@ public final class Plans extends AppCompatActivity implements OnPageChangeListen
      */
     @Override
     public void onPageScrolled(final int position, final float positionOffset,
-            final int positionOffsetPixels) {
+                               final int positionOffsetPixels) {
         // nothing to do
 
     }
@@ -703,6 +513,188 @@ public final class Plans extends AppCompatActivity implements OnPageChangeListen
             setSupportProgressBarIndeterminateVisibility(false);
         } else {
             setSupportProgressBarIndeterminateVisibility(true);
+        }
+    }
+
+    /**
+     * Show all {@link PlansFragment}s.
+     *
+     * @author flx
+     */
+    private static class PlansFragmentAdapter extends FragmentPagerAdapter {
+
+        /**
+         * {@link FragmentManager} .
+         */
+        private final FragmentManager mFragmentManager;
+
+        /**
+         * List of positions.
+         */
+        private final Long[] positions;
+
+        /**
+         * List of bill days.
+         */
+        private final Long[] billDays;
+
+        /**
+         * List of titles.
+         */
+        private final String[] titles;
+
+        /**
+         * {@link Context}.
+         */
+        private final Context ctx;
+
+        /**
+         * Default constructor.
+         *
+         * @param context {@link Context}
+         * @param fm      {@link FragmentManager}
+         */
+        public PlansFragmentAdapter(final Context context, final FragmentManager fm) {
+            super(fm);
+            mFragmentManager = fm;
+            ctx = context;
+            ContentResolver cr = context.getContentResolver();
+            Cursor c = cr.query(DataProvider.Logs.CONTENT_URI,
+                    new String[]{DataProvider.Logs.DATE}, null, null, DataProvider.Logs.DATE
+                            + " ASC LIMIT 1");
+            if (c == null || !c.moveToFirst()) {
+                positions = new Long[]{-1L, -1L};
+                billDays = positions;
+                if (c != null && !c.isClosed()) {
+                    c.close();
+                }
+            } else {
+                final long minDate = c.getLong(0);
+                c.close();
+                c = cr.query(
+                        DataProvider.Plans.CONTENT_URI,
+                        DataProvider.Plans.PROJECTION,
+                        DataProvider.Plans.TYPE + "=? and " + DataProvider.Plans.BILLPERIOD + "!=?",
+                        new String[]{String.valueOf(DataProvider.TYPE_BILLPERIOD),
+                                String.valueOf(DataProvider.BILLPERIOD_INFINITE)},
+                        DataProvider.Plans.ORDER + " LIMIT 1");
+                if (minDate < 0L || c == null || !c.moveToFirst()) {
+                    positions = new Long[]{-1L, -1L};
+                    billDays = positions;
+                    if (c != null) {
+                        c.close();
+                    }
+                } else {
+                    ArrayList<Long> list = new ArrayList<>();
+                    int bptype = c.getInt(DataProvider.Plans.INDEX_BILLPERIOD);
+                    ArrayList<Long> bps = DataProvider.Plans.getBillDays(bptype,
+                            c.getLong(DataProvider.Plans.INDEX_BILLDAY), minDate, -1);
+                    if (bps != null) {
+                        Log.d(TAG, "bill periods: ", bps.size());
+                        if (!bps.isEmpty()) {
+                            bps.remove(bps.size() - 1);
+                            list.addAll(bps);
+                        }
+                    }
+                    c.close();
+                    list.add(-1L); // current time
+                    list.add(-1L); // summary
+                    list.add(-1L); // logs
+                    positions = list.toArray(new Long[list.size()]);
+                    int l = positions.length;
+                    Arrays.sort(positions, 0, l - 2);
+
+                    billDays = new Long[l];
+                    for (int i = 0; i < l - 1; i++) {
+                        long pos = positions[i];
+                        billDays[i] = DataProvider.Plans.getBillDay(bptype, pos + 1L, pos,
+                                false).getTimeInMillis();
+                    }
+                }
+            }
+            Common.setDateFormat(context);
+            final int l = positions.length;
+            titles = new String[l];
+            titles[l - 3] = context.getString(R.string.now);
+            titles[l - 2] = "Summary";
+            titles[l - 1] = context.getString(R.string.logs);
+        }
+
+        /**
+         * Get a {@link Fragment}'s name.
+         *
+         * @param viewId container view
+         * @param index  position
+         * @return name of {@link Fragment}
+         */
+        private static String makeFragmentName(final int viewId, final int index) {
+            // this might change in underlying method!
+            return "android:switcher:" + viewId + ":" + index;
+        }
+
+        /**
+         * Get an active fragment.
+         *
+         * @param container {@link ViewPager}
+         * @param position  position in container
+         * @return null if no fragment was initialized
+         */
+        public Fragment getActiveFragment(final ViewPager container, final int position) {
+            String name = makeFragmentName(container.getId(), position);
+            return mFragmentManager.findFragmentByTag(name);
+        }
+
+        @Override
+        public int getCount() {
+            return positions.length;
+        }
+
+        @Override
+        public Fragment getItem(final int position) {
+            if (position == getSummaryFragmentPos()) {
+                return new SummaryFragment();
+            } else if (position == getLogsFragmentPos()) {
+                return new LogsFragment();
+            } else {
+                return PlansFragment.newInstance(position, positions[position]);
+            }
+        }
+
+        /**
+         * Get position of home {@link Fragment}.
+         *
+         * @return position of home {@link Fragment}
+         */
+        public int getHomeFragmentPos() {
+            return positions.length - 3;
+        }
+
+        /**
+         * Get position of Logs {@link Fragment}.
+         *
+         * @return position of Logs {@link Fragment}
+         */
+        public int getLogsFragmentPos() {
+            return positions.length - 1;
+        }
+
+        public int getSummaryFragmentPos() {
+            return positions.length - 2;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public CharSequence getPageTitle(final int position) {
+            String ret;
+            if (titles[position] == null) {
+                ret = Common.formatDate(ctx, billDays[position]);
+                titles[position] = ret;
+            } else {
+                ret = titles[position];
+            }
+            return ret;
         }
     }
 }

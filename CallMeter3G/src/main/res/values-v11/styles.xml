@@ -1,12 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--    Copyright (C) 2009-2015 Felix Bechstein -->
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--    Copyright (C) 2009-2015 Felix Bechstein --><!--
 		This file is part of ub0rlib. This program is free software; you can
 		redistribute it and/or modify it under the terms of the GNU General
 		Public License as published by the Free Software Foundation; either
 		version 3 of the License, or (at your option) any later version.
--->
-<!--
+--><!--
 		This program is distributed in the hope that it will be useful, but
 		WITHOUT ANY WARRANTY; without even the implied warranty of
 		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
@@ -16,11 +13,11 @@
 -->
 <resources>
 
-	<style name="Theme.Default" parent="android:Theme.Holo">
-		<item name="ubButtonBarBackground">@android:color/transparent</item>
-	</style>
+    <style name="Theme.Default" parent="android:Theme.Holo">
+        <item name="ubButtonBarBackground">@android:color/transparent</item>
+    </style>
 
-	<style name="TextAppearance.MultiComplete" parent="@android:style/TextAppearance" />
+    <style name="TextAppearance.MultiComplete" parent="@android:style/TextAppearance" />
 
     <style name="ButtonBar" parent="@android:style/ButtonBar">
         <item name="android:background">?attr/ubButtonBarBackground</item>

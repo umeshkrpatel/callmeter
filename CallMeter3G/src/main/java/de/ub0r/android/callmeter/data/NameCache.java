@@ -38,6 +38,13 @@ public final class NameCache extends LruCache<String, String> {
     private static NameCache instance;
 
     /**
+     * hide public constructor.
+     */
+    private NameCache() {
+        super(MAX_CACHE_SIZE);
+    }
+
+    /**
      * Get the cache.
      *
      * @return the single {@link NameCache} instance
@@ -47,13 +54,6 @@ public final class NameCache extends LruCache<String, String> {
             instance = new NameCache();
         }
         return instance;
-    }
-
-    /**
-     * hide public constructor.
-     */
-    private NameCache() {
-        super(MAX_CACHE_SIZE);
     }
 
     /**

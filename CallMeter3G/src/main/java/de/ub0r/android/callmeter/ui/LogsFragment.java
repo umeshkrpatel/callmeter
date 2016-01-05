@@ -68,7 +68,9 @@ import de.ub0r.android.logg0r.Log;
 public final class LogsFragment extends ListFragment implements OnClickListener,
         OnItemLongClickListener, LoaderCallbacks<Cursor> {
 
-    /** Tag for output. */
+    /**
+     * Tag for output.
+     */
     private static final String TAG = "LogsFragment";
 
     /**
@@ -100,193 +102,30 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
      * Prefs: {@link ToggleButton} state for out.
      */
     private static final String PREF_OUT = "_out";
-
-    /**
-     * {@link ToggleButton}s.
-     */
-    private ToggleButton tbCall, tbSMS, tbMMS, tbData, tbIn, tbOut, tbPlan;
-
-    /**
-     * Show my number.
-     */
-    private boolean showMyNumber = false;
-
-    /**
-     * Show hours and days.
-     */
-    private boolean showHours = true;
-
-    /**
-     * Currency format.
-     */
-    private String cformat;
-
-    /**
-     * Selected plan id.
-     */
-    private long planId = -1;
-
     /**
      * Unique id for this {@link LogsFragment}s loader.
      */
     private static final int LOADER_UID = -2;
-
     /**
-     * Adapter binding logs to View.
-     *
-     * @author flx
+     * {@link ToggleButton}s.
      */
-    public class LogAdapter extends ResourceCursorAdapter {
-
-        /**
-         * View holder.
-         *
-         * @author flx
-         */
-        private class ViewHolder {
-
-            /**
-             * Holder for item's view.
-             */
-            TextView tvName, tvNumber, tvTime, tvDuration;
-
-            ImageView ivType;
-            /**
-             * Hold {@link NameLoader}.
-             */
-            NameLoader loader;
-        }
-
-        /**
-         * Column ids.
-         */
-        private int idPlanName, idRuleName;
-
-        /**
-         * Default Constructor.
-         *
-         * @param context {@link Context}
-         */
-        public LogAdapter(final Context context) {
-            super(context, R.layout.logs_item, null, true);
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public final Cursor swapCursor(final Cursor cursor) {
-            Cursor c = super.swapCursor(cursor);
-            idPlanName = cursor.getColumnIndex(DataProvider.Plans.NAME);
-            idRuleName = cursor.getColumnIndex(DataProvider.Rules.NAME);
-            return c;
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public final void bindView(final View view, final Context context, final Cursor cursor) {
-            ViewHolder holder = (ViewHolder) view.getTag();
-            if (holder == null) {
-                holder = new ViewHolder();
-                holder.tvName = (TextView) view.findViewById(R.id.tvName);
-                holder.tvNumber = (TextView) view.findViewById(R.id.tvNumber);
-                holder.tvTime = (TextView) view.findViewById(R.id.tvTime);
-                holder.tvDuration = (TextView) view.findViewById(R.id.tvDuration);
-                holder.ivType = (ImageView) view.findViewById(R.id.ivType);
-                view.setTag(holder);
-            } else if (holder.loader != null && !holder.loader.isCancelled()) {
-                holder.loader.cancel(true);
-            }
-
-            StringBuilder buf = new StringBuilder();
-            final int t = cursor.getInt(DataProvider.Logs.INDEX_TYPE);
-            final int pt = cursor.getInt(DataProvider.Logs.INDEX_PLAN_TYPE);
-            final long date = cursor.getLong(DataProvider.Logs.INDEX_DATE);
-            buf.append(Common.formatDate(context, date));
-            buf.append(" ");
-            buf.append(DateFormat.getTimeFormat(context).format(new Date(date)));
-            holder.tvTime.setText(buf.toString());
-
-            String type = cursor.getString(idRuleName);
-            if (type.contains("In")) {
-                holder.ivType.setImageResource(R.drawable.ic_incoming);
-            } else {
-                holder.ivType.setImageResource(R.drawable.ic_outgoing);
-            }
-
-            String s = cursor.getString(DataProvider.Logs.INDEX_REMOTE);
-            if (s == null || s.trim().length() == 0) {
-                holder.tvNumber.setVisibility(View.GONE);
-            } else {
-                holder.tvName.setText(s);
-                holder.tvNumber.setText(s);
-                holder.tvName.setVisibility(View.VISIBLE);
-                holder.tvNumber.setVisibility(View.VISIBLE);
-                String format = "%s <" + s + ">";
-                String name = NameCache.getInstance().get(s, format);
-                if (name != null) {
-                    holder.tvName.setText(name);
-                }
-            }
-
-/*            s = cursor.getString(DataProvider.Logs.INDEX_MYNUMBER);
-            boolean b = s != null && s.length() <= 2 && Utils.parseInt(s, -1) >= 0;
-
-            if (LogsFragment.this.showMyNumber || b) {
-                holder.tvNumber.setText(b ? R.string.my_sim_id_ : R.string.my_number_);
-                //holder.tvMyNumber.setText(s);
-                holder.tvNumber.setVisibility(View.VISIBLE);
-                //holder.tvMyNumber.setVisibility(View.VISIBLE);
-            } else {
-                //holder.tvMyNumberLabel.setVisibility(View.GONE);
-                holder.tvNumber.setVisibility(View.GONE);
-            }
-*/
-            final long amount = cursor.getLong(DataProvider.Logs.INDEX_AMOUNT);
-            s = Common.formatAmount(t, amount, LogsFragment.this.showHours);
-            if (s == null || s.trim().length() == 0 || s.equals("1")) {
-                holder.tvDuration.setVisibility(View.GONE);
-            } else {
-                holder.tvDuration.setVisibility(View.VISIBLE);
-                holder.tvDuration.setText(s);
-            }
-
-            /*
-            final float ba = cursor.getFloat(DataProvider.Logs.INDEX_BILL_AMOUNT);
-            if (amount != ba || pt == DataProvider.TYPE_MIXED) {
-                holder.tvBilledLength.setText(Common.formatAmount(pt, ba,
-                        LogsFragment.this.showHours));
-                holder.tvBilledLength.setVisibility(View.VISIBLE);
-                holder.tvBilledLengthLabel.setVisibility(View.VISIBLE);
-            } else {
-                holder.tvBilledLength.setVisibility(View.GONE);
-                holder.tvBilledLengthLabel.setVisibility(View.GONE);
-            }
-            final float cost = cursor.getFloat(DataProvider.Logs.INDEX_COST);
-            final float free = cursor.getFloat(DataProvider.Logs.INDEX_FREE);
-
-            if (cost > 0f) {
-                String c;
-                if (free == 0f) {
-                    c = String.format(LogsFragment.this.cformat, cost);
-                } else if (free >= cost) {
-                    c = "(" + String.format(LogsFragment.this.cformat, cost) + ")";
-                } else {
-                    c = "(" + String.format(LogsFragment.this.cformat, free) + ") "
-                            + String.format(LogsFragment.this.cformat, cost - free);
-                }
-                holder.tvCost.setText(c);
-                holder.tvCost.setVisibility(View.VISIBLE);
-                holder.tvCostLabel.setVisibility(View.VISIBLE);
-            } else {
-                holder.tvCost.setVisibility(View.GONE);
-                holder.tvCostLabel.setVisibility(View.GONE);
-            }
-            */
-        }
-    }
+    private ToggleButton tbCall, tbSMS, tbMMS, tbData, tbIn, tbOut, tbPlan;
+    /**
+     * Show my number.
+     */
+    private boolean showMyNumber = false;
+    /**
+     * Show hours and days.
+     */
+    private boolean showHours = true;
+    /**
+     * Currency format.
+     */
+    private String cformat;
+    /**
+     * Selected plan id.
+     */
+    private long planId = -1;
 
     /**
      * {@inheritDoc}
@@ -312,7 +151,7 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
      */
     @Override
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
-            final Bundle savedInstanceState) {
+                             final Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.logs, container, false);
         tbCall = (ToggleButton) v.findViewById(R.id.calls);
         tbCall.setOnClickListener(this);
@@ -512,7 +351,7 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
      */
     @Override
     public boolean onItemLongClick(final AdapterView<?> parent, final View view,
-            final int position, final long id) {
+                                   final int position, final long id) {
         final Builder b = new Builder(getActivity());
         b.setCancelable(true);
         b.setItems(R.array.dialog_delete, new DialogInterface.OnClickListener() {
@@ -561,6 +400,163 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
             ((LogAdapter) getListAdapter()).swapCursor(null);
         } catch (Exception e) {
             Log.w(TAG, "error removing cursor", e);
+        }
+    }
+
+    /**
+     * Adapter binding logs to View.
+     *
+     * @author flx
+     */
+    public class LogAdapter extends ResourceCursorAdapter {
+
+        /**
+         * Column ids.
+         */
+        private int idPlanName, idRuleName;
+
+        /**
+         * Default Constructor.
+         *
+         * @param context {@link Context}
+         */
+        public LogAdapter(final Context context) {
+            super(context, R.layout.logs_item, null, true);
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public final Cursor swapCursor(final Cursor cursor) {
+            Cursor c = super.swapCursor(cursor);
+            idPlanName = cursor.getColumnIndex(DataProvider.Plans.NAME);
+            idRuleName = cursor.getColumnIndex(DataProvider.Rules.NAME);
+            return c;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public final void bindView(final View view, final Context context, final Cursor cursor) {
+            ViewHolder holder = (ViewHolder) view.getTag();
+            if (holder == null) {
+                holder = new ViewHolder();
+                holder.tvName = (TextView) view.findViewById(R.id.tvName);
+                holder.tvNumber = (TextView) view.findViewById(R.id.tvNumber);
+                holder.tvTime = (TextView) view.findViewById(R.id.tvTime);
+                holder.tvDuration = (TextView) view.findViewById(R.id.tvDuration);
+                holder.ivType = (ImageView) view.findViewById(R.id.ivType);
+                view.setTag(holder);
+            } else if (holder.loader != null && !holder.loader.isCancelled()) {
+                holder.loader.cancel(true);
+            }
+
+            StringBuilder buf = new StringBuilder();
+            final int t = cursor.getInt(DataProvider.Logs.INDEX_TYPE);
+            final int pt = cursor.getInt(DataProvider.Logs.INDEX_PLAN_TYPE);
+            final long date = cursor.getLong(DataProvider.Logs.INDEX_DATE);
+            buf.append(Common.formatDate(context, date));
+            buf.append(" ");
+            buf.append(DateFormat.getTimeFormat(context).format(new Date(date)));
+            holder.tvTime.setText(buf.toString());
+
+            String type = cursor.getString(idRuleName);
+            if (type.contains("In")) {
+                holder.ivType.setImageResource(R.drawable.ic_incoming);
+            } else {
+                holder.ivType.setImageResource(R.drawable.ic_outgoing);
+            }
+
+            String s = cursor.getString(DataProvider.Logs.INDEX_REMOTE);
+            if (s == null || s.trim().length() == 0) {
+                holder.tvNumber.setVisibility(View.GONE);
+            } else {
+                holder.tvName.setText(s);
+                holder.tvNumber.setText(s);
+                holder.tvName.setVisibility(View.VISIBLE);
+                holder.tvNumber.setVisibility(View.VISIBLE);
+                String format = "%s <" + s + ">";
+                String name = NameCache.getInstance().get(s, format);
+                if (name != null) {
+                    holder.tvName.setText(name);
+                }
+            }
+
+/*            s = cursor.getString(DataProvider.Logs.INDEX_MYNUMBER);
+            boolean b = s != null && s.length() <= 2 && Utils.parseInt(s, -1) >= 0;
+
+            if (LogsFragment.this.showMyNumber || b) {
+                holder.tvNumber.setText(b ? R.string.my_sim_id_ : R.string.my_number_);
+                //holder.tvMyNumber.setText(s);
+                holder.tvNumber.setVisibility(View.VISIBLE);
+                //holder.tvMyNumber.setVisibility(View.VISIBLE);
+            } else {
+                //holder.tvMyNumberLabel.setVisibility(View.GONE);
+                holder.tvNumber.setVisibility(View.GONE);
+            }
+*/
+            final long amount = cursor.getLong(DataProvider.Logs.INDEX_AMOUNT);
+            s = Common.formatAmount(t, amount, LogsFragment.this.showHours);
+            if (s == null || s.trim().length() == 0 || s.equals("1")) {
+                holder.tvDuration.setVisibility(View.GONE);
+            } else {
+                holder.tvDuration.setVisibility(View.VISIBLE);
+                holder.tvDuration.setText(s);
+            }
+
+            /*
+            final float ba = cursor.getFloat(DataProvider.Logs.INDEX_BILL_AMOUNT);
+            if (amount != ba || pt == DataProvider.TYPE_MIXED) {
+                holder.tvBilledLength.setText(Common.formatAmount(pt, ba,
+                        LogsFragment.this.showHours));
+                holder.tvBilledLength.setVisibility(View.VISIBLE);
+                holder.tvBilledLengthLabel.setVisibility(View.VISIBLE);
+            } else {
+                holder.tvBilledLength.setVisibility(View.GONE);
+                holder.tvBilledLengthLabel.setVisibility(View.GONE);
+            }
+            final float cost = cursor.getFloat(DataProvider.Logs.INDEX_COST);
+            final float free = cursor.getFloat(DataProvider.Logs.INDEX_FREE);
+
+            if (cost > 0f) {
+                String c;
+                if (free == 0f) {
+                    c = String.format(LogsFragment.this.cformat, cost);
+                } else if (free >= cost) {
+                    c = "(" + String.format(LogsFragment.this.cformat, cost) + ")";
+                } else {
+                    c = "(" + String.format(LogsFragment.this.cformat, free) + ") "
+                            + String.format(LogsFragment.this.cformat, cost - free);
+                }
+                holder.tvCost.setText(c);
+                holder.tvCost.setVisibility(View.VISIBLE);
+                holder.tvCostLabel.setVisibility(View.VISIBLE);
+            } else {
+                holder.tvCost.setVisibility(View.GONE);
+                holder.tvCostLabel.setVisibility(View.GONE);
+            }
+            */
+        }
+
+        /**
+         * View holder.
+         *
+         * @author flx
+         */
+        private class ViewHolder {
+
+            /**
+             * Holder for item's view.
+             */
+            TextView tvName, tvNumber, tvTime, tvDuration;
+
+            ImageView ivType;
+            /**
+             * Hold {@link NameLoader}.
+             */
+            NameLoader loader;
         }
     }
 }

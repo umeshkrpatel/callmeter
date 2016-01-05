@@ -107,7 +107,7 @@ public final class DatePreference extends DialogPreference implements
      * {@inheritDoc}
      */
     public void onDateChanged(final DatePicker view, final int year, final int monthOfYear,
-            final int dayOfMonth) {
+                              final int dayOfMonth) {
         Calendar c = Calendar.getInstance();
         c.set(year, monthOfYear, dayOfMonth);
         this.persistLong(c.getTimeInMillis());

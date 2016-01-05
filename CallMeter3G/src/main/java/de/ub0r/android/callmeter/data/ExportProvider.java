@@ -18,62 +18,51 @@ import de.ub0r.android.logg0r.Log;
 public class ExportProvider extends ContentProvider {
 
     /**
-     * Tag for output.
-     */
-    private static final String TAG = "ExportProvider";
-
-    /**
      * Authority.
      */
     public static final String AUTHORITY = DataProvider.PACKAGE + ".export";
-
     /**
      * Mime type for export.
      */
     public static final String EXPORT_MIMETYPE = "application/android.callmeter.export";
-
     /**
      * {@link Uri} for export Content.
      */
     public static final Uri EXPORT_RULESET_URI = Uri.parse("content://" + AUTHORITY + "/ruleset");
-
     /**
      * {@link Uri} for export Content.
      */
     public static final Uri EXPORT_LOGS_URI = Uri.parse("content://" + AUTHORITY + "/logs");
-
     /**
      * {@link Uri} for export Content.
      */
     public static final Uri EXPORT_NUMGROUPS_URI = Uri.parse("content://" + AUTHORITY
             + "/numgroups");
-
     /**
      * {@link Uri} for export Content.
      */
     public static final Uri EXPORT_HOURGROUPS_URI = Uri.parse("content://" + AUTHORITY
             + "/hourgroups");
-
     /**
      * Filename for the actual export file.
      */
     public static final String EXPORT_RULESET_FILE = "ruleset.xml";
-
     /**
      * Filename for the actual logs file.
      */
     public static final String EXPORT_LOGS_FILE = "logs.xml";
-
     /**
      * Filename for the actual number groups file.
      */
     public static final String EXPORT_NUMGROUPS_FILE = "numgroups.xml";
-
     /**
      * Filename for the actual hour groups file.
      */
     public static final String EXPORT_HOURGROUPS_FILE = "hourgroups.xml";
-
+    /**
+     * Tag for output.
+     */
+    private static final String TAG = "ExportProvider";
     /**
      * {@link UriMatcher}.
      */
@@ -137,7 +126,7 @@ public class ExportProvider extends ContentProvider {
 
     @Override
     public Cursor query(final Uri uri, final String[] projection, final String selection,
-            final String[] selectionArgs, final String sortOrder) {
+                        final String[] selectionArgs, final String sortOrder) {
         Log.d(TAG, "export uri: ", uri);
         String fn;
         final int uid = URI_MATCHER.match(uri);
@@ -178,7 +167,7 @@ public class ExportProvider extends ContentProvider {
 
     @Override
     public int update(final Uri uri, final ContentValues values, final String selection,
-            final String[] selectionArgs) {
+                      final String[] selectionArgs) {
         throw new IllegalStateException("Unsupported operation: update(" + uri + ")");
     }
 

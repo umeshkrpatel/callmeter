@@ -1,13 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--    Copyright (C) 2009-2015 Felix Bechstein -->
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--    Copyright (C) 2009-2015 Felix Bechstein --><!--
 		This file is part of Call Meter 3G. This program is free software; you
 		can redistribute it and/or modify it under the terms of the GNU
 		General Public License as published by the Free Software Foundation;
 		either version 3 of the License, or (at your option) any later
 		version.
--->
-<!--
+--><!--
 		This program is distributed in the hope that it will be useful, but
 		WITHOUT ANY WARRANTY; without even the implied warranty of
 		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
@@ -15,35 +12,34 @@
 		copy of the GNU General Public License along with this program; If
 		not, see <http://www.gnu.org/licenses/>.
 -->
-<menu
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
-        xmlns:app="http://schemas.android.com/apk/res-auto">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <item
-            android:id="@+id/item_add"
-            android:title="@string/add_"
-            android:icon="@drawable/ic_menu_add"
-            android:showAsAction="ifRoom"
-            app:showAsAction="ifRoom"
-            tools:ignore="AppCompatResource,UnusedAttribute"/>
+        android:id="@+id/item_add"
+        android:icon="@drawable/ic_menu_add"
+        android:showAsAction="ifRoom"
+        android:title="@string/add_"
+        app:showAsAction="ifRoom"
+        tools:ignore="AppCompatResource,UnusedAttribute" />
     <item
-            android:id="@+id/item_rename"
-            android:title="@string/name_"
-            android:icon="@drawable/ic_menu_edit"/>
+        android:id="@+id/item_rename"
+        android:icon="@drawable/ic_menu_edit"
+        android:title="@string/name_" />
     <item
-            android:id="@+id/item_delete"
-            android:title="@string/delete_"
-            android:icon="@drawable/ic_menu_close_clear_cancel"
-            android:showAsAction="ifRoom"
-            app:showAsAction="ifRoom"
-            tools:ignore="AppCompatResource,UnusedAttribute"/>
+        android:id="@+id/item_delete"
+        android:icon="@drawable/ic_menu_close_clear_cancel"
+        android:showAsAction="ifRoom"
+        android:title="@string/delete_"
+        app:showAsAction="ifRoom"
+        tools:ignore="AppCompatResource,UnusedAttribute" />
     <item
-            android:id="@+id/item_help"
-            android:title="@string/help_"
-            android:icon="@drawable/ic_menu_help"
-            android:showAsAction="ifRoom"
-            app:showAsAction="ifRoom"
-            tools:ignore="AppCompatResource,UnusedAttribute"/>
+        android:id="@+id/item_help"
+        android:icon="@drawable/ic_menu_help"
+        android:showAsAction="ifRoom"
+        android:title="@string/help_"
+        app:showAsAction="ifRoom"
+        tools:ignore="AppCompatResource,UnusedAttribute" />
 
 </menu>

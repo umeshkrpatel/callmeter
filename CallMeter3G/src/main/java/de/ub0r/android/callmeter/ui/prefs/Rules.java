@@ -246,7 +246,7 @@ public final class Rules extends PreferenceActivity
                                             new DialogInterface.OnClickListener() {
                                                 @Override
                                                 public void onClick(final DialogInterface dialog,
-                                                        final int which) {
+                                                                    final int which) {
                                                     Rules.this
                                                             .getContentResolver()
                                                             .delete(ContentUris.withAppendedId(

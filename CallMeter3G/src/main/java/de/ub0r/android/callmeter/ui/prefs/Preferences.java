@@ -82,208 +82,167 @@ public final class Preferences extends PreferenceActivity implements
         OnPreferenceClickListener {
 
     /**
-     * Tag for output.
-     */
-    private static final String TAG = "Preferences";
-
-    /**
      * Standard buffer size.
      */
     public static final int BUFSIZE = 1024;
-
     /**
      * Action for exporting CSV file.
      */
     public static final String ACTION_EXPORT_CSV = "export_csv";
-
-    private static final int PERMISSION_REQUEST_READ_EXTERNAL_STORAGE = 1;
-    private static final int PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE = 2;
-
     /**
      * Preference's name: is default rule set.
      */
     public static final String PREFS_ISDEFAULT = "is_default_ruleset";
-
     /**
      * Preference's name: show advanced preferences.
      */
     public static final String PREFS_ADVANCED = "advanced_preferences";
-
     /**
      * Preference's name: split messages at 160chars.
      */
     public static final String PREFS_SPLIT_SMS_AT_160 = "split_at_160";
-
     /**
      * Preference's name: alert at 80% usage.
      */
     public static final String PREFS_ALERT80 = "alert_80";
-
     /**
      * Preference's name: alert at 100% usage.
      */
     public static final String PREFS_ALERT100 = "alert_100";
-
     /**
      * Preference's name: update interval.
      */
     public static final String PREFS_UPDATE_INTERVAL = "update_interval";
-
     /**
      * Preference's name: update interval (data).
      */
     public static final String PREFS_UPDATE_INTERVAL_DATA = "update_interval_data";
-
     /**
      * Preference's name: beginning of record.
      */
     public static final String PREFS_DATE_BEGIN = "date_begin";
-
     /**
      * Preference's name: delete old logs before x days.
      */
     public static final String PREFS_DELETE_OLD_LOGS = "delete_old_logs";
-
     /**
      * Preference's name: prepaid plan.
      */
     public static final String PREFS_PREPAID = "prepaid";
-
-    /**
-     * Preference's name: theme.
-     */
-    private static final String PREFS_THEME = "theme";
-
-    /**
-     * Theme: black.
-     */
-    private static final String THEME_BLACK = "black";
-
-    /**
-     * Theme: light.
-     */
-    private static final String THEME_LIGHT = "light";
-
-    /**
-     * Preference's name: text size.
-     */
-    private static final String PREFS_TEXTSIZE = "textsize";
-
-    /**
-     * Preference's name: text size for big titles.
-     */
-    private static final String PREFS_TEXTSIZE_BIGTITLE = "textsize_bigtitle";
-
-    /**
-     * Preference's name: text size for titles.
-     */
-    private static final String PREFS_TEXTSIZE_TITLE = "textsize_title";
-
-    /**
-     * Preference's name: text size for spacers.
-     */
-    private static final String PREFS_TEXTSIZE_SPACER = "textsize_spacer";
-
-    /**
-     * Preference's name: text size for progress bars.
-     */
-    private static final String PREFS_TEXTSIZE_PBAR = "textsize_pbar";
-
-    /**
-     * Preference's name: text size for progress bars of billing periods.
-     */
-    private static final String PREFS_TEXTSIZE_PBARBP = "textsize_pbarbp";
-
     /**
      * Preference's name: show last bill day instead of first.
      */
     public static final String PREFS_SHOW_TARGET_BILLDAY = "show_target_billday";
-
     /**
      * Preference's name: show hours.
      */
     public static final String PREFS_SHOWHOURS = "show_hours";
-
     /**
      * Preference's name: hide zero.
      */
     public static final String PREFS_HIDE_ZERO = "hide_zero";
-
     /**
      * Preference's name: hide no cost plans.
      */
     public static final String PREFS_HIDE_NOCOST = "hide_nocost";
-
     /**
      * Preference's name: hide progress bars in main view.
      */
     public static final String PREFS_HIDE_PROGRESSBARS = "hide_progressbars";
-
     /**
      * Preference's name: custom delimiter.
      */
     public static final String PREFS_DELIMITER = "custom_delimiter";
-
-    /**
-     * Preference's name: currency symbol.
-     */
-    private static final String PREFS_CURRENCY_SYMBOL = "currency_symbol";
-
-    /**
-     * Preference's name: currency format.
-     */
-    private static final String PREFS_CURRENCY_FORMAT = "currency_format";
-
-    /**
-     * Preference's name: date format.
-     */
-    private static final String PREFS_DATE_FORMAT = "date_format";
-
     /**
      * Preference's name: show today.
      */
     public static final String PREFS_SHOWTODAY = "show_today";
-
     /**
      * Preference's name: show total.
      */
     public static final String PREFS_SHOWTOTAL = "show_total";
-
     /**
      * Preference's name: show help.
      */
     public static final String PREFS_SHOWHELP = "show_help";
-
     /**
      * Preference's name: show length/cost of call.
      */
     public static final String PREFS_SHOWCALLINFO = "show_callinfo";
-
     /**
      * Preference's name: strip leading zeros.
      */
     public static final String PREFS_STRIP_LEADING_ZEROS = "strip_leading_zeros";
-
     /**
      * Preference's name: international prefix.
      */
     public static final String PREFS_INT_PREFIX = "intPrefix";
-
     /**
      * Preference's name: ask for plan.
      */
     public static final String PREFS_ASK_FOR_PLAN = "ask_for_plan";
-
     /**
      * Preference's name: ask for plan, auto hide.
      */
     public static final String PREFS_ASK_FOR_PLAN_AUTOHIDE = "autohide";
-
     /**
      * Preference's name: default plan for ask for plan.
      */
     public static final String PREFS_ASK_FOR_PLAN_DEFAULT = "ask_for_plan_default";
-
+    /**
+     * Tag for output.
+     */
+    private static final String TAG = "Preferences";
+    private static final int PERMISSION_REQUEST_READ_EXTERNAL_STORAGE = 1;
+    private static final int PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE = 2;
+    /**
+     * Preference's name: theme.
+     */
+    private static final String PREFS_THEME = "theme";
+    /**
+     * Theme: black.
+     */
+    private static final String THEME_BLACK = "black";
+    /**
+     * Theme: light.
+     */
+    private static final String THEME_LIGHT = "light";
+    /**
+     * Preference's name: text size.
+     */
+    private static final String PREFS_TEXTSIZE = "textsize";
+    /**
+     * Preference's name: text size for big titles.
+     */
+    private static final String PREFS_TEXTSIZE_BIGTITLE = "textsize_bigtitle";
+    /**
+     * Preference's name: text size for titles.
+     */
+    private static final String PREFS_TEXTSIZE_TITLE = "textsize_title";
+    /**
+     * Preference's name: text size for spacers.
+     */
+    private static final String PREFS_TEXTSIZE_SPACER = "textsize_spacer";
+    /**
+     * Preference's name: text size for progress bars.
+     */
+    private static final String PREFS_TEXTSIZE_PBAR = "textsize_pbar";
+    /**
+     * Preference's name: text size for progress bars of billing periods.
+     */
+    private static final String PREFS_TEXTSIZE_PBARBP = "textsize_pbarbp";
+    /**
+     * Preference's name: currency symbol.
+     */
+    private static final String PREFS_CURRENCY_SYMBOL = "currency_symbol";
+    /**
+     * Preference's name: currency format.
+     */
+    private static final String PREFS_CURRENCY_FORMAT = "currency_format";
+    /**
+     * Preference's name: date format.
+     */
+    private static final String PREFS_DATE_FORMAT = "date_format";
     /**
      * Default rule set.
      */
@@ -512,6 +471,247 @@ public final class Preferences extends PreferenceActivity implements
         final Editor e = PreferenceManager.getDefaultSharedPreferences(context).edit();
         e.putBoolean(PREFS_ISDEFAULT, isDefault);
         e.commit();
+    }
+
+    /**
+     * Export data.
+     *
+     * @param context   {@link Context}
+     * @param country   country
+     * @param provider  provider
+     * @param descr     description of the exported rule set
+     * @param fn        one of the predefined file names from {@link DataProvider}.
+     * @param recipient recipient of export
+     */
+    static void exportData(final Context context, final String country, final String provider,
+                           final String descr, final String fn, final String recipient) {
+        if (descr == null
+                || (recipient != null && !"sdcard".equals(recipient)
+                && fn.equals(ExportProvider.EXPORT_RULESET_FILE) && (TextUtils
+                .isEmpty(country) || TextUtils.isEmpty(provider) || TextUtils
+                .isEmpty(descr)))) {
+            Builder builder = new Builder(context);
+            EditText et0, et1, et2;
+            if (fn.equals(ExportProvider.EXPORT_RULESET_FILE)) {
+                View v = LayoutInflater.from(context).inflate(R.layout.dialog_export, null);
+                assert v != null;
+                builder.setView(v);
+                et0 = (EditText) v.findViewById(R.id.country);
+                if (!TextUtils.isEmpty(country)) {
+                    et0.setText(country);
+                }
+                et1 = (EditText) v.findViewById(R.id.provider);
+                et1.setText(provider);
+                et2 = (EditText) v.findViewById(R.id.plan);
+                et2.setText(descr);
+            } else {
+                et0 = null;
+                et1 = null;
+                et2 = new EditText(context);
+                builder.setView(et2);
+            }
+            final EditText etCountry = et0;
+            final EditText etProvider = et1;
+            final EditText etPlan = et2;
+            builder.setCancelable(true);
+            builder.setTitle(R.string.export_rules_descr);
+            builder.setNegativeButton(android.R.string.cancel, null);
+            builder.setPositiveButton(android.R.string.ok, new OnClickListener() {
+                @Override
+                public void onClick(final DialogInterface dialog, final int which) {
+                    String s0, s1, s2;
+                    //noinspection ConstantConditions
+                    s0 = etCountry == null ? null : etCountry.getText().toString().trim();
+                    //noinspection ConstantConditions
+                    s1 = etProvider == null ? null : etProvider.getText().toString().trim();
+                    //noinspection ConstantConditions
+                    s2 = etPlan == null ? null : etPlan.getText().toString().trim();
+                    exportData(context, s0, s1, s2, fn, recipient);
+                }
+            });
+            builder.show();
+        } else {
+            final ProgressDialog d = new ProgressDialog(context);
+            d.setIndeterminate(true);
+            d.setMessage(context.getString(R.string.export_progr));
+            d.setCancelable(false);
+            d.show();
+
+            // run task in background
+            final AsyncTask<Void, Void, String> task = new AsyncTask<Void, Void, String>() {
+                @Override
+                protected String doInBackground(final Void... params) {
+                    if (fn.equals(ExportProvider.EXPORT_RULESET_FILE)) {
+                        return DataProvider.backupRuleSet(context, country, provider, descr);
+                    } else if (fn.equals(ExportProvider.EXPORT_LOGS_FILE)) {
+                        return DataProvider.backupLogs(context, descr);
+                    } else if (fn.equals(ExportProvider.EXPORT_NUMGROUPS_FILE)) {
+                        return DataProvider.backupNumGroups(context, descr);
+                    } else if (fn.equals(ExportProvider.EXPORT_HOURGROUPS_FILE)) {
+                        return DataProvider.backupHourGroups(context, descr);
+                    }
+                    return null;
+                }
+
+                @Override
+                protected void onPostExecute(final String result) {
+                    Log.d(TAG, "export:\n", result);
+                    System.out.println("\n" + result);
+                    d.dismiss();
+                    if (result != null && result.length() > 0) {
+                        Uri uri = null;
+                        int resChooser = -1;
+                        if (fn.equals(ExportProvider.EXPORT_RULESET_FILE)) {
+                            uri = ExportProvider.EXPORT_RULESET_URI;
+                            resChooser = R.string.export_rules_;
+                        } else if (fn.equals(ExportProvider.EXPORT_LOGS_FILE)) {
+                            uri = ExportProvider.EXPORT_LOGS_URI;
+                            resChooser = R.string.export_logs_;
+                        } else if (fn.equals(ExportProvider.EXPORT_NUMGROUPS_FILE)) {
+                            uri = ExportProvider.EXPORT_NUMGROUPS_URI;
+                            resChooser = R.string.export_numgroups_;
+                        } else if (fn.equals(ExportProvider.EXPORT_HOURGROUPS_FILE)) {
+                            uri = ExportProvider.EXPORT_HOURGROUPS_URI;
+                            resChooser = R.string.export_hourgroups_;
+                        }
+                        Intent intent = null;
+                        if (!"sdcard".equals(recipient)) {
+                            intent = new Intent(Intent.ACTION_SEND);
+                            intent.setType(ExportProvider.EXPORT_MIMETYPE);
+                            intent.putExtra(Intent.EXTRA_STREAM, uri);
+                            intent.putExtra(Intent.EXTRA_SUBJECT, "Call Meter 3G export");
+                            if (!TextUtils.isEmpty(recipient)) {
+                                intent.putExtra(Intent.EXTRA_EMAIL, new String[]{recipient});
+                                intent.putExtra(Intent.EXTRA_TEXT, context.getString(
+                                        R.string.export_rules_body, country, provider, descr));
+                            }
+                            intent.addCategory(Intent.CATEGORY_DEFAULT);
+                        }
+
+                        try {
+                            final File d = new File(Environment.getExternalStorageDirectory(),
+                                    DataProvider.PACKAGE);
+                            final File f = new File(d, fn);
+                            //noinspection ResultOfMethodCallIgnored
+                            f.mkdirs();
+                            if (f.exists()) {
+                                //noinspection ResultOfMethodCallIgnored
+                                f.delete();
+                            }
+                            //noinspection ResultOfMethodCallIgnored
+                            f.createNewFile();
+                            FileWriter fw = new FileWriter(f);
+                            fw.append(result);
+                            fw.close();
+                            final String t = context.getString(R.string.exported_) + " "
+                                    + f.getAbsolutePath();
+                            Toast.makeText(context, t, Toast.LENGTH_LONG).show();
+                            // call an exporting app with the uri to the
+                            // preferences
+                            if (intent != null) {
+                                context.startActivity(Intent.createChooser(intent,
+                                        context.getString(resChooser)));
+                            }
+                        } catch (IOException e) {
+                            Log.e(TAG, "error writing export file", e);
+                            Toast.makeText(context, R.string.err_export_write, Toast.LENGTH_LONG)
+                                    .show();
+                        }
+                    }
+                }
+            };
+            task.execute((Void) null);
+        }
+    }
+
+    /**
+     * Export logs as CSV file.
+     *
+     * @param context {@link Context}
+     */
+    static void exportLogsCsv(final Context context) {
+        final ProgressDialog d = new ProgressDialog(context);
+        d.setIndeterminate(true);
+        d.setMessage(context.getString(R.string.export_progr));
+        d.setCancelable(false);
+        d.show();
+
+        // run task in background
+        final AsyncTask<Void, Void, String> task = new AsyncTask<Void, Void, String>() {
+            @Override
+            protected String doInBackground(final Void... params) {
+                File d = new File(Environment.getExternalStorageDirectory(), DataProvider.PACKAGE);
+                File f = new File(d, "logs-"
+                        + DateFormat.format("yyyyMMddkkmmss", System.currentTimeMillis()) + ".csv");
+                //noinspection ResultOfMethodCallIgnored
+                f.mkdirs();
+                if (f.exists()) {
+                    //noinspection ResultOfMethodCallIgnored
+                    f.delete();
+                }
+                try {
+                    // build csv file and save it to sd card
+                    FileWriter w = new FileWriter(f);
+                    Cursor c = context.getContentResolver().query(
+                            DataProvider.Logs.CONTENT_URI_JOIN, DataProvider.Logs.PROJECTION_JOIN,
+                            null, null, null);
+                    assert c != null;
+                    w.append("date;type;direction;my_number/sim_id;roamed;remote_number;"
+                            + "amount;billed_amount;cost;plan;rule\n");
+                    String[] types = context.getResources().getStringArray(R.array.plans_type);
+                    String[] directions = context.getResources().getStringArray(
+                            R.array.direction_calls);
+                    String cFormat = getCurrencyFormat(context);
+                    if (c.moveToFirst()) {
+                        do {
+                            w.append(DateFormat.format("yyyyMMddkkmmss;",
+                                    c.getLong(DataProvider.Logs.INDEX_DATE)));
+                            int t = c.getInt(DataProvider.Logs.INDEX_TYPE);
+                            w.append(types[t]).append(";");
+                            int dir = c.getInt(DataProvider.Logs.INDEX_DIRECTION);
+                            w.append(directions[dir]).append(";");
+                            w.append(c.getString(DataProvider.Logs.INDEX_MYNUMBER)).append(";");
+                            w.append(c.getString(DataProvider.Logs.INDEX_ROAMED)).append(";");
+                            w.append(c.getString(DataProvider.Logs.INDEX_REMOTE)).append(";");
+                            long a = c.getLong(DataProvider.Logs.INDEX_AMOUNT);
+                            float ba = c.getFloat(DataProvider.Logs.INDEX_BILL_AMOUNT);
+                            float cost = c.getFloat(DataProvider.Logs.INDEX_COST);
+                            w.append(Common.formatAmount(t, a, true)).append(";");
+                            w.append(Common.formatAmount(t, ba, true)).append(";");
+                            w.append(String.format(cFormat, cost)).append(";");
+                            w.append(c.getString(DataProvider.Logs.INDEX_PLAN_NAME)).append(";");
+                            w.append(c.getString(DataProvider.Logs.INDEX_RULE_NAME)).append("\n");
+                        } while (c.moveToNext());
+                    }
+
+                    c.close();
+                    w.close();
+                    // return file name
+                    return f.getAbsolutePath();
+                } catch (IOException e) {
+                    Log.e(TAG, "error writing csv file", e);
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(final String result) {
+                Log.d(TAG, "csv.task.onPostExecute(", result, ")");
+                try {
+                    d.dismiss();
+                } catch (Exception e) {
+                    Log.w(TAG, "activity already finished?", e);
+                }
+                if (TextUtils.isEmpty(result)) {
+                    Log.e(TAG, "error writing export file: " + result);
+                    Toast.makeText(context, R.string.err_export_write, Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(context, context.getString(R.string.exported_) + " " + result,
+                            Toast.LENGTH_LONG).show();
+                }
+            }
+        };
+        task.execute((Void) null);
     }
 
     /**
@@ -797,247 +997,6 @@ public final class Preferences extends PreferenceActivity implements
                 }
             }
         }.execute((Void) null);
-    }
-
-    /**
-     * Export data.
-     *
-     * @param context   {@link Context}
-     * @param country   country
-     * @param provider  provider
-     * @param descr     description of the exported rule set
-     * @param fn        one of the predefined file names from {@link DataProvider}.
-     * @param recipient recipient of export
-     */
-    static void exportData(final Context context, final String country, final String provider,
-            final String descr, final String fn, final String recipient) {
-        if (descr == null
-                || (recipient != null && !"sdcard".equals(recipient)
-                && fn.equals(ExportProvider.EXPORT_RULESET_FILE) && (TextUtils
-                .isEmpty(country) || TextUtils.isEmpty(provider) || TextUtils
-                .isEmpty(descr)))) {
-            Builder builder = new Builder(context);
-            EditText et0, et1, et2;
-            if (fn.equals(ExportProvider.EXPORT_RULESET_FILE)) {
-                View v = LayoutInflater.from(context).inflate(R.layout.dialog_export, null);
-                assert v != null;
-                builder.setView(v);
-                et0 = (EditText) v.findViewById(R.id.country);
-                if (!TextUtils.isEmpty(country)) {
-                    et0.setText(country);
-                }
-                et1 = (EditText) v.findViewById(R.id.provider);
-                et1.setText(provider);
-                et2 = (EditText) v.findViewById(R.id.plan);
-                et2.setText(descr);
-            } else {
-                et0 = null;
-                et1 = null;
-                et2 = new EditText(context);
-                builder.setView(et2);
-            }
-            final EditText etCountry = et0;
-            final EditText etProvider = et1;
-            final EditText etPlan = et2;
-            builder.setCancelable(true);
-            builder.setTitle(R.string.export_rules_descr);
-            builder.setNegativeButton(android.R.string.cancel, null);
-            builder.setPositiveButton(android.R.string.ok, new OnClickListener() {
-                @Override
-                public void onClick(final DialogInterface dialog, final int which) {
-                    String s0, s1, s2;
-                    //noinspection ConstantConditions
-                    s0 = etCountry == null ? null : etCountry.getText().toString().trim();
-                    //noinspection ConstantConditions
-                    s1 = etProvider == null ? null : etProvider.getText().toString().trim();
-                    //noinspection ConstantConditions
-                    s2 = etPlan == null ? null : etPlan.getText().toString().trim();
-                    exportData(context, s0, s1, s2, fn, recipient);
-                }
-            });
-            builder.show();
-        } else {
-            final ProgressDialog d = new ProgressDialog(context);
-            d.setIndeterminate(true);
-            d.setMessage(context.getString(R.string.export_progr));
-            d.setCancelable(false);
-            d.show();
-
-            // run task in background
-            final AsyncTask<Void, Void, String> task = new AsyncTask<Void, Void, String>() {
-                @Override
-                protected String doInBackground(final Void... params) {
-                    if (fn.equals(ExportProvider.EXPORT_RULESET_FILE)) {
-                        return DataProvider.backupRuleSet(context, country, provider, descr);
-                    } else if (fn.equals(ExportProvider.EXPORT_LOGS_FILE)) {
-                        return DataProvider.backupLogs(context, descr);
-                    } else if (fn.equals(ExportProvider.EXPORT_NUMGROUPS_FILE)) {
-                        return DataProvider.backupNumGroups(context, descr);
-                    } else if (fn.equals(ExportProvider.EXPORT_HOURGROUPS_FILE)) {
-                        return DataProvider.backupHourGroups(context, descr);
-                    }
-                    return null;
-                }
-
-                @Override
-                protected void onPostExecute(final String result) {
-                    Log.d(TAG, "export:\n", result);
-                    System.out.println("\n" + result);
-                    d.dismiss();
-                    if (result != null && result.length() > 0) {
-                        Uri uri = null;
-                        int resChooser = -1;
-                        if (fn.equals(ExportProvider.EXPORT_RULESET_FILE)) {
-                            uri = ExportProvider.EXPORT_RULESET_URI;
-                            resChooser = R.string.export_rules_;
-                        } else if (fn.equals(ExportProvider.EXPORT_LOGS_FILE)) {
-                            uri = ExportProvider.EXPORT_LOGS_URI;
-                            resChooser = R.string.export_logs_;
-                        } else if (fn.equals(ExportProvider.EXPORT_NUMGROUPS_FILE)) {
-                            uri = ExportProvider.EXPORT_NUMGROUPS_URI;
-                            resChooser = R.string.export_numgroups_;
-                        } else if (fn.equals(ExportProvider.EXPORT_HOURGROUPS_FILE)) {
-                            uri = ExportProvider.EXPORT_HOURGROUPS_URI;
-                            resChooser = R.string.export_hourgroups_;
-                        }
-                        Intent intent = null;
-                        if (!"sdcard".equals(recipient)) {
-                            intent = new Intent(Intent.ACTION_SEND);
-                            intent.setType(ExportProvider.EXPORT_MIMETYPE);
-                            intent.putExtra(Intent.EXTRA_STREAM, uri);
-                            intent.putExtra(Intent.EXTRA_SUBJECT, "Call Meter 3G export");
-                            if (!TextUtils.isEmpty(recipient)) {
-                                intent.putExtra(Intent.EXTRA_EMAIL, new String[]{recipient});
-                                intent.putExtra(Intent.EXTRA_TEXT, context.getString(
-                                        R.string.export_rules_body, country, provider, descr));
-                            }
-                            intent.addCategory(Intent.CATEGORY_DEFAULT);
-                        }
-
-                        try {
-                            final File d = new File(Environment.getExternalStorageDirectory(),
-                                    DataProvider.PACKAGE);
-                            final File f = new File(d, fn);
-                            //noinspection ResultOfMethodCallIgnored
-                            f.mkdirs();
-                            if (f.exists()) {
-                                //noinspection ResultOfMethodCallIgnored
-                                f.delete();
-                            }
-                            //noinspection ResultOfMethodCallIgnored
-                            f.createNewFile();
-                            FileWriter fw = new FileWriter(f);
-                            fw.append(result);
-                            fw.close();
-                            final String t = context.getString(R.string.exported_) + " "
-                                    + f.getAbsolutePath();
-                            Toast.makeText(context, t, Toast.LENGTH_LONG).show();
-                            // call an exporting app with the uri to the
-                            // preferences
-                            if (intent != null) {
-                                context.startActivity(Intent.createChooser(intent,
-                                        context.getString(resChooser)));
-                            }
-                        } catch (IOException e) {
-                            Log.e(TAG, "error writing export file", e);
-                            Toast.makeText(context, R.string.err_export_write, Toast.LENGTH_LONG)
-                                    .show();
-                        }
-                    }
-                }
-            };
-            task.execute((Void) null);
-        }
-    }
-
-    /**
-     * Export logs as CSV file.
-     *
-     * @param context {@link Context}
-     */
-    static void exportLogsCsv(final Context context) {
-        final ProgressDialog d = new ProgressDialog(context);
-        d.setIndeterminate(true);
-        d.setMessage(context.getString(R.string.export_progr));
-        d.setCancelable(false);
-        d.show();
-
-        // run task in background
-        final AsyncTask<Void, Void, String> task = new AsyncTask<Void, Void, String>() {
-            @Override
-            protected String doInBackground(final Void... params) {
-                File d = new File(Environment.getExternalStorageDirectory(), DataProvider.PACKAGE);
-                File f = new File(d, "logs-"
-                        + DateFormat.format("yyyyMMddkkmmss", System.currentTimeMillis()) + ".csv");
-                //noinspection ResultOfMethodCallIgnored
-                f.mkdirs();
-                if (f.exists()) {
-                    //noinspection ResultOfMethodCallIgnored
-                    f.delete();
-                }
-                try {
-                    // build csv file and save it to sd card
-                    FileWriter w = new FileWriter(f);
-                    Cursor c = context.getContentResolver().query(
-                            DataProvider.Logs.CONTENT_URI_JOIN, DataProvider.Logs.PROJECTION_JOIN,
-                            null, null, null);
-                    assert c != null;
-                    w.append("date;type;direction;my_number/sim_id;roamed;remote_number;"
-                            + "amount;billed_amount;cost;plan;rule\n");
-                    String[] types = context.getResources().getStringArray(R.array.plans_type);
-                    String[] directions = context.getResources().getStringArray(
-                            R.array.direction_calls);
-                    String cFormat = getCurrencyFormat(context);
-                    if (c.moveToFirst()) {
-                        do {
-                            w.append(DateFormat.format("yyyyMMddkkmmss;",
-                                    c.getLong(DataProvider.Logs.INDEX_DATE)));
-                            int t = c.getInt(DataProvider.Logs.INDEX_TYPE);
-                            w.append(types[t]).append(";");
-                            int dir = c.getInt(DataProvider.Logs.INDEX_DIRECTION);
-                            w.append(directions[dir]).append(";");
-                            w.append(c.getString(DataProvider.Logs.INDEX_MYNUMBER)).append(";");
-                            w.append(c.getString(DataProvider.Logs.INDEX_ROAMED)).append(";");
-                            w.append(c.getString(DataProvider.Logs.INDEX_REMOTE)).append(";");
-                            long a = c.getLong(DataProvider.Logs.INDEX_AMOUNT);
-                            float ba = c.getFloat(DataProvider.Logs.INDEX_BILL_AMOUNT);
-                            float cost = c.getFloat(DataProvider.Logs.INDEX_COST);
-                            w.append(Common.formatAmount(t, a, true)).append(";");
-                            w.append(Common.formatAmount(t, ba, true)).append(";");
-                            w.append(String.format(cFormat, cost)).append(";");
-                            w.append(c.getString(DataProvider.Logs.INDEX_PLAN_NAME)).append(";");
-                            w.append(c.getString(DataProvider.Logs.INDEX_RULE_NAME)).append("\n");
-                        } while (c.moveToNext());
-                    }
-
-                    c.close();
-                    w.close();
-                    // return file name
-                    return f.getAbsolutePath();
-                } catch (IOException e) {
-                    Log.e(TAG, "error writing csv file", e);
-                }
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(final String result) {
-                Log.d(TAG, "csv.task.onPostExecute(", result, ")");
-                try {
-                    d.dismiss();
-                } catch (Exception e) {
-                    Log.w(TAG, "activity already finished?", e);
-                }
-                if (TextUtils.isEmpty(result)) {
-                    Log.e(TAG, "error writing export file: " + result);
-                    Toast.makeText(context, R.string.err_export_write, Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(context, context.getString(R.string.exported_) + " " + result,
-                            Toast.LENGTH_LONG).show();
-                }
-            }
-        };
-        task.execute((Void) null);
     }
 
     /**

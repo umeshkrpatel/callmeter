@@ -47,16 +47,14 @@ public final class CVDatePreference extends DialogPreference implements OnTimeSe
      * Current date.
      */
     private final Calendar v = Calendar.getInstance();
-
-    /**
-     * {@link DatePicker}.
-     */
-    private DatePicker dp = null;
-
     /**
      * Show help.
      */
     private final boolean sh;
+    /**
+     * {@link DatePicker}.
+     */
+    private DatePicker dp = null;
 
     /**
      * Default constructor.
@@ -67,7 +65,7 @@ public final class CVDatePreference extends DialogPreference implements OnTimeSe
      * @param showDateAndTime Show date and time?
      */
     public CVDatePreference(final Context context, final ContentValues values, final String key,
-            final boolean showDateAndTime) {
+                            final boolean showDateAndTime) {
         super(context, null);
         setPersistent(false);
         setKey(key);

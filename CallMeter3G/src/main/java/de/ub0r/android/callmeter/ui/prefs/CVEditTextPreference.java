@@ -47,7 +47,7 @@ public class CVEditTextPreference extends EditTextPreference {
      * @param defValue default value
      */
     public CVEditTextPreference(final Context context, final ContentValues values,
-            final String key, final String defValue) {
+                                final String key, final String defValue) {
         super(context);
         setPersistent(false);
         setKey(key);
@@ -71,7 +71,7 @@ public class CVEditTextPreference extends EditTextPreference {
      * @param defValue default value as resource id
      */
     public CVEditTextPreference(final Context context, final ContentValues values,
-            final String key, final int defValue) {
+                                final String key, final int defValue) {
         this(context, values, key, context.getString(defValue));
     }
 

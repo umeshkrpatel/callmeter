@@ -59,76 +59,62 @@ public final class LogsAppWidgetConfigure extends AppCompatActivity
         OnCheckedChangeListener, OnSeekBarChangeListener {
 
     /**
-     * Tag for logging.
-     */
-    private static final String TAG = "wdgtcfg";
-
-    /**
-     * Widget id.
-     */
-    private int mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
-
-    /**
-     * {@link Spinner} holding the plan.
-     */
-    private Spinner spinner;
-
-    /**
-     * {@link CheckBox}s.
-     */
-    private CheckBox cbShowCost, cbShowIcon, cbSmallWidget;
-
-    /**
-     * {@link EditText}s.
-     */
-    private EditText etPlanTextSize, etStatsTextSize;
-
-    /**
-     * {@link Button}s.
-     */
-    private Button btnTextColor, btnBgColor;
-
-    /**
-     * {@link View}s.
-     */
-    private View vTextColor, vBgColor;
-
-    /**
-     * {@link SeekBar}.
-     */
-    private SeekBar sbBgTransparency;
-
-    /**
      * Default text size.
      */
     static final float DEFAULT_TEXTSIZE = 10f;
-
     /**
      * Default text color.
      */
     static final int DEFAULT_TEXTCOLOR = 0xffffffff;
-
     /**
      * Default background color.
      */
     static final int DEFAULT_BGCOLOR = 0x80000000;
-
+    /**
+     * Tag for logging.
+     */
+    private static final String TAG = "wdgtcfg";
     /**
      * Bit mask for colors.
      */
     private static final int BITMASK_COLOR = 0x00FFFFFF;
-
     /**
      * Shift for transparency.
      */
     private static final int BITSHIFT_TRANSPARENCY = 24;
-
     /**
      * Projection for {@link SimpleCursorAdapter} query.
      */
     private static final String[] PROJ_ADAPTER = new String[]{DataProvider.Plans.ID,
             DataProvider.Plans.NAME};
-
+    /**
+     * Widget id.
+     */
+    private int mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
+    /**
+     * {@link Spinner} holding the plan.
+     */
+    private Spinner spinner;
+    /**
+     * {@link CheckBox}s.
+     */
+    private CheckBox cbShowCost, cbShowIcon, cbSmallWidget;
+    /**
+     * {@link EditText}s.
+     */
+    private EditText etPlanTextSize, etStatsTextSize;
+    /**
+     * {@link Button}s.
+     */
+    private Button btnTextColor, btnBgColor;
+    /**
+     * {@link View}s.
+     */
+    private View vTextColor, vBgColor;
+    /**
+     * {@link SeekBar}.
+     */
+    private SeekBar sbBgTransparency;
     /**
      * Does the widget already exist?
      */
@@ -301,7 +287,7 @@ public final class LogsAppWidgetConfigure extends AppCompatActivity
      */
     @Override
     public void onProgressChanged(final SeekBar seekBar, final int progress,
-            final boolean fromUser) {
+                                  final boolean fromUser) {
         Log.d(TAG, "onProgressChanged(", progress, ")");
         final int tp = 255 - progress;
         int c = getBgColor();

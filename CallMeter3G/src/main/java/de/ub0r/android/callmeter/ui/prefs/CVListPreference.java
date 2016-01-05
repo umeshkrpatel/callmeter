@@ -29,21 +29,18 @@ public final class CVListPreference extends ListPreference {
      * Show a multi select dialog.
      */
     private final boolean m;
-
-    /**
-     * Checked values.
-     */
-    private boolean[] checked = null;
-
     /**
      * {@link UpdateListener}.
      */
     private final UpdateListener ul;
-
     /**
      * Show help.
      */
     private final boolean sh;
+    /**
+     * Checked values.
+     */
+    private boolean[] checked = null;
 
     /**
      * Default constructor.
@@ -76,7 +73,7 @@ public final class CVListPreference extends ListPreference {
      * @param multi   show multi selection
      */
     public CVListPreference(final Context context, final ContentValues values, final String key,
-            final boolean multi) {
+                            final boolean multi) {
         super(context);
         setPersistent(false);
         setKey(key);
@@ -244,7 +241,7 @@ public final class CVListPreference extends ListPreference {
             builder.setMultiChoiceItems(getEntries(), checked,
                     new DialogInterface.OnMultiChoiceClickListener() {
                         public void onClick(final DialogInterface dialog, final int which,
-                                final boolean val) {
+                                            final boolean val) {
                             CVListPreference.this.checked[which] = val;
                         }
                     });

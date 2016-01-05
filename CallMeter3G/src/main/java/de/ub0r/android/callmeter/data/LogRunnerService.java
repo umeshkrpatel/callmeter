@@ -68,51 +68,42 @@ import de.ub0r.android.logg0r.Log;
 public final class LogRunnerService extends IntentService {
 
     /**
+     * {@link Intent}'s action for run matcher.
+     */
+    public static final String ACTION_RUN_MATCHER = "de.ub0r.android.callmeter.RUN_MATCHER";
+    /**
+     * {@link Intent}'s action for short run.
+     */
+    public static final String ACTION_SHORT_RUN = "de.ub0r.android.callmeter.SHORT_RUN";
+    /**
      * Tag for output.
      */
     private static final String TAG = "LogRunnerService";
-
     /**
      * Minimum amount of unmatched logs to start showing the dialog.
      */
     private static final int UNMATHCEDLOGS_TO_SHOW_DIALOG = 50;
-
     /**
      * {@link Uri} to all threads.
      */
     private static final Uri URI_THREADS = Uri.parse("content://mms-sms/conversations").buildUpon()
             .appendQueryParameter("simple", "true").build();
-
     /**
      * {@link Uri} to all sms.
      */
     private static final Uri URI_SMS = Uri.parse("content://sms/");
-
     /**
      * {@link Uri} to all mms.
      */
     private static final Uri URI_MMS = Uri.parse("content://mms/");
-
     /**
      * Projection for threads table.
      */
     private static final String[] THREADS_PROJ = new String[]{"recipient_ids"};
-
     /**
      * {@link HashMap} mapping threads to numbers.
      */
     private static final SparseArray<String> THREAD_TO_NUMBER = new SparseArray<String>();
-
-    /**
-     * {@link Intent}'s action for run matcher.
-     */
-    public static final String ACTION_RUN_MATCHER = "de.ub0r.android.callmeter.RUN_MATCHER";
-
-    /**
-     * {@link Intent}'s action for short run.
-     */
-    public static final String ACTION_SHORT_RUN = "de.ub0r.android.callmeter.SHORT_RUN";
-
     /**
      * {@link Intent}'s action for receiving SMS.
      */
@@ -147,52 +138,42 @@ public final class LogRunnerService extends IntentService {
      * Length of an SMS.
      */
     private static final int SMS_LENGTH = 160;
-
-    /**
-     * Is phone roaming?
-     */
-    private static boolean roaming = false;
-
-    /**
-     * My own number.
-     */
-    private static String mynumber = null;
-
-    /**
-     * Split messages at 160chars.
-     */
-    private static boolean splitAt160 = false;
-
-    /**
-     * Ignore logs before.
-     */
-    private static long dateStart = 0L;
-
-    /**
-     * Delete logs before that date.
-     */
-    private static long deleteBefore = -1L;
-
     /**
      * Minimal difference of traffic which will get saved.
      */
     private static final long DATA_MIN_DIFF = 1024L * 512L;
-
     /**
      * Time to wait for logs after hanging up.
      */
     private static final long WAIT_FOR_LOGS = 1500L;
-
     /**
      * Maximum gap for logs.
      */
     private static final long GAP_FOR_LOGS = 10000L;
-
     /**
      * Minimal time between updates.
      */
     private static final long MIN_DELAY = 5000L;
-
+    /**
+     * Is phone roaming?
+     */
+    private static boolean roaming = false;
+    /**
+     * My own number.
+     */
+    private static String mynumber = null;
+    /**
+     * Split messages at 160chars.
+     */
+    private static boolean splitAt160 = false;
+    /**
+     * Ignore logs before.
+     */
+    private static long dateStart = 0L;
+    /**
+     * Delete logs before that date.
+     */
+    private static long deleteBefore = -1L;
     /**
      * Action of last call.
      */
@@ -320,7 +301,7 @@ public final class LogRunnerService extends IntentService {
      * @return amount of last log entry
      */
     private static long getLastData(final SharedPreferences p, final int type,
-            final int direction) {
+                                    final int direction) {
         Log.d(TAG, "getLastData(p,", type, ",", direction, ")");
         long l = p.getLong(PREFS_LASTDATA_PREFIX + type + "_" + direction, 0L);
         Log.d(TAG, "getLastData(): ", l);
@@ -336,7 +317,7 @@ public final class LogRunnerService extends IntentService {
      * @return {@link Cursor} of last log record; column 0=id,1=amount
      */
     private static Cursor getLastData(final ContentResolver cr, final int type,
-            final int direction) {
+                                      final int direction) {
         Cursor c = cr.query(DataProvider.Logs.CONTENT_URI, new String[]{DataProvider.Logs.ID,
                         DataProvider.Logs.AMOUNT, DataProvider.Logs.PLAN_ID,
                         DataProvider.Logs.ROAMED},
@@ -372,7 +353,7 @@ public final class LogRunnerService extends IntentService {
      * @param amount    amount
      */
     public static void setLastData(final Editor e, final int type, final int direction,
-            final long amount) {
+                                   final long amount) {
         if (amount < 0L) {
             e.remove(PREFS_LASTDATA_PREFIX + type + "_" + direction);
         } else {

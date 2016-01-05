@@ -41,7 +41,7 @@ public class BillModeListPreference extends ListPreference {
                 b.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(final DialogInterface paramDialogInterface,
-                            final int paramInt) {
+                                        final int paramInt) {
                         BillModeListPreference.this.setValue(ov);
                     }
                 });

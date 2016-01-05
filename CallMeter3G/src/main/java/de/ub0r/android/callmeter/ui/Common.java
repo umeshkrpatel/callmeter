@@ -141,7 +141,7 @@ public final class Common {
      * @return {@link String} representing amount
      */
     public static String formatAmount(final int pType, final float amount,
-            final boolean showHours) {
+                                      final boolean showHours) {
         switch (pType) {
             case DataProvider.TYPE_DATA:
                 return prettyBytes(amount);
@@ -164,7 +164,7 @@ public final class Common {
      * @return formated date
      */
     public static String formatDate(final Context context, final int billperiod,
-            final Calendar billDay) {
+                                    final Calendar billDay) {
         if (billperiod == DataProvider.BILLPERIOD_INFINITE && billDay == null) {
             return "\u221E";
         } else {
@@ -186,8 +186,8 @@ public final class Common {
      * @return string
      */
     public static String formatValues(final Context context, final long now, final int pType,
-            final long count, final float amount, final int billperiod, final long billday,
-            final boolean showHours) {
+                                      final long count, final float amount, final int billperiod, final long billday,
+                                      final boolean showHours) {
         switch (pType) {
             case DataProvider.TYPE_BILLPERIOD:
                 Calendar billDay = Calendar.getInstance();
