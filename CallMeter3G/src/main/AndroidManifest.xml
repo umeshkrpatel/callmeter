@@ -47,13 +47,13 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
-        android:name=".CallMeter"
+        android:name="com.umeshkrpatel.logmonitor.CallMeter"
         android:allowBackup="true"
         android:hardwareAccelerated="true"
         android:icon="@drawable/icon"
         android:label="@string/app_name">
         <activity
-            android:name=".ui.Plans"
+            android:name="com.umeshkrpatel.logmonitor.ui.Plans"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/app_name"
             android:theme="@style/Theme.CallMeter_Light"
@@ -65,16 +65,16 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.AddLogActivity"
+            android:name="com.umeshkrpatel.logmonitor.ui.AddLogActivity"
             android:theme="@style/Theme.CallMeter_Light"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".ui.AskForPlan"
+            android:name="com.umeshkrpatel.logmonitor.ui.AskForPlan"
             android:configChanges="orientation|keyboardHidden"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".ui.prefs.Preferences"
+            android:name="com.umeshkrpatel.logmonitor.ui.prefs.Preferences"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/import_rules_"
             android:launchMode="singleTask"
@@ -115,101 +115,101 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.prefs.PreferencesPlain"
+            android:name="com.umeshkrpatel.logmonitor.ui.prefs.PreferencesPlain"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/settings"
             android:theme="@style/Theme.Default"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".ui.prefs.PreferencesRules"
+            android:name="com.umeshkrpatel.logmonitor.ui.prefs.PreferencesRules"
             android:label="@string/settings"
             android:theme="@style/Theme.Default" />
         <activity
-            android:name=".ui.prefs.SimplePreferences"
+            android:name="com.umeshkrpatel.logmonitor.ui.prefs.SimplePreferences"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/simple_preferences_"
             android:launchMode="singleTask"
             android:theme="@style/Theme.Default"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".ui.prefs.SimplePreferencesChild"
+            android:name="com.umeshkrpatel.logmonitor.ui.prefs.SimplePreferencesChild"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/simple_preferences_"
             android:theme="@style/Theme.Default"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".ui.prefs.PreferencesImport"
+            android:name="com.umeshkrpatel.logmonitor.ui.prefs.PreferencesImport"
             android:label="@string/import_rules_"
             android:theme="@style/Theme.Default"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".ui.prefs.Plans"
+            android:name="com.umeshkrpatel.logmonitor.ui.prefs.Plans"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/plans"
             android:launchMode="singleTop"
             android:theme="@style/Theme.Default"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".ui.prefs.PlanEdit"
+            android:name="com.umeshkrpatel.logmonitor.ui.prefs.PlanEdit"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/plans"
             android:launchMode="singleTop"
             android:theme="@style/Theme.Default"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".ui.prefs.Rules"
+            android:name="com.umeshkrpatel.logmonitor.ui.prefs.Rules"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/rules"
             android:launchMode="singleTop"
             android:theme="@style/Theme.Default"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".ui.prefs.RuleEdit"
+            android:name="com.umeshkrpatel.logmonitor.ui.prefs.RuleEdit"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/rules"
             android:theme="@style/Theme.Default"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".ui.prefs.NumberGroups"
+            android:name="com.umeshkrpatel.logmonitor.ui.prefs.NumberGroups"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/numbergroups_edit_"
             android:launchMode="singleTop"
             android:theme="@style/Theme.Default"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".ui.prefs.NumberGroupEdit"
+            android:name="com.umeshkrpatel.logmonitor.ui.prefs.NumberGroupEdit"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/numbers"
             android:theme="@style/Theme.Default"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".ui.prefs.HourGroups"
+            android:name="com.umeshkrpatel.logmonitor.ui.prefs.HourGroups"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/hourgroups_edit_"
             android:launchMode="singleTop"
             android:theme="@style/Theme.Default"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".ui.prefs.HourGroupEdit"
+            android:name="com.umeshkrpatel.logmonitor.ui.prefs.HourGroupEdit"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/hours"
             android:theme="@style/Theme.Default"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".ui.AboutActivity"
+            android:name="com.umeshkrpatel.logmonitor.ui.AboutActivity"
             android:theme="@style/Theme.CallMeter"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".ui.HelpActivity"
+            android:name="com.umeshkrpatel.logmonitor.ui.HelpActivity"
             android:label="@string/help_"
             android:theme="@style/Theme.CallMeter"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".ui.IntroActivity"
+            android:name="com.umeshkrpatel.logmonitor.ui.IntroActivity"
             android:theme="@style/Theme.CallMeter_Light"
             android:windowSoftInputMode="adjustResize" />
 
-        <receiver android:name=".data.LogRunnerReceiver">
+        <receiver android:name="com.umeshkrpatel.logmonitor.data.LogRunnerReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.ACTION_SHUTDOWN" />
@@ -228,19 +228,19 @@
             </intent-filter>
         </receiver>
 
-        <service android:name=".data.LogRunnerService" />
+        <service android:name="com.umeshkrpatel.logmonitor.data.LogRunnerService" />
 
         <provider
-            android:name=".data.DataProvider"
-            android:authorities="de.ub0r.android.callmeter.data"
+            android:name="com.umeshkrpatel.logmonitor.data.DataProvider"
+            android:authorities="com.umeshkrpatel.logmonitor.data"
             android:exported="false" />
         <provider
-            android:name=".data.ExportProvider"
+            android:name="com.umeshkrpatel.logmonitor.data.ExportProvider"
             android:authorities="de.ub0r.android.callmeter.export"
             android:exported="true" />
 
         <receiver
-            android:name=".widget.StatsAppWidgetProvider"
+            android:name="com.umeshkrpatel.logmonitor.widget.StatsAppWidgetProvider"
             android:label="@string/widget_stats_title">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -251,7 +251,7 @@
                 android:resource="@xml/stats_appwidget_info" />
         </receiver>
         <receiver
-            android:name=".widget.LogsAppWidgetProvider"
+            android:name="com.umeshkrpatel.logmonitor.widget.LogsAppWidgetProvider"
             android:label="@string/widget_logs_title">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -263,7 +263,7 @@
         </receiver>
 
         <activity
-            android:name=".widget.StatsAppWidgetConfigure"
+            android:name="com.umeshkrpatel.logmonitor.widget.StatsAppWidgetConfigure"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/widget_config_"
             android:launchMode="singleTop"
@@ -274,7 +274,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".widget.LogsAppWidgetConfigure"
+            android:name="com.umeshkrpatel.logmonitor.widget.LogsAppWidgetConfigure"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/widget_config_"
             android:launchMode="singleTop"
@@ -292,7 +292,7 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
-        <activity android:name=".ui.SummaryFragment" />
+        <activity android:name="com.umeshkrpatel.logmonitor.ui.SummaryFragment" />
     </application>
 
 </manifest>
