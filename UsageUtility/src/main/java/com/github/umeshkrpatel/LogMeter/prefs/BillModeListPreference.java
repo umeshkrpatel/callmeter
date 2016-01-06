@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.preference.ListPreference;
 import android.text.TextUtils;
-import android.util.AttributeSet;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -17,11 +16,6 @@ public class BillModeListPreference extends ListPreference {
 
     public BillModeListPreference(final Context context) {
         super(context);
-        ctx = context;
-    }
-
-    public BillModeListPreference(final Context context, final AttributeSet attr) {
-        super(context, attr);
         ctx = context;
     }
 
@@ -49,7 +43,7 @@ public class BillModeListPreference extends ListPreference {
                     @Override
                     public void onClick(final DialogInterface dialog, final int which) {
                         String nv = et.getText().toString().trim();
-                        final String[] t = nv.toString().split("/");
+                        final String[] t = nv.split("/");
                         if (t.length != 2 || !TextUtils.isDigitsOnly(t[0])
                                 || !TextUtils.isDigitsOnly(t[1])) {
                             Toast.makeText(BillModeListPreference.this.ctx, R.string.missing_slash,

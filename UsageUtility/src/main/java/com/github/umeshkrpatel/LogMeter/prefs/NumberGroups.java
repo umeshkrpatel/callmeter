@@ -62,6 +62,9 @@ public final class NumberGroups extends PreferenceActivity implements
         ps.removeAll();
         Cursor c = getContentResolver().query(DataProvider.NumbersGroup.CONTENT_URI,
                 DataProvider.NumbersGroup.PROJECTION, null, null, null);
+        if (c == null)
+            return;
+
         if (c.moveToFirst()) {
             do {
                 Preference p = new Preference(this);

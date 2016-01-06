@@ -45,7 +45,7 @@ import android.widget.Toast;
 
 import com.github.umeshkrpatel.LogMeter.R;
 import com.github.umeshkrpatel.LogMeter.prefs.Preferences;
-import com.github.umeshkrpatel.LogMeter.utils.LogMeter;
+import com.github.umeshkrpatel.LogMeter.LogMeter;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;

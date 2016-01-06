@@ -32,7 +32,7 @@ import android.telephony.TelephonyManager;
 import android.text.InputType;
 import android.text.TextUtils;
 
-import com.github.umeshkrpatel.LogMeter.utils.LogMeter;
+import com.github.umeshkrpatel.LogMeter.LogMeter;
 import com.github.umeshkrpatel.LogMeter.R;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
 import com.github.umeshkrpatel.LogMeter.data.LogRunnerService;
@@ -197,6 +197,9 @@ public final class RuleEdit extends PreferenceActivity implements UpdateListener
         boolean hasSmsSimId = LogRunnerService.checkSmsSimIdColumn(getContentResolver());
         Cursor c = getContentResolver().query(uri, DataProvider.Rules.PROJECTION, null,
                 null, null);
+        if (c == null)
+            return;
+
         if (c.moveToFirst()) {
             // name
             CVEditTextPreference ep = new CVEditTextPreference(this, values,
@@ -358,6 +361,9 @@ public final class RuleEdit extends PreferenceActivity implements UpdateListener
             // in-/exclude hours
             Cursor query = getContentResolver().query(DataProvider.HoursGroup.CONTENT_URI,
                     DataProvider.HoursGroup.PROJECTION, null, null, null);
+            if (query == null)
+                return;
+
             if (query.getCount() > 0) {
                 // include hours
                 lp = new CVListPreference(this, values, DataProvider.Rules.INHOURS_ID, true);
@@ -381,6 +387,9 @@ public final class RuleEdit extends PreferenceActivity implements UpdateListener
                 // in-/exclude numbers
                 query = getContentResolver().query(DataProvider.NumbersGroup.CONTENT_URI,
                         DataProvider.NumbersGroup.PROJECTION, null, null, null);
+                if (query == null)
+                    return;
+
                 if (query.getCount() > 0) {
                     // include numbers
                     lp = new CVListPreference(this, values, DataProvider.Rules.INNUMBERS_ID, true);

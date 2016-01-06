@@ -85,6 +85,9 @@ public final class Rules extends PreferenceActivity
         ps.removeAll();
         Cursor c = getContentResolver().query(DataProvider.Rules.CONTENT_URI,
                 DataProvider.Rules.PROJECTION, null, null, null);
+        if (c == null)
+            return;
+
         if (c.moveToFirst()) {
             String[] types = getResources().getStringArray(R.array.rules_type);
             do {
@@ -181,6 +184,9 @@ public final class Rules extends PreferenceActivity
     private void move(final Uri u, final int diretion) {
         Cursor c0 = getContentResolver().query(u, DataProvider.Rules.PROJECTION, null, null,
                 null);
+        if (c0 == null)
+            return;
+
         if (c0.moveToFirst()) {
             int o0;
             if (c0.isNull(DataProvider.Rules.INDEX_ORDER)) {
@@ -202,6 +208,11 @@ public final class Rules extends PreferenceActivity
             String s0 = String.valueOf(o0);
             Cursor c1 = getContentResolver().query(DataProvider.Rules.CONTENT_URI,
                     DataProvider.Rules.PROJECTION, w, new String[]{s0, s0}, o);
+            if (c1 == null) {
+                c0.close();
+                return;
+            }
+
             if (c1.moveToFirst()) {
                 ContentValues values = new ContentValues();
                 values.put(DataProvider.Rules.ORDER, o0);

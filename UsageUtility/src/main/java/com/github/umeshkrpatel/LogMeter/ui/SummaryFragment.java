@@ -55,7 +55,7 @@ import java.util.ArrayList;
 import com.github.umeshkrpatel.LogMeter.R;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
 import com.github.umeshkrpatel.LogMeter.data.LogRunnerService;
-import com.github.umeshkrpatel.LogMeter.data.NameLoader;
+import com.github.umeshkrpatel.LogMeter.data.ContactFinder;
 import com.github.umeshkrpatel.LogMeter.prefs.Preferences;
 import de.ub0r.android.logg0r.Log;
 
@@ -292,7 +292,7 @@ public final class SummaryFragment extends ListFragment implements OnClickListen
         //    if (id < 0L) {
         //        tbPlan.setVisibility(View.GONE);
         //    } else {
-        //        String p = DataProvider.UtilityActivity.getName(getActivity().getContentResolver(),
+        //        String p = DataProvider.UtilityActivity.findContactForNumber(getActivity().getContentResolver(),
         //                planId);
         //        tbPlan.setText(p);
         //        tbPlan.setTextOn(p);
@@ -508,9 +508,9 @@ public final class SummaryFragment extends ListFragment implements OnClickListen
 
             ImageView ivType;
             /**
-             * Hold {@link NameLoader}.
+             * Hold {@link ContactFinder}.
              */
-            NameLoader loader;
+            ContactFinder loader;
             long callIn, callOut, smsIn, smsOut, mmsIn, mmsOut, dataIn, dataOut;
         }
     }

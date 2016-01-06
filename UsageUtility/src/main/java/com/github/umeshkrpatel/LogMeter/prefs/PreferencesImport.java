@@ -36,7 +36,7 @@ import android.widget.Toast;
 
 import java.io.File;
 
-import com.github.umeshkrpatel.LogMeter.utils.LogMeter;
+import com.github.umeshkrpatel.LogMeter.LogMeter;
 import com.github.umeshkrpatel.LogMeter.R;
 import de.ub0r.android.lib.Utils;
 import de.ub0r.android.logg0r.Log;

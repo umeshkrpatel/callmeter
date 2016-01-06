@@ -1,5 +1,5 @@
 
-package com.github.umeshkrpatel.LogMeter.utils;
+package com.github.umeshkrpatel.LogMeter;
 
 import android.annotation.TargetApi;
 import android.app.Activity;

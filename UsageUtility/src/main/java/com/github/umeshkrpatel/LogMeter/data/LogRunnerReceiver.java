@@ -31,7 +31,7 @@ import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
 
-import com.github.umeshkrpatel.LogMeter.utils.LogMeter;
+import com.github.umeshkrpatel.LogMeter.LogMeter;
 import com.github.umeshkrpatel.LogMeter.prefs.Preferences;
 
 import de.ub0r.android.lib.Utils;
@@ -201,34 +201,40 @@ public final class LogRunnerReceiver extends BroadcastReceiver {
         final String a = intent.getAction();
         Log.d(TAG, "action: ", a);
         if (a != null) {
-            if (a.equals(ACTION_CM_WEBSMS)) {
-                final String su = intent.getStringExtra(EXTRA_WEBSMS_URI);
-                if (su != null && su.length() > 0) {
-                    final long si = Utils.parseLong(su.replaceAll(".*/", ""), -1);
-                    final String sc = intent.getStringExtra(EXTRA_WEBSMS_CONNECTOR);
-                    Log.d(TAG, "websms id:  ", si);
-                    Log.d(TAG, "websms con: ", sc);
-                    if (si >= 0L) {
-                        saveWebSMS(context, su, si, sc);
+            switch (a) {
+                case ACTION_CM_WEBSMS: {
+                    final String su = intent.getStringExtra(EXTRA_WEBSMS_URI);
+                    if (su != null && su.length() > 0) {
+                        final long si = Utils.parseLong(su.replaceAll(".*/", ""), -1);
+                        final String sc = intent.getStringExtra(EXTRA_WEBSMS_CONNECTOR);
+                        Log.d(TAG, "websms id:  ", si);
+                        Log.d(TAG, "websms con: ", sc);
+                        if (si >= 0L) {
+                            saveWebSMS(context, su, si, sc);
+                        }
                     }
+                    break;
                 }
-            } else if (a.equals(ACTION_CM_SIP)) {
-                final String su = intent.getStringExtra(EXTRA_SIP_URI);
-                if (su != null && su.length() > 0) {
-                    final long si = Utils.parseLong(su.replaceAll(".*/", ""), -1);
-                    final String sc = intent.getStringExtra(EXTRA_SIP_PROVIDER);
-                    Log.d(TAG, "sip call id:  ", si);
-                    Log.d(TAG, "sip call con: ", sc);
-                    if (si >= 0L) {
-                        saveSipCall(context, su, si, sc);
+                case ACTION_CM_SIP: {
+                    final String su = intent.getStringExtra(EXTRA_SIP_URI);
+                    if (su != null && su.length() > 0) {
+                        final long si = Utils.parseLong(su.replaceAll(".*/", ""), -1);
+                        final String sc = intent.getStringExtra(EXTRA_SIP_PROVIDER);
+                        Log.d(TAG, "sip call id:  ", si);
+                        Log.d(TAG, "sip call con: ", sc);
+                        if (si >= 0L) {
+                            saveSipCall(context, su, si, sc);
+                        }
                     }
+                    break;
                 }
-            } else if (a.equals(TelephonyManager.ACTION_PHONE_STATE_CHANGED)) {
-                final String state = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
-                if (state != null && !state.equals(TelephonyManager.EXTRA_STATE_IDLE)) {
-                    return;
-                }
-                Log.d(TAG, "PHONE_STATE_CHANGE with state=", state);
+                case TelephonyManager.ACTION_PHONE_STATE_CHANGED:
+                    final String state = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
+                    if (state != null && !state.equals(TelephonyManager.EXTRA_STATE_IDLE)) {
+                        return;
+                    }
+                    Log.d(TAG, "PHONE_STATE_CHANGE with state=", state);
+                    break;
             }
         }
         // run LogRunnerService

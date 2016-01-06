@@ -38,7 +38,7 @@ import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.github.umeshkrpatel.LogMeter.utils.LogMeter;
+import com.github.umeshkrpatel.LogMeter.LogMeter;
 import com.github.umeshkrpatel.LogMeter.R;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
 import com.github.umeshkrpatel.LogMeter.data.RuleMatcher;
@@ -108,6 +108,8 @@ public final class NumberGroupEdit extends PreferenceActivity implements
         Cursor c = getContentResolver().query(
                 ContentUris.withAppendedId(DataProvider.NumbersGroup.CONTENT_URI, gid),
                 DataProvider.NumbersGroup.PROJECTION, null, null, null);
+        if (c == null)
+            return;
         if (c.moveToFirst()) {
             LogMeter.setActivitySubtitle(this, c.getString(DataProvider.NumbersGroup.INDEX_NAME));
         }
@@ -117,6 +119,9 @@ public final class NumberGroupEdit extends PreferenceActivity implements
         c = getContentResolver().query(
                 ContentUris.withAppendedId(DataProvider.Numbers.GROUP_URI, gid),
                 DataProvider.Numbers.PROJECTION, null, null, DataProvider.Numbers.NUMBER);
+        if (c == null)
+            return;
+
         if (c.moveToFirst()) {
             do {
                 Preference p = new Preference(this);
@@ -146,6 +151,9 @@ public final class NumberGroupEdit extends PreferenceActivity implements
         Cursor c = getContentResolver().query(
                 ContentUris.withAppendedId(DataProvider.Numbers.GROUP_URI, gid),
                 DataProvider.Numbers.PROJECTION, null, null, null);
+        if (c == null)
+            return;
+
         if (c.getCount() == 0) {
             Toast.makeText(this, R.string.empty_group, Toast.LENGTH_LONG).show();
         }
@@ -286,6 +294,9 @@ public final class NumberGroupEdit extends PreferenceActivity implements
         Cursor c = getContentResolver().query(u, DataProvider.NumbersGroup.PROJECTION, null,
                 null, null);
         String name = null;
+        if (c == null)
+            return;
+
         if (c.moveToFirst()) {
             name = c.getString(DataProvider.NumbersGroup.INDEX_NAME);
         }

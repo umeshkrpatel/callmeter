@@ -118,7 +118,7 @@ public final class CVBillModePreference extends ListPreference {
                     @Override
                     public void onClick(final DialogInterface dialog, final int which) {
                         String nv = et.getText().toString().trim();
-                        final String[] t = nv.toString().split("/");
+                        final String[] t = nv.split("/");
                         if (t.length != 2 || !TextUtils.isDigitsOnly(t[0])
                                 || !TextUtils.isDigitsOnly(t[1])) {
                             Toast.makeText(CVBillModePreference.this.ctx, R.string.missing_slash,

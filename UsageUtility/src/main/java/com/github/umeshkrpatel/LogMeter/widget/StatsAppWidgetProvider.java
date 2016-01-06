@@ -37,7 +37,7 @@ import android.view.View;
 import android.widget.RemoteViews;
 
 import com.github.umeshkrpatel.LogMeter.ui.UtilityActivity;
-import com.github.umeshkrpatel.LogMeter.utils.LogMeter;
+import com.github.umeshkrpatel.LogMeter.LogMeter;
 import com.github.umeshkrpatel.LogMeter.R;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider.Plans.Plan;

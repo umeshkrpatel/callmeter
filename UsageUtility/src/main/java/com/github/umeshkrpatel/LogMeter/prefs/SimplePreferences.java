@@ -58,85 +58,29 @@ public final class SimplePreferences extends PreferenceActivity implements
      */
     static final String PREFS_BILLMODE = "sp_billmode";
     /**
-     * Preference's name: bill mode.
-     */
-    static final String PREFS_BILLMODE_2 = "sp_billmode_2";
-    /**
-     * Preference's name: bill mode.
-     */
-    static final String PREFS_BILLMODE_VOIP = "sp_billmode_voip";
-    /**
      * Preference's name: custom bill mode.
      */
     static final String PREFS_CUSTOM_BILLMODE = "sp_custom_billmode";
-    /**
-     * Preference's name: custom bill mode.
-     */
-    static final String PREFS_CUSTOM_BILLMODE_2 = "sp_custom_billmode_2";
-    /**
-     * Preference's name: custom bill mode.
-     */
-    static final String PREFS_CUSTOM_BILLMODE_VOIP = "sp_custom_billmode_voip";
     /**
      * Preference's name: free minutes.
      */
     static final String PREFS_FREEMIN = "sp_freemin";
     /**
-     * Preference's name: free minutes.
-     */
-    static final String PREFS_FREEMIN_2 = "sp_freemin_2";
-    /**
-     * Preference's name: free minutes.
-     */
-    static final String PREFS_FREEMIN_VOIP = "sp_freemin_voip";
-    /**
      * Preference's name: free cost per call.
      */
     static final String PREFS_COST_PER_CALL = "sp_cost_per_call";
-    /**
-     * Preference's name: free cost per call.
-     */
-    static final String PREFS_COST_PER_CALL_2 = "sp_cost_per_call_2";
-    /**
-     * Preference's name: free cost per call.
-     */
-    static final String PREFS_COST_PER_CALL_VOIP = "sp_cost_per_call_voip";
     /**
      * Preference's name: free cost per min.
      */
     static final String PREFS_COST_PER_MIN = "sp_cost_per_min";
     /**
-     * Preference's name: free cost per min.
-     */
-    static final String PREFS_COST_PER_MIN_2 = "sp_cost_per_min_2";
-    /**
-     * Preference's name: free cost per min.
-     */
-    static final String PREFS_COST_PER_MIN_VOIP = "sp_cost_per_min_voip";
-    /**
      * Preference's name: free sms.
      */
     static final String PREFS_FREESMS = "sp_freesms";
     /**
-     * Preference's name: free sms.
-     */
-    static final String PREFS_FREESMS_2 = "sp_freesms_2";
-    /**
-     * Preference's name: free sms.
-     */
-    static final String PREFS_FREESMS_WEBSMS = "sp_freesms_websms";
-    /**
      * Preference's name: free cost per sms.
      */
     static final String PREFS_COST_PER_SMS = "sp_cost_per_sms";
-    /**
-     * Preference's name: free cost per sms.
-     */
-    static final String PREFS_COST_PER_SMS_2 = "sp_cost_per_sms_2";
-    /**
-     * Preference's name: free cost per sms.
-     */
-    static final String PREFS_COST_PER_SMS_WEBSMS = "sp_cost_per_sms_websms";
     /**
      * Preference's name: free mms.
      */
@@ -165,6 +109,9 @@ public final class SimplePreferences extends PreferenceActivity implements
                                       final String postfix) {
         Cursor c = cr.query(DataProvider.Plans.CONTENT_URI, DataProvider.Plans.PROJECTION,
                 SELECTION_ID, new String[]{String.valueOf(planId)}, null);
+        if (c == null)
+            return;
+
         if (c.moveToFirst()) {
             String billmode = c.getString(DataProvider.Plans.INDEX_BILLMODE);
             Log.d(TAG, "billmode: ", billmode);
@@ -188,6 +135,9 @@ public final class SimplePreferences extends PreferenceActivity implements
                                      final String postfix) {
         Cursor c = cr.query(DataProvider.Plans.CONTENT_URI, DataProvider.Plans.PROJECTION,
                 SELECTION_ID, new String[]{String.valueOf(planId)}, null);
+        if (c == null)
+            return;
+
         if (c.moveToFirst()) {
             int i = c.getInt(DataProvider.Plans.INDEX_LIMIT_TYPE);
             if (i == DataProvider.LIMIT_TYPE_UNITS) {
@@ -214,6 +164,9 @@ public final class SimplePreferences extends PreferenceActivity implements
                 .query(DataProvider.Plans.CONTENT_URI, DataProvider.Plans.PROJECTION,
                         SELECTION_TYPE,
                         new String[]{String.valueOf(DataProvider.TYPE_BILLPERIOD)}, null);
+        if (c == null)
+            return;
+
         if (c.moveToFirst()) {
             long billday = c.getLong(DataProvider.Plans.INDEX_BILLDAY);
             Log.d(TAG, "billday: ", billday);
@@ -236,6 +189,9 @@ public final class SimplePreferences extends PreferenceActivity implements
         // mms
         c = cr.query(DataProvider.Plans.CONTENT_URI, DataProvider.Plans.PROJECTION, SELECTION_ID,
                 new String[]{"28"}, null);
+        if (c == null)
+            return;
+
         if (c.moveToFirst()) {
             int i = c.getInt(DataProvider.Plans.INDEX_LIMIT_TYPE);
             if (i == DataProvider.LIMIT_TYPE_UNITS) {
@@ -250,6 +206,9 @@ public final class SimplePreferences extends PreferenceActivity implements
         // data
         c = cr.query(DataProvider.Plans.CONTENT_URI, DataProvider.Plans.PROJECTION, SELECTION_TYPE,
                 new String[]{String.valueOf(DataProvider.TYPE_DATA)}, null);
+        if (c == null)
+            return;
+
         if (c.moveToFirst()) {
             int i = c.getInt(DataProvider.Plans.INDEX_LIMIT_TYPE);
             if (i == DataProvider.LIMIT_TYPE_UNITS) {
@@ -260,7 +219,7 @@ public final class SimplePreferences extends PreferenceActivity implements
             e.putString(PREFS_COST_PER_MB, c.getString(DataProvider.Plans.INDEX_COST_PER_AMOUNT1));
         }
         c.close();
-        e.commit();
+        e.apply();
     }
 
     private static void savePrefsCall(final SharedPreferences p, final ContentResolver cr,
@@ -377,6 +336,7 @@ public final class SimplePreferences extends PreferenceActivity implements
                 new String[]{String.valueOf(DataProvider.TYPE_DATA)});
     }
 
+    @SuppressWarnings("deprecation")
     private void removePreferenceIfPlanMissing(final ContentResolver cr, final PreferenceGroup pg,
                                                final String key, final long planId) {
         Preference p = findPreference(key);
@@ -385,6 +345,9 @@ public final class SimplePreferences extends PreferenceActivity implements
         }
         Cursor c = cr.query(DataProvider.Plans.CONTENT_URI, new String[]{DataProvider.Plans.ID},
                 SELECTION_ID, new String[]{String.valueOf(planId)}, null);
+        if (c == null)
+            return;
+
         if (c.getCount() == 0) {
             pg.removePreference(p);
         }

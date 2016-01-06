@@ -43,7 +43,7 @@ import java.util.Calendar;
 import java.util.HashSet;
 
 import com.github.umeshkrpatel.LogMeter.ui.UtilityActivity;
-import com.github.umeshkrpatel.LogMeter.utils.LogMeter;
+import com.github.umeshkrpatel.LogMeter.LogMeter;
 import com.github.umeshkrpatel.LogMeter.R;
 
 import com.github.umeshkrpatel.LogMeter.prefs.Preferences;

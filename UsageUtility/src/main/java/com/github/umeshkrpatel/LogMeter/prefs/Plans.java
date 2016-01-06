@@ -84,6 +84,9 @@ public final class Plans extends PreferenceActivity
         ps.removeAll();
         Cursor c = getContentResolver().query(DataProvider.Plans.CONTENT_URI,
                 DataProvider.Plans.PROJECTION, null, null, null);
+        if (c == null)
+            return;
+
         if (c.moveToFirst()) {
             String[] types = getResources().getStringArray(R.array.plans_type);
             do {
@@ -149,6 +152,9 @@ public final class Plans extends PreferenceActivity
     private void move(final Uri u, final int diretion) {
         Cursor c0 = getContentResolver().query(u, DataProvider.Plans.PROJECTION_BASIC, null,
                 null, null);
+        if (c0 == null)
+            return;
+
         if (c0.moveToFirst()) {
             int idx = c0.getColumnIndex(DataProvider.Plans.ORDER);
             int o0;
@@ -171,6 +177,11 @@ public final class Plans extends PreferenceActivity
             String s0 = String.valueOf(o0);
             Cursor c1 = getContentResolver().query(DataProvider.Plans.CONTENT_URI,
                     DataProvider.Plans.PROJECTION_BASIC, w, new String[]{s0, s0}, o);
+            if (c1 == null) {
+                c0.close();
+                return;
+            }
+
             if (c1.moveToFirst()) {
                 ContentValues values = new ContentValues();
                 values.put(DataProvider.Plans.ORDER, o0);

@@ -23,7 +23,7 @@ import android.content.Context;
 import java.text.DateFormat;
 import java.util.Calendar;
 
-import com.github.umeshkrpatel.LogMeter.utils.LogMeter;
+import com.github.umeshkrpatel.LogMeter.LogMeter;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
 import com.github.umeshkrpatel.LogMeter.prefs.Preferences;
 

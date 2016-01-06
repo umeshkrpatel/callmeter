@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.provider.OpenableColumns;
+import android.support.annotation.NonNull;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -97,12 +98,12 @@ public class ExportProvider extends ContentProvider {
     }
 
     @Override
-    public int delete(final Uri uri, final String selection, final String[] selectionArgs) {
+    public int delete(@NonNull final Uri uri, final String selection, final String[] selectionArgs) {
         throw new IllegalStateException("Unsupported operation: delete(" + uri + ")");
     }
 
     @Override
-    public String getType(final Uri uri) {
+    public String getType(@NonNull final Uri uri) {
         switch (URI_MATCHER.match(uri)) {
             case EXPORT_RULESET:
             case EXPORT_LOGS:
@@ -115,7 +116,7 @@ public class ExportProvider extends ContentProvider {
     }
 
     @Override
-    public Uri insert(final Uri uri, final ContentValues values) {
+    public Uri insert(@NonNull final Uri uri, final ContentValues values) {
         throw new IllegalStateException("Unsupported operation: insert(" + uri + ")");
     }
 
@@ -125,7 +126,7 @@ public class ExportProvider extends ContentProvider {
     }
 
     @Override
-    public Cursor query(final Uri uri, final String[] projection, final String selection,
+    public Cursor query(@NonNull final Uri uri, final String[] projection, final String selection,
                         final String[] selectionArgs, final String sortOrder) {
         Log.d(TAG, "export uri: ", uri);
         String fn;
@@ -166,13 +167,13 @@ public class ExportProvider extends ContentProvider {
     }
 
     @Override
-    public int update(final Uri uri, final ContentValues values, final String selection,
+    public int update(@NonNull final Uri uri, final ContentValues values, final String selection,
                       final String[] selectionArgs) {
         throw new IllegalStateException("Unsupported operation: update(" + uri + ")");
     }
 
     @Override
-    public ParcelFileDescriptor openFile(final Uri uri, final String mode)
+    public ParcelFileDescriptor openFile(@NonNull final Uri uri, @NonNull final String mode)
             throws FileNotFoundException {
         Log.d(TAG, "openFile(", uri.toString(), ")");
         final File d = Environment.getExternalStorageDirectory();

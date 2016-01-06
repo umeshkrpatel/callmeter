@@ -41,10 +41,10 @@ import android.widget.RemoteViews;
 import java.util.Date;
 
 import com.github.umeshkrpatel.LogMeter.R;
+import com.github.umeshkrpatel.LogMeter.data.ContactFinder;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
 import com.github.umeshkrpatel.LogMeter.data.LogRunnerService;
-import com.github.umeshkrpatel.LogMeter.data.NameCache;
-import com.github.umeshkrpatel.LogMeter.data.NameLoader;
+import com.github.umeshkrpatel.LogMeter.data.ContactCache;
 import com.github.umeshkrpatel.LogMeter.ui.Common;
 import com.github.umeshkrpatel.LogMeter.ui.UtilityActivity;
 import com.github.umeshkrpatel.LogMeter.prefs.Preferences;
@@ -203,9 +203,9 @@ public final class LogsAppWidgetProvider extends AppWidgetProvider {
                 if (TextUtils.isEmpty(number)) {
                     buf1.append("???");
                 } else {
-                    String name = NameCache.getInstance().get(number);
+                    String name = ContactCache.getInstance().get(number);
                     if (name == null) {
-                        name = NameLoader.getName(context, number, null);
+                        name = ContactFinder.findContactForNumber(context, number, null);
                     }
                     if (name == null) {
                         buf1.append(number);

@@ -92,7 +92,7 @@ public class CVEditTextPreference extends EditTextPreference {
         if (TextUtils.isEmpty(text)) {
             super.setText(dv);
             if (!TextUtils.isEmpty(dv) && !"0".equals(dv) && ul != null) {
-                ul.onSetDefaultValue(this, getText().toString());
+                ul.onSetDefaultValue(this, getText());
             }
         } else {
             super.setText(text);

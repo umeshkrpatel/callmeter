@@ -58,7 +58,7 @@ import com.github.mikephil.charting.charts.PieChart;
 
 import java.util.UnknownFormatConversionException;
 
-import com.github.umeshkrpatel.LogMeter.utils.LogMeter;
+import com.github.umeshkrpatel.LogMeter.LogMeter;
 import com.github.umeshkrpatel.LogMeter.R;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
 import com.github.umeshkrpatel.LogMeter.prefs.PlanEdit;

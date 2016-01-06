@@ -44,18 +44,19 @@ import android.text.TextUtils;
 import android.util.SparseArray;
 import android.widget.Toast;
 
+import com.github.umeshkrpatel.LogMeter.BuildConfig;
+import com.github.umeshkrpatel.LogMeter.LogMeter;
+import com.github.umeshkrpatel.LogMeter.prefs.Preferences;
+import com.github.umeshkrpatel.LogMeter.ui.AskForPlan;
+import com.github.umeshkrpatel.LogMeter.ui.Common;
+import com.github.umeshkrpatel.LogMeter.ui.UtilityActivity;
+import com.github.umeshkrpatel.LogMeter.widget.LogsAppWidgetProvider;
+import com.github.umeshkrpatel.LogMeter.widget.StatsAppWidgetProvider;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import com.github.umeshkrpatel.LogMeter.BuildConfig;
-import com.github.umeshkrpatel.LogMeter.utils.LogMeter;
-import com.github.umeshkrpatel.LogMeter.ui.AskForPlan;
-import com.github.umeshkrpatel.LogMeter.ui.Common;
-import com.github.umeshkrpatel.LogMeter.ui.UtilityActivity;
-import com.github.umeshkrpatel.LogMeter.prefs.Preferences;
-import com.github.umeshkrpatel.LogMeter.widget.LogsAppWidgetProvider;
-import com.github.umeshkrpatel.LogMeter.widget.StatsAppWidgetProvider;
 import de.ub0r.android.lib.Utils;
 import de.ub0r.android.lib.apis.Contact;
 import de.ub0r.android.logg0r.Log;
@@ -103,7 +104,7 @@ public final class LogRunnerService extends IntentService {
     /**
      * {@link HashMap} mapping threads to numbers.
      */
-    private static final SparseArray<String> THREAD_TO_NUMBER = new SparseArray<String>();
+    private static final SparseArray<String> THREAD_TO_NUMBER = new SparseArray<>();
     /**
      * {@link Intent}'s action for receiving SMS.
      */
@@ -376,11 +377,12 @@ public final class LogRunnerService extends IntentService {
         if (!doUpdate) {
             long dateLastRx = getMaxDate(cr, DataProvider.TYPE_DATA, DataProvider.DIRECTION_IN);
             long dateLastTx = getMaxDate(cr, DataProvider.TYPE_DATA, DataProvider.DIRECTION_OUT);
-            final long updateinterval = Utils.parseLong(
-                    p.getString(Preferences.PREFS_UPDATE_INTERVAL,
-                            String.valueOf(LogRunnerReceiver.DELAY)), LogRunnerReceiver.DELAY
-            )
-                    * LogRunnerReceiver.DELAY_FACTOR;
+            final long updateinterval =
+                    Utils.parseLong(
+                        p.getString(Preferences.PREFS_UPDATE_INTERVAL,
+                                    String.valueOf(LogRunnerReceiver.DELAY)),
+                        LogRunnerReceiver.DELAY
+                    ) * LogRunnerReceiver.DELAY_FACTOR;
             final long n = System.currentTimeMillis();
             if (n - dateLastRx > updateinterval / 2) {
                 doUpdate = true;
@@ -480,7 +482,7 @@ public final class LogRunnerService extends IntentService {
                         dirty = true;
                     }
                     if (dirty) {
-                        e.commit();
+                        e.apply();
                     }
                 }
             }
@@ -566,8 +568,7 @@ public final class LogRunnerService extends IntentService {
      */
     public static boolean checkCallsSimIdColumn(final ContentResolver cr) {
         try {
-            String where = BuildConfig.DEBUG_LOG ? null : "1=2";
-            Cursor c = cr.query(Calls.CONTENT_URI, null, where, null, null);
+            Cursor c = cr.query(Calls.CONTENT_URI, null, null, null, null);
             boolean check = false;
             if (c != null) {
                 check = getSimIdColumn(c) >= 0;
@@ -586,8 +587,7 @@ public final class LogRunnerService extends IntentService {
      */
     public static boolean checkSmsSimIdColumn(final ContentResolver cr) {
         try {
-            String where = BuildConfig.DEBUG_LOG ? null : "1=2";
-            Cursor c = cr.query(URI_SMS, null, where, null, null);
+            Cursor c = cr.query(URI_SMS, null, null, null, null);
             boolean check = false;
             if (c != null) {
                 check = getSimIdColumn(c) >= 0;
@@ -637,11 +637,10 @@ public final class LogRunnerService extends IntentService {
             final int idNumber = cursor.getColumnIndex(Calls.NUMBER);
             final int idSimId = getSimIdColumn(cursor);
 
-            final ArrayList<ContentValues> cvalues = new ArrayList<ContentValues>(
-                    LogMeter.kHundredth);
+            final ArrayList<ContentValues> cvalues = new ArrayList<>(LogMeter.kHundredth);
             int i = 0;
             do {
-                if (BuildConfig.DEBUG_LOG && i < 30) {
+                if (i < 30) {
                     printColumn(cursor, i);
                     i += 1;
                 }
@@ -693,7 +692,7 @@ public final class LogRunnerService extends IntentService {
                 Log.d(TAG, "new calls: ", cvalues.size());
                 Editor e = p.edit();
                 setLastData(e, DataProvider.TYPE_CALL, 0, maxdate);
-                e.commit();
+                e.apply();
             }
         }
         cursor.close();
@@ -744,11 +743,10 @@ public final class LogRunnerService extends IntentService {
             final int idAddress = cursor.getColumnIndex("address");
             final int idBody = cursor.getColumnIndex("body");
             final int idSimId = getSimIdColumn(cursor);
-            final ArrayList<ContentValues> cvalues = new ArrayList<ContentValues>(
-                    LogMeter.kHundredth);
+            final ArrayList<ContentValues> cvalues = new ArrayList<>(LogMeter.kHundredth);
             int i = 0;
             do {
-                if (BuildConfig.DEBUG_LOG && i < 30) {
+                if (i < 30) {
                     printColumn(cursor, i);
                     i += 1;
                 }
@@ -850,8 +848,7 @@ public final class LogRunnerService extends IntentService {
             final int idThId = cursor.getColumnIndex(THRADID);
             final int idSimId = cursor.getColumnIndex("sim_id");
 
-            final ArrayList<ContentValues> cvalues = new ArrayList<ContentValues>(
-                    LogMeter.kHundredth);
+            final ArrayList<ContentValues> cvalues = new ArrayList<>(LogMeter.kHundredth);
             do {
                 final ContentValues cv = new ContentValues();
                 final int t = cursor.getInt(idType);

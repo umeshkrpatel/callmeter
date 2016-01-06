@@ -52,9 +52,9 @@ public class PreferencesRules extends PreferenceActivity {
             JSONObject json = new JSONObject(getIntent().getStringExtra(EXTRA_JSON));
             JSONArray ja = json.getJSONArray(k);
 
-            ArrayList<String> providers = new ArrayList<String>();
+            ArrayList<String> providers = new ArrayList<>();
             HashMap<String, ArrayList<JSONObject>> map
-                    = new HashMap<String, ArrayList<JSONObject>>();
+                    = new HashMap<>();
 
             int l = ja.length();
             for (int i = 0; i < l; i++) {
@@ -65,7 +65,7 @@ public class PreferencesRules extends PreferenceActivity {
                     ArrayList<JSONObject> list = map.get(provider);
                     if (list == null) {
                         providers.add(provider);
-                        list = new ArrayList<JSONObject>();
+                        list = new ArrayList<>();
                         map.put(provider, list);
                     }
                     list.add(jo);

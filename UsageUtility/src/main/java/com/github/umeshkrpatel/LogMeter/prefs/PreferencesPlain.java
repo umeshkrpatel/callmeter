@@ -181,7 +181,7 @@ public final class PreferencesPlain extends PreferenceActivity implements
                 base.removeAll();
                 base = (PreferenceGroup) PreferencesPlain.this.findPreference("import_rules_base");
                 // build list
-                ArrayList<String> keys = new ArrayList<String>(result.length());
+                ArrayList<String> keys = new ArrayList<>(result.length());
 
                 Iterator it = result.keys();
                 while (it.hasNext()) {
@@ -338,37 +338,38 @@ public final class PreferencesPlain extends PreferenceActivity implements
     @Override
     public boolean onPreferenceClick(final Preference preference) {
         final String k = preference.getKey();
-        if (k.equals("export_rules")) {
-            Preferences
-                    .exportData(this, null, null, null, ExportProvider.EXPORT_RULESET_FILE, null);
-            return true;
-        } else if (k.equals("export_rules_sd")) {
-            Preferences.exportData(this, null, null, null, ExportProvider.EXPORT_RULESET_FILE,
-                    "sdcard");
-            return true;
-        } else if (k.equals("export_rules_dev")) {
-            Preferences.exportData(this, null, null, null, ExportProvider.EXPORT_RULESET_FILE,
-                    "android@ub0r.de");
-            return true;
-        } else if (k.equals("export_logs")) {
-            Preferences.exportData(this, null, null, null, ExportProvider.EXPORT_LOGS_FILE, null);
-            return true;
-        } else if (k.equals("export_logs_csv")) {
-            Preferences.exportLogsCsv(this);
-            return true;
-        } else if (k.equals("export_numgroups")) {
-            Preferences.exportData(this, null, null, null, ExportProvider.EXPORT_NUMGROUPS_FILE,
-                    null);
-            return true;
-        } else if (k.equals("export_hourgroups")) {
-            Preferences.exportData(this, null, null, null, ExportProvider.EXPORT_HOURGROUPS_FILE,
-                    null);
-            return true;
-        } else if (k.equals("import_rules_default")) {
-            final Intent i = new Intent(this, Preferences.class);
-            i.setData(Uri.parse("content://default"));
-            startActivity(i);
-            return true;
+        switch (k) {
+            case "export_rules":
+                Preferences
+                        .exportData(this, null, null, null, ExportProvider.EXPORT_RULESET_FILE, null);
+                return true;
+            case "export_rules_sd":
+                Preferences.exportData(this, null, null, null, ExportProvider.EXPORT_RULESET_FILE,
+                        "sdcard");
+                return true;
+            case "export_rules_dev":
+                Preferences.exportData(this, null, null, null, ExportProvider.EXPORT_RULESET_FILE,
+                        "android@ub0r.de");
+                return true;
+            case "export_logs":
+                Preferences.exportData(this, null, null, null, ExportProvider.EXPORT_LOGS_FILE, null);
+                return true;
+            case "export_logs_csv":
+                Preferences.exportLogsCsv(this);
+                return true;
+            case "export_numgroups":
+                Preferences.exportData(this, null, null, null, ExportProvider.EXPORT_NUMGROUPS_FILE,
+                        null);
+                return true;
+            case "export_hourgroups":
+                Preferences.exportData(this, null, null, null, ExportProvider.EXPORT_HOURGROUPS_FILE,
+                        null);
+                return true;
+            case "import_rules_default":
+                final Intent i = new Intent(this, Preferences.class);
+                i.setData(Uri.parse("content://default"));
+                startActivity(i);
+                return true;
         }
         return false;
     }

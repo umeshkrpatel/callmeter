@@ -52,10 +52,10 @@ import android.widget.ToggleButton;
 import java.util.Date;
 
 import com.github.umeshkrpatel.LogMeter.R;
+import com.github.umeshkrpatel.LogMeter.data.ContactFinder;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
 import com.github.umeshkrpatel.LogMeter.data.LogRunnerService;
-import com.github.umeshkrpatel.LogMeter.data.NameCache;
-import com.github.umeshkrpatel.LogMeter.data.NameLoader;
+import com.github.umeshkrpatel.LogMeter.data.ContactCache;
 import com.github.umeshkrpatel.LogMeter.prefs.Preferences;
 import de.ub0r.android.lib.DbUtils;
 import de.ub0r.android.logg0r.Log;
@@ -478,7 +478,7 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
                 holder.tvName.setVisibility(View.VISIBLE);
                 holder.tvNumber.setVisibility(View.VISIBLE);
                 String format = "%s <" + s + ">";
-                String name = NameCache.getInstance().get(s, format);
+                String name = ContactCache.getInstance().get(context, s, format);
                 if (name != null) {
                     holder.tvName.setText(name);
                 }
@@ -554,9 +554,9 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
 
             ImageView ivType;
             /**
-             * Hold {@link NameLoader}.
+             * Hold {@link ContactFinder}.
              */
-            NameLoader loader;
+            ContactFinder loader;
         }
     }
 }

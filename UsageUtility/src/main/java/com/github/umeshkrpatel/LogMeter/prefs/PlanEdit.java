@@ -33,7 +33,7 @@ import android.text.InputType;
 
 import java.util.Calendar;
 
-import com.github.umeshkrpatel.LogMeter.utils.LogMeter;
+import com.github.umeshkrpatel.LogMeter.LogMeter;
 import com.github.umeshkrpatel.LogMeter.R;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
 import com.github.umeshkrpatel.LogMeter.data.RuleMatcher;
@@ -97,6 +97,9 @@ public final class PlanEdit extends PreferenceActivity implements UpdateListener
 
         Cursor c = getContentResolver().query(uri, DataProvider.Plans.PROJECTION, null,
                 null, null);
+        if (c == null)
+            return;
+
         if (c.moveToFirst()) {
             int t;
             if (c.isNull(DataProvider.Plans.INDEX_TYPE)) {

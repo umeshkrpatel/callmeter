@@ -22,7 +22,6 @@ package com.github.umeshkrpatel.LogMeter.prefs;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.ProgressDialog;
-import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -47,6 +46,16 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.github.umeshkrpatel.LogMeter.BuildConfig;
+import com.github.umeshkrpatel.LogMeter.LogMeter;
+import com.github.umeshkrpatel.LogMeter.R;
+import com.github.umeshkrpatel.LogMeter.data.DataProvider;
+import com.github.umeshkrpatel.LogMeter.data.DataProvider.XmlMetaData;
+import com.github.umeshkrpatel.LogMeter.data.ExportProvider;
+import com.github.umeshkrpatel.LogMeter.data.LogRunnerService;
+import com.github.umeshkrpatel.LogMeter.data.RuleMatcher;
+import com.github.umeshkrpatel.LogMeter.ui.Common;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
@@ -59,20 +68,8 @@ import java.net.URL;
 import java.util.Currency;
 import java.util.Locale;
 
-import com.github.umeshkrpatel.LogMeter.BuildConfig;
-import com.github.umeshkrpatel.LogMeter.utils.LogMeter;
-import com.github.umeshkrpatel.LogMeter.R;
-import com.github.umeshkrpatel.LogMeter.data.DataProvider;
-import com.github.umeshkrpatel.LogMeter.data.DataProvider.XmlMetaData;
-import com.github.umeshkrpatel.LogMeter.data.Device;
-import com.github.umeshkrpatel.LogMeter.data.ExportProvider;
-import com.github.umeshkrpatel.LogMeter.data.LogRunnerService;
-import com.github.umeshkrpatel.LogMeter.data.RuleMatcher;
-import com.github.umeshkrpatel.LogMeter.ui.Common;
-
 import de.ub0r.android.lib.Utils;
 import de.ub0r.android.logg0r.Log;
-import de.ub0r.android.logg0r.LogCollector;
 
 /**
  * Preferences.
@@ -194,8 +191,6 @@ public final class Preferences extends PreferenceActivity implements
      * Tag for output.
      */
     private static final String TAG = "Preferences";
-    private static final int PERMISSION_REQUEST_READ_EXTERNAL_STORAGE = 1;
-    private static final int PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE = 2;
     /**
      * Preference's name: theme.
      */
@@ -290,7 +285,7 @@ public final class Preferences extends PreferenceActivity implements
     public static int getTheme(final Context context) {
         final SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(context);
         final String s = p.getString(PREFS_THEME, THEME_LIGHT);
-        if (s != null && THEME_BLACK.equals(s)) {
+        if (THEME_BLACK.equals(s)) {
             return R.style.Theme_CallMeter;
         } else {
             return R.style.Theme_CallMeter_Light;
@@ -306,8 +301,7 @@ public final class Preferences extends PreferenceActivity implements
     public static int getTextsize(final Context context) {
         final SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(context);
         final String s = p.getString(PREFS_TEXTSIZE, null);
-        int size = Utils.parseInt(s, 0);
-        return size;
+        return Utils.parseInt(s, 0);
     }
 
     /**
@@ -319,8 +313,7 @@ public final class Preferences extends PreferenceActivity implements
     public static int getTextsizeBigTitle(final Context context) {
         final SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(context);
         final String s = p.getString(PREFS_TEXTSIZE_BIGTITLE, null);
-        int size = Utils.parseInt(s, 0);
-        return size;
+        return Utils.parseInt(s, 0);
     }
 
     /**
@@ -332,8 +325,7 @@ public final class Preferences extends PreferenceActivity implements
     public static int getTextsizeTitle(final Context context) {
         final SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(context);
         final String s = p.getString(PREFS_TEXTSIZE_TITLE, null);
-        int size = Utils.parseInt(s, 0);
-        return size;
+        return Utils.parseInt(s, 0);
     }
 
     /**
@@ -345,8 +337,7 @@ public final class Preferences extends PreferenceActivity implements
     public static int getTextsizeSpacer(final Context context) {
         final SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(context);
         final String s = p.getString(PREFS_TEXTSIZE_SPACER, null);
-        int size = Utils.parseInt(s, 0);
-        return size;
+        return Utils.parseInt(s, 0);
     }
 
     /**
@@ -358,8 +349,7 @@ public final class Preferences extends PreferenceActivity implements
     public static int getTextsizeProgressBar(final Context context) {
         final SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(context);
         final String s = p.getString(PREFS_TEXTSIZE_PBAR, null);
-        int size = Utils.parseInt(s, 0);
-        return size;
+        return Utils.parseInt(s, 0);
     }
 
     /**
@@ -371,8 +361,7 @@ public final class Preferences extends PreferenceActivity implements
     public static int getTextsizeProgressBarBP(final Context context) {
         final SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(context);
         final String s = p.getString(PREFS_TEXTSIZE_PBARBP, null);
-        int size = Utils.parseInt(s, 0);
-        return size;
+        return Utils.parseInt(s, 0);
     }
 
     /**
@@ -471,7 +460,7 @@ public final class Preferences extends PreferenceActivity implements
     public static void setDefaultPlan(final Context context, final boolean isDefault) {
         final Editor e = PreferenceManager.getDefaultSharedPreferences(context).edit();
         e.putBoolean(PREFS_ISDEFAULT, isDefault);
-        e.commit();
+        e.apply();
     }
 
     /**
@@ -542,14 +531,15 @@ public final class Preferences extends PreferenceActivity implements
             final AsyncTask<Void, Void, String> task = new AsyncTask<Void, Void, String>() {
                 @Override
                 protected String doInBackground(final Void... params) {
-                    if (fn.equals(ExportProvider.EXPORT_RULESET_FILE)) {
-                        return DataProvider.backupRuleSet(context, country, provider, descr);
-                    } else if (fn.equals(ExportProvider.EXPORT_LOGS_FILE)) {
-                        return DataProvider.backupLogs(context, descr);
-                    } else if (fn.equals(ExportProvider.EXPORT_NUMGROUPS_FILE)) {
-                        return DataProvider.backupNumGroups(context, descr);
-                    } else if (fn.equals(ExportProvider.EXPORT_HOURGROUPS_FILE)) {
-                        return DataProvider.backupHourGroups(context, descr);
+                    switch (fn) {
+                        case ExportProvider.EXPORT_RULESET_FILE:
+                            return DataProvider.backupRuleSet(context, country, provider, descr);
+                        case ExportProvider.EXPORT_LOGS_FILE:
+                            return DataProvider.backupLogs(context, descr);
+                        case ExportProvider.EXPORT_NUMGROUPS_FILE:
+                            return DataProvider.backupNumGroups(context, descr);
+                        case ExportProvider.EXPORT_HOURGROUPS_FILE:
+                            return DataProvider.backupHourGroups(context, descr);
                     }
                     return null;
                 }
@@ -562,18 +552,23 @@ public final class Preferences extends PreferenceActivity implements
                     if (result != null && result.length() > 0) {
                         Uri uri = null;
                         int resChooser = -1;
-                        if (fn.equals(ExportProvider.EXPORT_RULESET_FILE)) {
-                            uri = ExportProvider.EXPORT_RULESET_URI;
-                            resChooser = R.string.export_rules_;
-                        } else if (fn.equals(ExportProvider.EXPORT_LOGS_FILE)) {
-                            uri = ExportProvider.EXPORT_LOGS_URI;
-                            resChooser = R.string.export_logs_;
-                        } else if (fn.equals(ExportProvider.EXPORT_NUMGROUPS_FILE)) {
-                            uri = ExportProvider.EXPORT_NUMGROUPS_URI;
-                            resChooser = R.string.export_numgroups_;
-                        } else if (fn.equals(ExportProvider.EXPORT_HOURGROUPS_FILE)) {
-                            uri = ExportProvider.EXPORT_HOURGROUPS_URI;
-                            resChooser = R.string.export_hourgroups_;
+                        switch (fn) {
+                            case ExportProvider.EXPORT_RULESET_FILE:
+                                uri = ExportProvider.EXPORT_RULESET_URI;
+                                resChooser = R.string.export_rules_;
+                                break;
+                            case ExportProvider.EXPORT_LOGS_FILE:
+                                uri = ExportProvider.EXPORT_LOGS_URI;
+                                resChooser = R.string.export_logs_;
+                                break;
+                            case ExportProvider.EXPORT_NUMGROUPS_FILE:
+                                uri = ExportProvider.EXPORT_NUMGROUPS_URI;
+                                resChooser = R.string.export_numgroups_;
+                                break;
+                            case ExportProvider.EXPORT_HOURGROUPS_FILE:
+                                uri = ExportProvider.EXPORT_HOURGROUPS_URI;
+                                resChooser = R.string.export_hourgroups_;
+                                break;
                         }
                         Intent intent = null;
                         if (!"sdcard".equals(recipient)) {
@@ -724,7 +719,7 @@ public final class Preferences extends PreferenceActivity implements
         if (type < 0 || type == DataProvider.TYPE_CALL) {
             Editor e = PreferenceManager.getDefaultSharedPreferences(this).edit();
             LogRunnerService.setLastData(e, DataProvider.TYPE_CALL, 0, -1L);
-            e.commit();
+            e.apply();
         }
         if (type < 0) {
             getContentResolver().delete(DataProvider.Logs.CONTENT_URI, null, null);
@@ -891,6 +886,7 @@ public final class Preferences extends PreferenceActivity implements
                 try {
                     InputStream is = Preferences.this.getStream(
                             Preferences.this.getContentResolver(), uri);
+                    assert is != null;
                     if (is != IS_DEFAULT) {
                         final BufferedReader r = new BufferedReader(new InputStreamReader(is),
                                 BUFSIZE);
@@ -1026,35 +1022,6 @@ public final class Preferences extends PreferenceActivity implements
         final String k = preference.getKey();
         assert k != null;
         switch (k) {
-            case "more_apps":
-                try {
-                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(
-                            "https://play.google.com/store/apps/developer?id=Felix+Bechstein")));
-                } catch (ActivityNotFoundException e) {
-                    Log.e(TAG, "no play store", e);
-                    Toast.makeText(this, "play store not found", Toast.LENGTH_LONG).show();
-                }
-                return true;
-            case "send_logs":
-                LogCollector.collectAndSendLogs(this, "android@ub0r.de",
-                        getString(R.string.sendlog_install_),
-                        getString(R.string.sendlog_install),
-                        getString(R.string.sendlog_run_),
-                        getString(R.string.sendlog_run));
-                return true;
-            case "send_devices":
-                final Intent intent = new Intent(Intent.ACTION_SEND);
-                intent.setType("text/plain");
-                intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"android@ub0r.de", ""});
-                intent.putExtra(Intent.EXTRA_TEXT, Device.debugDeviceList(this));
-                intent.putExtra(Intent.EXTRA_SUBJECT, "Call Meter 3G: Device List");
-                try {
-                    startActivity(intent);
-                } catch (ActivityNotFoundException e) {
-                    Log.e(TAG, "no mail", e);
-                    Toast.makeText(this, "no mail app found", Toast.LENGTH_LONG).show();
-                }
-                return true;
             case "reset_data":
                 resetDataDialog();
                 return true;

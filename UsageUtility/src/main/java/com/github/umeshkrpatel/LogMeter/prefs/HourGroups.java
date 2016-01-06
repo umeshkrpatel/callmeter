@@ -62,6 +62,9 @@ public final class HourGroups extends PreferenceActivity implements
         ps.removeAll();
         Cursor c = getContentResolver().query(DataProvider.HoursGroup.CONTENT_URI,
                 DataProvider.HoursGroup.PROJECTION, null, null, null);
+        if (c == null)
+            return;
+
         if (c.moveToFirst()) {
             do {
                 Preference p = new Preference(this);
