@@ -25,8 +25,8 @@
         android:title="@string/import_rules_sd_">
         <intent
             android:action="android.intent.action.MAIN"
-            android:targetClass="de.ub0r.android.callmeter.ui.prefs.PreferencesImport"
-            android:targetPackage="de.ub0r.android.callmeter" />
+            android:targetClass="com.github.umeshkrpatel.LogMeter.ui.prefs.PreferencesImport"
+            android:targetPackage="com.github.umeshkrpatel.LogMeter" />
     </PreferenceScreen>
 
     <PreferenceCategory

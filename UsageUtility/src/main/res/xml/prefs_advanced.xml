@@ -27,8 +27,8 @@
         android:title="@string/plans">
         <intent
             android:action="android.intent.action.MAIN"
-            android:targetClass="de.ub0r.android.callmeter.ui.prefs.Plans"
-            android:targetPackage="de.ub0r.android.callmeter" />
+            android:targetClass="com.github.umeshkrpatel.LogMeter.ui.prefs.Plans"
+            android:targetPackage="com.github.umeshkrpatel.LogMeter" />
     </PreferenceScreen>
     <PreferenceScreen
         android:dependency="advanced_preferences"
@@ -36,23 +36,23 @@
         android:title="@string/rules">
         <intent
             android:action="android.intent.action.MAIN"
-            android:targetClass="de.ub0r.android.callmeter.ui.prefs.Rules"
-            android:targetPackage="de.ub0r.android.callmeter" />
+            android:targetClass="com.github.umeshkrpatel.LogMeter.ui.prefs.Rules"
+            android:targetPackage="com.github.umeshkrpatel.LogMeter" />
     </PreferenceScreen>
     <PreferenceScreen
         android:summary="@string/numbergroups_edit_hint"
         android:title="@string/numbergroups_edit_">
         <intent
             android:action="android.intent.action.MAIN"
-            android:targetClass="de.ub0r.android.callmeter.ui.prefs.NumberGroups"
-            android:targetPackage="de.ub0r.android.callmeter" />
+            android:targetClass="com.github.umeshkrpatel.LogMeter.ui.prefs.NumberGroups"
+            android:targetPackage="com.github.umeshkrpatel.LogMeter" />
     </PreferenceScreen>
     <PreferenceScreen
         android:summary="@string/hourgroups_edit_hint"
         android:title="@string/hourgroups_edit_">
         <intent
             android:action="android.intent.action.MAIN"
-            android:targetClass="de.ub0r.android.callmeter.ui.prefs.HourGroups"
-            android:targetPackage="de.ub0r.android.callmeter" />
+            android:targetClass="com.github.umeshkrpatel.LogMeter.ui.prefs.HourGroups"
+            android:targetPackage="com.github.umeshkrpatel.LogMeter" />
     </PreferenceScreen>
 </PreferenceScreen>

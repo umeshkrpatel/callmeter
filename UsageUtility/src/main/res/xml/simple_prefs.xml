@@ -27,8 +27,8 @@
     <PreferenceScreen android:title="@string/calls">
         <intent
             android:action="CALLS"
-            android:targetClass="de.ub0r.android.callmeter.ui.prefs.SimplePreferencesChild"
-            android:targetPackage="de.ub0r.android.callmeter" />
+            android:targetClass="com.github.umeshkrpatel.LogMeter.ui.prefs.SimplePreferencesChild"
+            android:targetPackage="com.github.umeshkrpatel.LogMeter" />
     </PreferenceScreen>
     <PreferenceScreen
         android:key="calls_2"
@@ -36,8 +36,8 @@
         android:title="@string/calls">
         <intent
             android:action="CALLS_2"
-            android:targetClass="de.ub0r.android.callmeter.ui.prefs.SimplePreferencesChild"
-            android:targetPackage="de.ub0r.android.callmeter" />
+            android:targetClass="com.github.umeshkrpatel.LogMeter.ui.prefs.SimplePreferencesChild"
+            android:targetPackage="com.github.umeshkrpatel.LogMeter" />
     </PreferenceScreen>
     <PreferenceScreen
         android:key="calls_voip"
@@ -45,14 +45,14 @@
         android:title="@string/calls">
         <intent
             android:action="CALLS_VOIP"
-            android:targetClass="de.ub0r.android.callmeter.ui.prefs.SimplePreferencesChild"
-            android:targetPackage="de.ub0r.android.callmeter" />
+            android:targetClass="com.github.umeshkrpatel.LogMeter.ui.prefs.SimplePreferencesChild"
+            android:targetPackage="com.github.umeshkrpatel.LogMeter" />
     </PreferenceScreen>
     <PreferenceScreen android:title="@string/sms">
         <intent
             android:action="SMS"
-            android:targetClass="de.ub0r.android.callmeter.ui.prefs.SimplePreferencesChild"
-            android:targetPackage="de.ub0r.android.callmeter" />
+            android:targetClass="com.github.umeshkrpatel.LogMeter.ui.prefs.SimplePreferencesChild"
+            android:targetPackage="com.github.umeshkrpatel.LogMeter" />
     </PreferenceScreen>
     <PreferenceScreen
         android:key="sms_2"
@@ -60,8 +60,8 @@
         android:title="@string/sms">
         <intent
             android:action="SMS_2"
-            android:targetClass="de.ub0r.android.callmeter.ui.prefs.SimplePreferencesChild"
-            android:targetPackage="de.ub0r.android.callmeter" />
+            android:targetClass="com.github.umeshkrpatel.LogMeter.ui.prefs.SimplePreferencesChild"
+            android:targetPackage="com.github.umeshkrpatel.LogMeter" />
     </PreferenceScreen>
     <PreferenceScreen
         android:key="sms_websms"
@@ -69,20 +69,20 @@
         android:title="@string/sms">
         <intent
             android:action="SMS_WEBSMS"
-            android:targetClass="de.ub0r.android.callmeter.ui.prefs.SimplePreferencesChild"
-            android:targetPackage="de.ub0r.android.callmeter" />
+            android:targetClass="com.github.umeshkrpatel.LogMeter.ui.prefs.SimplePreferencesChild"
+            android:targetPackage="com.github.umeshkrpatel.LogMeter" />
     </PreferenceScreen>
     <PreferenceScreen android:title="@string/mms">
         <intent
             android:action="MMS"
-            android:targetClass="de.ub0r.android.callmeter.ui.prefs.SimplePreferencesChild"
-            android:targetPackage="de.ub0r.android.callmeter" />
+            android:targetClass="com.github.umeshkrpatel.LogMeter.ui.prefs.SimplePreferencesChild"
+            android:targetPackage="com.github.umeshkrpatel.LogMeter" />
     </PreferenceScreen>
     <PreferenceScreen android:title="@string/data">
         <intent
             android:action="DATA"
-            android:targetClass="de.ub0r.android.callmeter.ui.prefs.SimplePreferencesChild"
-            android:targetPackage="de.ub0r.android.callmeter" />
+            android:targetClass="com.github.umeshkrpatel.LogMeter.ui.prefs.SimplePreferencesChild"
+            android:targetPackage="com.github.umeshkrpatel.LogMeter" />
     </PreferenceScreen>
 
 </PreferenceScreen>

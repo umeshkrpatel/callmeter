@@ -13,7 +13,7 @@
 		not, see <http://www.gnu.org/licenses/>.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="de.ub0r.android.callmeter"
+    package="com.github.umeshkrpatel.LogMeter"
     android:installLocation="internalOnly">
 
     <uses-feature
@@ -47,13 +47,13 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
-        android:name="com.github.umeshkrpatel.utils.CallMeter"
+        android:name="com.github.umeshkrpatel.LogMeter.utils.LogMeter"
         android:allowBackup="true"
         android:hardwareAccelerated="true"
         android:icon="@drawable/icon"
         android:label="@string/app_name">
         <activity
-            android:name="com.github.umeshkrpatel.ui.UtilityActivity"
+            android:name="com.github.umeshkrpatel.LogMeter.ui.UtilityActivity"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/app_name"
             android:theme="@style/Theme.CallMeter_Light"
@@ -65,16 +65,16 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.github.umeshkrpatel.ui.AddLogActivity"
+            android:name="com.github.umeshkrpatel.LogMeter.ui.AddLogActivity"
             android:theme="@style/Theme.CallMeter_Light"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name="com.github.umeshkrpatel.ui.AskForPlan"
+            android:name="com.github.umeshkrpatel.LogMeter.ui.AskForPlan"
             android:configChanges="orientation|keyboardHidden"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name="com.github.umeshkrpatel.prefs.Preferences"
+            android:name="com.github.umeshkrpatel.LogMeter.prefs.Preferences"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/import_rules_"
             android:launchMode="singleTask"
@@ -115,101 +115,101 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.github.umeshkrpatel.prefs.PreferencesPlain"
+            android:name="com.github.umeshkrpatel.LogMeter.prefs.PreferencesPlain"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/settings"
             android:theme="@style/Theme.Default"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name="com.github.umeshkrpatel.prefs.PreferencesRules"
+            android:name="com.github.umeshkrpatel.LogMeter.prefs.PreferencesRules"
             android:label="@string/settings"
             android:theme="@style/Theme.Default" />
         <activity
-            android:name="com.github.umeshkrpatel.prefs.SimplePreferences"
+            android:name="com.github.umeshkrpatel.LogMeter.prefs.SimplePreferences"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/simple_preferences_"
             android:launchMode="singleTask"
             android:theme="@style/Theme.Default"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name="com.github.umeshkrpatel.prefs.SimplePreferencesChild"
+            android:name="com.github.umeshkrpatel.LogMeter.prefs.SimplePreferencesChild"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/simple_preferences_"
             android:theme="@style/Theme.Default"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name="com.github.umeshkrpatel.prefs.PreferencesImport"
+            android:name="com.github.umeshkrpatel.LogMeter.prefs.PreferencesImport"
             android:label="@string/import_rules_"
             android:theme="@style/Theme.Default"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name="com.github.umeshkrpatel.prefs.Plans"
+            android:name="com.github.umeshkrpatel.LogMeter.prefs.Plans"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/plans"
             android:launchMode="singleTop"
             android:theme="@style/Theme.Default"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name="com.github.umeshkrpatel.prefs.PlanEdit"
+            android:name="com.github.umeshkrpatel.LogMeter.prefs.PlanEdit"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/plans"
             android:launchMode="singleTop"
             android:theme="@style/Theme.Default"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name="com.github.umeshkrpatel.prefs.Rules"
+            android:name="com.github.umeshkrpatel.LogMeter.prefs.Rules"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/rules"
             android:launchMode="singleTop"
             android:theme="@style/Theme.Default"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name="com.github.umeshkrpatel.prefs.RuleEdit"
+            android:name="com.github.umeshkrpatel.LogMeter.prefs.RuleEdit"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/rules"
             android:theme="@style/Theme.Default"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name="com.github.umeshkrpatel.prefs.NumberGroups"
+            android:name="com.github.umeshkrpatel.LogMeter.prefs.NumberGroups"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/numbergroups_edit_"
             android:launchMode="singleTop"
             android:theme="@style/Theme.Default"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name="com.github.umeshkrpatel.prefs.NumberGroupEdit"
+            android:name="com.github.umeshkrpatel.LogMeter.prefs.NumberGroupEdit"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/numbers"
             android:theme="@style/Theme.Default"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name="com.github.umeshkrpatel.prefs.HourGroups"
+            android:name="com.github.umeshkrpatel.LogMeter.prefs.HourGroups"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/hourgroups_edit_"
             android:launchMode="singleTop"
             android:theme="@style/Theme.Default"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name="com.github.umeshkrpatel.prefs.HourGroupEdit"
+            android:name="com.github.umeshkrpatel.LogMeter.prefs.HourGroupEdit"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/hours"
             android:theme="@style/Theme.Default"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name="com.github.umeshkrpatel.ui.AboutActivity"
+            android:name="com.github.umeshkrpatel.LogMeter.ui.AboutActivity"
             android:theme="@style/Theme.CallMeter"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name="com.github.umeshkrpatel.ui.HelpActivity"
+            android:name="com.github.umeshkrpatel.LogMeter.ui.HelpActivity"
             android:label="@string/help_"
             android:theme="@style/Theme.CallMeter"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name="com.github.umeshkrpatel.ui.IntroActivity"
+            android:name="com.github.umeshkrpatel.LogMeter.ui.IntroActivity"
             android:theme="@style/Theme.CallMeter_Light"
             android:windowSoftInputMode="adjustResize" />
 
-        <receiver android:name="com.github.umeshkrpatel.data.LogRunnerReceiver">
+        <receiver android:name="com.github.umeshkrpatel.LogMeter.data.LogRunnerReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.ACTION_SHUTDOWN" />
@@ -223,24 +223,24 @@
                 <category android:name="android.intent.category.HOME" />
             </intent-filter>
             <intent-filter>
-                <action android:name="de.ub0r.android.callmeter.SAVE_WEBSMS" />
-                <action android:name="de.ub0r.android.callmeter.SAVE_SIPCALL" />
+                <action android:name="com.github.umeshkrpatel.LogMeter.SAVE_WEBSMS" />
+                <action android:name="com.github.umeshkrpatel.LogMeter.SAVE_SIPCALL" />
             </intent-filter>
         </receiver>
 
-        <service android:name="com.github.umeshkrpatel.data.LogRunnerService" />
+        <service android:name="com.github.umeshkrpatel.LogMeter.data.LogRunnerService" />
 
         <provider
-            android:name="com.github.umeshkrpatel.data.DataProvider"
-            android:authorities="com.github.umeshkrpatel.data"
+            android:name="com.github.umeshkrpatel.LogMeter.data.DataProvider"
+            android:authorities="com.github.umeshkrpatel.LogMeter.data"
             android:exported="false" />
         <provider
-            android:name="com.github.umeshkrpatel.data.ExportProvider"
-            android:authorities="de.ub0r.android.callmeter.export"
+            android:name="com.github.umeshkrpatel.LogMeter.data.ExportProvider"
+            android:authorities="com.github.umeshkrpatel.LogMeter.export"
             android:exported="true" />
 
         <receiver
-            android:name="com.github.umeshkrpatel.widget.StatsAppWidgetProvider"
+            android:name="com.github.umeshkrpatel.LogMeter.widget.StatsAppWidgetProvider"
             android:label="@string/widget_stats_title">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -251,7 +251,7 @@
                 android:resource="@xml/stats_appwidget_info" />
         </receiver>
         <receiver
-            android:name="com.github.umeshkrpatel.widget.LogsAppWidgetProvider"
+            android:name="com.github.umeshkrpatel.LogMeter.widget.LogsAppWidgetProvider"
             android:label="@string/widget_logs_title">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -263,7 +263,7 @@
         </receiver>
 
         <activity
-            android:name="com.github.umeshkrpatel.widget.StatsAppWidgetConfigure"
+            android:name="com.github.umeshkrpatel.LogMeter.widget.StatsAppWidgetConfigure"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/widget_config_"
             android:launchMode="singleTop"
@@ -274,7 +274,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.github.umeshkrpatel.widget.LogsAppWidgetConfigure"
+            android:name="com.github.umeshkrpatel.LogMeter.widget.LogsAppWidgetConfigure"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/widget_config_"
             android:launchMode="singleTop"
@@ -292,7 +292,7 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
-        <activity android:name="com.github.umeshkrpatel.ui.SummaryFragment" />
+        <activity android:name="com.github.umeshkrpatel.LogMeter.ui.SummaryFragment" />
     </application>
 
 </manifest>

@@ -11,7 +11,7 @@
 					  total 256
     -->
 
-    <com.github.umeshkrpatel.utils.AmbilWarnaKotak
+    <com.github.umeshkrpatel.LogMeter.utils.AmbilWarnaKotak
         android:id="@+id/ambilwarna_viewKotak"
         android:layout_width="240dp"
         android:layout_height="240dp"
