@@ -1,21 +1,3 @@
-/*
- * Copyright (C) 2009-2013 Felix Bechstein
- * 
- * This file is part of Call Meter 3G.
- * 
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation; either version 3 of the License, or (at your option) any later
- * version.
- * 
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
- * 
- * You should have received a copy of the GNU General Public License along with
- * this program; If not, see <http://www.gnu.org/licenses/>.
- */
 package com.github.umeshkrpatel.LogMeter.ui;
 
 import android.Manifest;
@@ -40,25 +22,21 @@ import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.Window;
-
-import com.google.android.gms.ads.AdListener;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
-import com.viewpagerindicator.TitlePageIndicator;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
 
 import com.github.umeshkrpatel.LogMeter.LogMeter;
 import com.github.umeshkrpatel.LogMeter.R;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
 import com.github.umeshkrpatel.LogMeter.data.LogRunnerReceiver;
 import com.github.umeshkrpatel.LogMeter.data.LogRunnerService;
-import com.github.umeshkrpatel.LogMeter.prefs.Preferences;
-import de.ub0r.android.lib.DonationHelper;
+import com.github.umeshkrpatel.LogMeter.ui.prefs.Preferences;
+import com.viewpagerindicator.TitlePageIndicator;
+
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+
 import de.ub0r.android.lib.Utils;
 import de.ub0r.android.logg0r.Log;
 
@@ -67,7 +45,11 @@ import de.ub0r.android.logg0r.Log;
  *
  * @author flx
  */
-public final class UtilityActivity extends AppCompatActivity implements OnPageChangeListener {
+public final class UtilityActivity
+        extends AppCompatActivity
+        implements OnPageChangeListener,
+            DetailFragment.OnFragmentInteractionListener,
+            LogsFragment.OnFragmentInteractionListener {
 
     /**
      * {@link Message} for {@link Handler}: start background: LogMatcher.
@@ -103,10 +85,6 @@ public final class UtilityActivity extends AppCompatActivity implements OnPageCh
     private static final long DELAY_LOGRUNNER = 1500;
 
     /**
-     * Display ads?
-     */
-    private static boolean prefsNoAds;
-    /**
      * {@link Handler} for outside.
      */
     private static Handler currentHandler = null;
@@ -118,15 +96,25 @@ public final class UtilityActivity extends AppCompatActivity implements OnPageCh
      * {@link PlansFragmentAdapter}.
      */
     private PlansFragmentAdapter fadapter;
-    private AdView mAdView;
     /**
      * Number of background tasks.
      */
     private int progressCount = 0;
+
+    @Override
+    public String onDetailFragmentInteraction() {
+        return "";
+    }
+
+    @Override
+    public void onLogFragmentInteraction(String number) {
+        showDetailFragment(number);
+    }
+
     /**
      * {@link Handler} for handling messages from background process.
      */
-    private final Handler handler = new Handler() {
+    private static class MessageHandler extends Handler {
         /** LogRunner running in background? */
         private boolean inProgressRunner = false;
 
@@ -139,43 +127,52 @@ public final class UtilityActivity extends AppCompatActivity implements OnPageCh
         /** String for recalculate message. */
         private String recalc = null;
 
+        private WeakReference<UtilityActivity> mActivity;
+        MessageHandler(UtilityActivity activity) {
+            mActivity = new WeakReference<>(activity);
+        }
         @Override
         public synchronized void handleMessage(final Message msg) {
             Log.d(TAG, "handleMessage(", msg.what, ")");
+
+            UtilityActivity activity = mActivity.get();
+            if (activity == null || activity.getSupportActionBar() == null)
+                return;
+
             switch (msg.what) {
                 case MSG_BACKGROUND_START_RUNNER:
                     inProgressRunner = true;
                 case MSG_BACKGROUND_START_MATCHER:
                     statusMatcherProgress = false;
-                    UtilityActivity.this.setInProgress(1);
+                    activity.setInProgress(1);
                     break;
                 case MSG_BACKGROUND_STOP_RUNNER:
                     inProgressRunner = false;
-                    UtilityActivity.this.setInProgress(-1);
-                    UtilityActivity.this.getSupportActionBar().setSubtitle(null);
+                    activity.setInProgress(-1);
+                    activity.getSupportActionBar().setSubtitle(null);
                     break;
                 case MSG_BACKGROUND_STOP_MATCHER:
-                    UtilityActivity.this.setInProgress(-1);
-                    UtilityActivity.this.getSupportActionBar().setSubtitle(null);
-                    Fragment f = UtilityActivity.this.fadapter.getActiveFragment(UtilityActivity.this.pager,
-                            UtilityActivity.this.fadapter.getHomeFragmentPos());
+                    activity.setInProgress(-1);
+                    activity.getSupportActionBar().setSubtitle(null);
+                    Fragment f = activity.fadapter.getActiveFragment(activity.pager,
+                            activity.fadapter.getHomeFragmentPos());
                     if (f != null && f instanceof PlansFragment) {
                         ((PlansFragment) f).reQuery(true);
                     }
                     break;
                 case MSG_BACKGROUND_PROGRESS_MATCHER:
-                    if (UtilityActivity.this.progressCount == 0) {
-                        UtilityActivity.this.setProgress(1);
+                    if (activity.progressCount == 0) {
+                        activity.setProgress(1);
                     }
                     if (statusMatcher == null
                             || (!this.statusMatcherProgress || statusMatcher.isShowing())) {
                         Log.d(TAG, "matcher progress: ", msg.arg1);
                         if (statusMatcher == null || !this.statusMatcherProgress) {
                             final ProgressDialog dold = statusMatcher;
-                            statusMatcher = new ProgressDialog(UtilityActivity.this);
+                            statusMatcher = new ProgressDialog(activity);
                             statusMatcher.setCancelable(true);
                             if (recalc == null) {
-                                recalc = UtilityActivity.this.getString(R.string.reset_data_progr2);
+                                recalc = activity.getString(R.string.reset_data_progr2);
                             }
                             statusMatcher.setMessage(recalc);
                             statusMatcher.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
@@ -195,9 +192,9 @@ public final class UtilityActivity extends AppCompatActivity implements OnPageCh
                         statusMatcher.setProgress(msg.arg1);
                     }
                     if (recalc == null) {
-                        recalc = UtilityActivity.this.getString(R.string.reset_data_progr2);
+                        recalc = activity.getString(R.string.reset_data_progr2);
                     }
-                    UtilityActivity.this.getSupportActionBar().setSubtitle(
+                    activity.getSupportActionBar().setSubtitle(
                             recalc + " " + msg.arg1 + "/" + msg.arg2);
                     break;
                 default:
@@ -207,9 +204,9 @@ public final class UtilityActivity extends AppCompatActivity implements OnPageCh
             if (inProgressRunner) {
                 if (statusMatcher == null
                         || (msg.arg1 <= 0 && !this.statusMatcher.isShowing())) {
-                    statusMatcher = new ProgressDialog(UtilityActivity.this);
+                    statusMatcher = new ProgressDialog(activity);
                     statusMatcher.setCancelable(true);
-                    statusMatcher.setMessage(UtilityActivity.this.getString(R.string.reset_data_progr1));
+                    statusMatcher.setMessage(activity.getString(R.string.reset_data_progr1));
                     statusMatcher.setIndeterminate(true);
                     statusMatcherProgress = false;
                     try {
@@ -229,7 +226,7 @@ public final class UtilityActivity extends AppCompatActivity implements OnPageCh
                 }
             }
         }
-    };
+    }
 
     /**
      * Get the current {@link Handler}.
@@ -242,7 +239,6 @@ public final class UtilityActivity extends AppCompatActivity implements OnPageCh
 
     @Override
     public void onDestroy() {
-        mAdView.destroy();
         super.onDestroy();
     }
 
@@ -253,13 +249,12 @@ public final class UtilityActivity extends AppCompatActivity implements OnPageCh
         Utils.setLocale(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.plans);
+		assert getSupportActionBar()!=null;
         getSupportActionBar().setHomeButtonEnabled(true);
 
         SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(this);
         //noinspection ConstantConditions
         if (p.getAll().isEmpty()) {
-            // show intro
-            startActivity(new Intent(this, IntroActivity.class));
             // set date of recordings to beginning of last month
             Calendar c = Calendar.getInstance();
             c.set(Calendar.DAY_OF_MONTH, 0);
@@ -269,23 +264,6 @@ public final class UtilityActivity extends AppCompatActivity implements OnPageCh
         }
 
         pager = (ViewPager) findViewById(R.id.pager);
-
-        prefsNoAds = DonationHelper.hideAds(this);
-        mAdView = (AdView) findViewById(R.id.ads);
-        mAdView.setVisibility(View.GONE);
-        if (!prefsNoAds) {
-            mAdView.loadAd(new AdRequest.Builder().build());
-            mAdView.setAdListener(new AdListener() {
-                @Override
-                public void onAdLoaded() {
-                    mAdView.setVisibility(View.VISIBLE);
-                    super.onAdLoaded();
-                }
-            });
-        } else {
-            findViewById(R.id.cookieconsent).setVisibility(View.GONE);
-        }
-
         initAdapter();
     }
 
@@ -332,11 +310,13 @@ public final class UtilityActivity extends AppCompatActivity implements OnPageCh
     protected void onResume() {
         super.onResume();
         Utils.setLocale(this);
-        currentHandler = handler;
+        if (currentHandler==null) {
+            currentHandler = new MessageHandler(this);
+        }
         setInProgress(0);
         PlansFragment.reloadPreferences(this);
         runLogRunner();
-        mAdView.resume();
+        //mAdView.resume();
     }
 
     private void runLogRunner() {
@@ -359,7 +339,7 @@ public final class UtilityActivity extends AppCompatActivity implements OnPageCh
     @Override
     protected void onPause() {
         currentHandler = null;
-        mAdView.pause();
+        //mAdView.pause();
         super.onPause();
     }
 
@@ -381,7 +361,6 @@ public final class UtilityActivity extends AppCompatActivity implements OnPageCh
                     Log.e(TAG, "permission denied: " + requestCode + " , exit");
                     finish();
                 }
-                return;
         }
     }
 
@@ -406,17 +385,6 @@ public final class UtilityActivity extends AppCompatActivity implements OnPageCh
             case R.id.item_settings:
                 startActivity(new Intent(this, Preferences.class));
                 return true;
-            /* case R.id.item_donate:
-                try {
-                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(
-                            "https://play.google.com/store/apps/details?id=de.ub0r.android.donator")));
-                } catch (ActivityNotFoundException e) {
-                    Log.e(TAG, "error opening play store with donation app", e);
-                    Toast.makeText(this, R.string.common_google_play_services_unknown_issue,
-                            Toast.LENGTH_LONG).show();
-                }
-                return true;
-             */
             case R.id.item_logs:
                 showLogsFragment(-1L);
                 return true;
@@ -446,6 +414,15 @@ public final class UtilityActivity extends AppCompatActivity implements OnPageCh
         Fragment f = fadapter.getActiveFragment(pager, p);
         if (f != null && f instanceof LogsFragment) {
             ((LogsFragment) f).setPlanId(planId);
+        }
+        pager.setCurrentItem(p, true);
+    }
+
+    public void showDetailFragment(final String number) {
+        int p = fadapter.getDetailFragmentPos();
+        Fragment f = fadapter.getActiveFragment(pager, p);
+        if (f != null && f instanceof DetailFragment) {
+            ((DetailFragment) f).updateDetailFragment(number);
         }
         pager.setCurrentItem(p, true);
     }
@@ -507,13 +484,6 @@ public final class UtilityActivity extends AppCompatActivity implements OnPageCh
             Log.w(TAG, "this.progressCount: " + progressCount);
             progressCount = 0;
         }
-
-        Log.d(TAG, "progressCount: ", progressCount);
-        if (progressCount == 0) {
-            setSupportProgressBarIndeterminateVisibility(false);
-        } else {
-            setSupportProgressBarIndeterminateVisibility(true);
-        }
     }
 
     /**
@@ -563,7 +533,7 @@ public final class UtilityActivity extends AppCompatActivity implements OnPageCh
                     new String[]{DataProvider.Logs.DATE}, null, null, DataProvider.Logs.DATE
                             + " ASC LIMIT 1");
             if (c == null || !c.moveToFirst()) {
-                positions = new Long[]{-1L, -1L, -1L};
+                positions = new Long[]{-1L, -1L, -1L, -1L};
                 billDays = positions;
                 if (c != null && !c.isClosed()) {
                     c.close();
@@ -579,7 +549,7 @@ public final class UtilityActivity extends AppCompatActivity implements OnPageCh
                                 String.valueOf(DataProvider.BILLPERIOD_INFINITE)},
                         DataProvider.Plans.ORDER + " LIMIT 1");
                 if (minDate < 0L || c == null || !c.moveToFirst()) {
-                    positions = new Long[]{-1L, -1L, -1L};
+                    positions = new Long[]{-1L, -1L, -1L, -1L};
                     billDays = positions;
                     if (c != null) {
                         c.close();
@@ -600,6 +570,7 @@ public final class UtilityActivity extends AppCompatActivity implements OnPageCh
                     list.add(-1L); // now
                     list.add(-1L); // summary
                     list.add(-1L); // logs
+                    list.add(-1L); // detail
                     positions = list.toArray(new Long[list.size()]);
                     int l = positions.length;
                     Arrays.sort(positions, 0, l - 2);
@@ -615,9 +586,10 @@ public final class UtilityActivity extends AppCompatActivity implements OnPageCh
             Common.setDateFormat(context);
             final int l = positions.length;
             titles = new String[l];
-            titles[l - 3] = context.getString(R.string.now);
-            titles[l - 2] = context.getString(R.string.summary);
-            titles[l - 1] = context.getString(R.string.logs);
+            titles[l - 4] = context.getString(R.string.now);
+            titles[l - 3] = context.getString(R.string.summary);
+            titles[l - 2] = context.getString(R.string.logs);
+            titles[l - 1] = context.getString(R.string.detail);
         }
 
         /**
@@ -653,6 +625,8 @@ public final class UtilityActivity extends AppCompatActivity implements OnPageCh
         public Fragment getItem(final int position) {
             if (position == getSummaryFragmentPos()) {
                 return new SummaryFragment();
+            } else if (position == getDetailFragmentPos()){
+                return DetailFragment.newInstance("+918867630185");
             } else if (position == getLogsFragmentPos()) {
                 return new LogsFragment();
             } else {
@@ -674,14 +648,13 @@ public final class UtilityActivity extends AppCompatActivity implements OnPageCh
          *
          * @return position of Logs {@link Fragment}
          */
-        public int getLogsFragmentPos() {
-            return positions.length - 1;
-        }
-
         public int getSummaryFragmentPos() {
+            return positions.length - 3;
+        }
+        public int getLogsFragmentPos() {
             return positions.length - 2;
         }
-
+        public int getDetailFragmentPos() { return positions.length -1; }
         /**
          * {@inheritDoc}
          */

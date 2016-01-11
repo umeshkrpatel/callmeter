@@ -26,7 +26,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 
 import com.github.umeshkrpatel.LogMeter.R;
-import com.github.umeshkrpatel.LogMeter.prefs.Preferences;
+import com.github.umeshkrpatel.LogMeter.ui.prefs.Preferences;
 import de.ub0r.android.lib.Utils;
 
 /**

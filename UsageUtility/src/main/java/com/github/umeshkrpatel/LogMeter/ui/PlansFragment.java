@@ -61,8 +61,8 @@ import java.util.UnknownFormatConversionException;
 import com.github.umeshkrpatel.LogMeter.LogMeter;
 import com.github.umeshkrpatel.LogMeter.R;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
-import com.github.umeshkrpatel.LogMeter.prefs.PlanEdit;
-import com.github.umeshkrpatel.LogMeter.prefs.Preferences;
+import com.github.umeshkrpatel.LogMeter.ui.prefs.PlanEdit;
+import com.github.umeshkrpatel.LogMeter.ui.prefs.Preferences;
 
 import de.ub0r.android.logg0r.Log;
 

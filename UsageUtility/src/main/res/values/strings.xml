@@ -123,6 +123,7 @@
     <string name="logs" formatted="false">Logs</string>
     <string name="now" formatted="false">Now</string>
     <string name="summary" formatted="false">Summary</string>
+    <string name="detail" formatted="false">Details</string>
     <string name="show_logs" formatted="false">Show logs</string>
     <string name="plans" formatted="false">Plans</string>
     <string name="plans_hint" formatted="false">Set your plans for all kind of billing here.</string>
@@ -458,4 +459,7 @@
     <string name="permissions_read_call_log" formatted="false">Read call log: this permission is necessary to read call stats from phone\'s database.\nThe app does not work without this permission.</string>
     <string name="permissions_read_external_storage" formatted="false">Read external storage: this permission is necessary load saved rule sets and backups from external storage.\nThe app still works when this permission is denied.</string>
     <string name="permissions_write_external_storage" formatted="false">Write external storage: this permission is necessary to save rule sets and backups to external storage.\nThe app still works when this permission is denied.</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

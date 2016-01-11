@@ -1,33 +1,12 @@
-/*
- * Copyright (C) 2009-2013 Felix Bechstein
- * 
- * This file is part of Call Meter 3G.
- * 
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation; either version 3 of the License, or (at your option) any later
- * version.
- * 
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
- * 
- * You should have received a copy of the GNU General Public License along with
- * this program; If not, see <http://www.gnu.org/licenses/>.
- */
 package com.github.umeshkrpatel.LogMeter.ui;
-
 
 import android.app.AlertDialog.Builder;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
@@ -42,21 +21,17 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.ToggleButton;
 
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.formatter.ValueFormatter;
-
-import java.util.ArrayList;
-
 import com.github.umeshkrpatel.LogMeter.R;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
 import com.github.umeshkrpatel.LogMeter.data.LogRunnerService;
-import com.github.umeshkrpatel.LogMeter.data.ContactFinder;
-import com.github.umeshkrpatel.LogMeter.prefs.Preferences;
+import com.github.umeshkrpatel.LogMeter.ui.prefs.Preferences;
+
+import java.util.ArrayList;
+
 import de.ub0r.android.logg0r.Log;
 
 /**
@@ -66,62 +41,12 @@ import de.ub0r.android.logg0r.Log;
  */
 public final class SummaryFragment extends ListFragment implements OnClickListener,
         OnItemLongClickListener, LoaderCallbacks<Cursor> {
-
-    /**
-     * Tag for output.
-     */
     private static final String TAG = "LogsFragment";
 
-    /**
-     * Prefs: {@link ToggleButton} state for calls.
-     */
-    private static final String PREF_CALL = "_logs_call";
-
-    /**
-     * Prefs: {@link ToggleButton} state for sms.
-     */
-    private static final String PREF_SMS = "_logs_sms";
-
-    /**
-     * Prefs: {@link ToggleButton} state for mms.
-     */
-    private static final String PREF_MMS = "_logs_mms";
-
-    /**
-     * Prefs: {@link ToggleButton} state for data.
-     */
-    private static final String PREF_DATA = "_logs_data";
-
-    /**
-     * Prefs: {@link ToggleButton} state for in.
-     */
-    private static final String PREF_IN = "_in";
-
-    /**
-     * Prefs: {@link ToggleButton} state for out.
-     */
-    private static final String PREF_OUT = "_out";
     /**
      * Unique id for this {@link LogsFragment}s loader.
      */
     private static final int LOADER_UID = -2;
-    /**
-     * {@link ToggleButton}s.
-     */
-    //private ToggleButton tbCall, tbSMS, tbMMS, tbData, tbIn, tbOut, tbPlan;
-    private PieChart pcCallDuration, pcCallCount, pcSmsMms, pcData;
-    /**
-     * Show my number.
-     */
-    private boolean showMyNumber = false;
-    /**
-     * Show hours and days.
-     */
-    private boolean showHours = true;
-    /**
-     * Currency format.
-     */
-    private String cformat;
     /**
      * Selected plan id.
      */
@@ -153,16 +78,12 @@ public final class SummaryFragment extends ListFragment implements OnClickListen
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
                              final Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.summary, container, false);
-        final SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(this
-                .getActivity());
-        String[] directions = getResources().getStringArray(R.array.direction_calls);
 
         if (planId >= 0L) {
             setPlanId(planId);
         }
         Cursor cursor = getActivity().getContentResolver().query(DataProvider.Plans.CONTENT_URI_SUM
                         .buildUpon()
-                                //.appendQueryParameter(DataProvider.UtilityActivity.PARAM_DATE, String.valueOf(now))
                         .appendQueryParameter(DataProvider.Plans.PARAM_HIDE_ZERO,
                                 String.valueOf(false))
                         .appendQueryParameter(DataProvider.Plans.PARAM_HIDE_NOCOST,
@@ -173,37 +94,40 @@ public final class SummaryFragment extends ListFragment implements OnClickListen
                                 String.valueOf(false)).build(), DataProvider.Plans.PROJECTION_SUM,
                 null, null, null);
 
-        pcCallDuration = (PieChart) v.findViewById(R.id.callDurationChart);
-        pcCallCount = (PieChart) v.findViewById(R.id.callCountChart);
-        pcSmsMms = (PieChart) v.findViewById(R.id.smsMmsChart);
-        pcData = (PieChart) v.findViewById(R.id.dataChart);
+        PieChart pcCallDuration = (PieChart) v.findViewById(R.id.callDurationChart);
+        PieChart pcCallCount = (PieChart) v.findViewById(R.id.callCountChart);
+        PieChart pcSmsMms = (PieChart) v.findViewById(R.id.smsMmsChart);
+        PieChart pcData = (PieChart) v.findViewById(R.id.dataChart);
 
-        ArrayList<Entry> entriesCallDuration = new ArrayList<Entry>();
-        ArrayList<Entry> entriesCallCount = new ArrayList<Entry>();
-        ArrayList<Entry> entriesSmsMms = new ArrayList<Entry>();
-        ArrayList<Entry> entriesData = new ArrayList<Entry>();
+        ArrayList<Entry> entriesCallDuration = new ArrayList<>();
+        ArrayList<Entry> entriesCallCount = new ArrayList<>();
+        ArrayList<Entry> entriesSmsMms = new ArrayList<>();
+        ArrayList<Entry> entriesData = new ArrayList<>();
 
         int calli = 1, smsi = 1, mmsi = 1, datai = 1;
-        while (cursor.moveToNext()) {
-            DataProvider.Plans.Plan plan =
-                    new DataProvider.Plans.Plan(cursor);
-            if (plan.name.contains("2") || plan.type < 4 || plan.type > 6 || plan.atBa <= 0) {
-                continue;
-            } else if (plan.type == 4) {
-                entriesCallDuration.add(new Entry(plan.atBa, calli));
-                entriesCallCount.add(new Entry(plan.atCount, calli));
-                calli++;
-            } else if (plan.type == 5) {
-                entriesSmsMms.add(new Entry(plan.atBa, smsi));
-                smsi++;
-            } else if (plan.type == 6) {
-                entriesSmsMms.set(mmsi,
-                        new Entry(plan.atBa + entriesSmsMms.get(mmsi).getVal(), mmsi));
-                mmsi++;
-            } else if (plan.type == 7) {
-                entriesData.add(new Entry(plan.atBa, datai));
-                datai++;
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                DataProvider.Plans.Plan plan =
+                        new DataProvider.Plans.Plan(cursor);
+                if (plan.name.contains("2") || plan.type < 4 || plan.type > 6 || plan.atBa <= 0) {
+                    Log.d(TAG, "No data");
+                } else if (plan.type == 4) {
+                    entriesCallDuration.add(new Entry(plan.atBa, calli));
+                    entriesCallCount.add(new Entry(plan.atCount, calli));
+                    calli++;
+                } else if (plan.type == 5) {
+                    entriesSmsMms.add(new Entry(plan.atBa, smsi));
+                    smsi++;
+                } else if (plan.type == 6) {
+                    entriesSmsMms.set(mmsi,
+                            new Entry(plan.atBa + entriesSmsMms.get(mmsi).getVal(), mmsi));
+                    mmsi++;
+                } else if (plan.type == 7) {
+                    entriesData.add(new Entry(plan.atBa, datai));
+                    datai++;
+                }
             }
+            cursor.close();
         }
 
         ValueFormatter formatter = new ChartFormat.CountFormatter();
@@ -225,21 +149,6 @@ public final class SummaryFragment extends ListFragment implements OnClickListen
     @Override
     public void onResume() {
         super.onResume();
-        Common.setDateFormat(getActivity());
-        Cursor c = this
-                .getActivity()
-                .getContentResolver()
-                .query(DataProvider.Rules.CONTENT_URI, new String[]{DataProvider.Rules.ID},
-                        DataProvider.Rules.MYNUMBER + " like '___%'", null, null);
-        if (c != null) {
-            showMyNumber = c.getCount() > 0;
-            c.close();
-        } else {
-            showMyNumber = false;
-        }
-        showHours = PreferenceManager.getDefaultSharedPreferences(getActivity())
-                .getBoolean(Preferences.PREFS_SHOWHOURS, true);
-        cformat = Preferences.getCurrencyFormat(getActivity());
     }
 
     /**
@@ -288,25 +197,6 @@ public final class SummaryFragment extends ListFragment implements OnClickListen
      */
     public void setPlanId(final long id) {
         planId = id;
-        //if (tbPlan != null) {
-        //    if (id < 0L) {
-        //        tbPlan.setVisibility(View.GONE);
-        //    } else {
-        //        String p = DataProvider.UtilityActivity.findContactForNumber(getActivity().getContentResolver(),
-        //                planId);
-        //        tbPlan.setText(p);
-        //        tbPlan.setTextOn(p);
-        //        tbPlan.setTextOff(p);
-        //        tbPlan.setVisibility(View.VISIBLE);
-        //        tbPlan.setChecked(true);
-        //        tbIn.setChecked(true);
-        //        tbOut.setChecked(true);
-        //        tbCall.setChecked(true);
-        //        tbData.setChecked(true);
-        //        tbMMS.setChecked(true);
-        //        tbSMS.setChecked(true);
-        //    }
-        //}
         if (isVisible()) {
             setAdapter(true);
         }
@@ -408,11 +298,6 @@ public final class SummaryFragment extends ListFragment implements OnClickListen
     public class SummaryAdapter extends ResourceCursorAdapter {
 
         /**
-         * Column ids.
-         */
-        private int idPlanName, idRuleName;
-
-        /**
          * Default Constructor.
          *
          * @param context {@link Context}
@@ -426,10 +311,7 @@ public final class SummaryFragment extends ListFragment implements OnClickListen
          */
         @Override
         public final Cursor swapCursor(final Cursor cursor) {
-            Cursor c = super.swapCursor(cursor);
-            idPlanName = cursor.getColumnIndex(DataProvider.Plans.NAME);
-            idRuleName = cursor.getColumnIndex(DataProvider.Rules.NAME);
-            return c;
+            return super.swapCursor(cursor);
         }
 
         /**
@@ -437,81 +319,7 @@ public final class SummaryFragment extends ListFragment implements OnClickListen
          */
         @Override
         public final void bindView(final View view, final Context context, final Cursor cursor) {
-            /*
-            ViewHolder holder = (ViewHolder) view.getTag();
-            if (holder == null) {
-                holder = new ViewHolder();
-                holder.tvName = (TextView) view.findViewById(R.id.tvName);
-                holder.tvNumber = (TextView) view.findViewById(R.id.tvNumber);
-                holder.tvTime = (TextView) view.findViewById(R.id.tvTime);
-                holder.tvDuration = (TextView) view.findViewById(R.id.tvDuration);
-                holder.ivType = (ImageView) view.findViewById(R.id.ivType);
-                view.setTag(holder);
-            } else if (holder.loader != null && !holder.loader.isCancelled()) {
-                holder.loader.cancel(true);
-            }
 
-            long [] calls = new long[2];
-            long [] smss = new long[2];
-            long [] mmss = new long[2];
-            long datas = 0;
-            int calli = 0, smsi = 0, mmsi = 0, datai = 0;
-            while(cursor.moveToNext()) {
-                DataProvider.UtilityActivity.Plan plan =
-                        new DataProvider.UtilityActivity.Plan(cursor);
-                if (plan.name.contains("2") || plan.type < 4 || plan.type > 6) {
-                    continue;
-                } else if (plan.type == 4) {
-                    calls[calli] = (long) plan.atBa;
-                    calli++;
-                } else if (plan.type == 5) {
-                    smss[smsi] = (long) plan.atBa;
-                    smsi++;
-                } else if (plan.type == 6) {
-                    datas = (long) plan.atBa;
-                }
-            }
-
-            /*
-            if (plan.sname.contains("CallsIn")) {
-                holder.tvDuration.setText(String.valueOf(plan.bpBa));
-            } else if (plan.sname.contains("CallsOut")) {
-                holder.callOut++;
-            } else if (plan.sname.contains("SMSIn")) {
-                holder.smsIn++;
-            } else if (plan.sname.contains("SMSOut")) {
-                holder.smsOut++;
-            } else if (plan.sname.contains("MMSIn")) {
-                holder.mmsIn++;
-            } else if (plan.sname.contains("MMSOut")) {
-                holder.mmsOut++;
-            } else if (plan.sname.contains("DATAInOut")) {
-                holder.dataIn++;
-            } else {
-                //holder.dataOut++;
-            }
-            holder.tvName.setText(String.valueOf(holder.callIn));
-            */
-        }
-
-        /**
-         * View holder.
-         *
-         * @author flx
-         */
-        private class ViewHolder {
-
-            /**
-             * Holder for item's view.
-             */
-            TextView tvName, tvNumber, tvTime, tvDuration;
-
-            ImageView ivType;
-            /**
-             * Hold {@link ContactFinder}.
-             */
-            ContactFinder loader;
-            long callIn, callOut, smsIn, smsOut, mmsIn, mmsOut, dataIn, dataOut;
         }
     }
 }

@@ -44,7 +44,7 @@ import android.util.Xml;
 import android.widget.Toast;
 
 import com.github.umeshkrpatel.LogMeter.R;
-import com.github.umeshkrpatel.LogMeter.prefs.Preferences;
+import com.github.umeshkrpatel.LogMeter.ui.prefs.Preferences;
 import com.github.umeshkrpatel.LogMeter.LogMeter;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -398,6 +398,7 @@ public final class DataProvider extends ContentProvider {
         ContentValues[] cvs;
         try {
             cvs = backup(db, table, projection, selection, selectionArgs, strip, null);
+            assert cvs!=null;
         } catch (IOException e) {
             throw new IllegalStateException("this can not be true!", e);
         }
@@ -601,28 +602,34 @@ public final class DataProvider extends ContentProvider {
                     continue;
                 }
                 String k = parser.getName();
-                if (k.equals("hours")) {
-                    parser.next();
-                    ArrayList<ContentValues> l = lists.get(DataProvider.Hours.TABLE);
-                    if (l == null) {
-                        l = new ArrayList<ContentValues>();
-                        lists.put(DataProvider.Hours.TABLE, l);
+                switch (k) {
+                    case "hours": {
+                        parser.next();
+                        ArrayList<ContentValues> l = lists.get(Hours.TABLE);
+                        if (l == null) {
+                            l = new ArrayList<>();
+                            lists.put(Hours.TABLE, l);
+                        }
+                        parseValues(parser, lists, k, l);
+                        break;
                     }
-                    parseValues(parser, lists, k, l);
-                } else if (k.equals("numbers")) {
-                    parser.next();
-                    ArrayList<ContentValues> l = lists.get(DataProvider.Numbers.TABLE);
-                    if (l == null) {
-                        l = new ArrayList<ContentValues>();
-                        lists.put(DataProvider.Numbers.TABLE, l);
+                    case "numbers": {
+                        parser.next();
+                        ArrayList<ContentValues> l = lists.get(Numbers.TABLE);
+                        if (l == null) {
+                            l = new ArrayList<>();
+                            lists.put(Numbers.TABLE, l);
+                        }
+                        parseValues(parser, lists, k, l);
+                        break;
                     }
-                    parseValues(parser, lists, k, l);
-                } else {
-                    parser.next();
-                    String v = parser.getText();
-                    if (!TextUtils.isEmpty(v)) {
-                        cv.put(k, decodeString(v));
-                    }
+                    default:
+                        parser.next();
+                        String v = parser.getText();
+                        if (!TextUtils.isEmpty(v)) {
+                            cv.put(k, decodeString(v));
+                        }
+                        break;
                 }
             }
             if (cv.size() > 0) {
@@ -661,21 +668,25 @@ public final class DataProvider extends ContentProvider {
                     continue;
                 }
                 String name = parser.getName();
-                if (name.equals("country")) {
-                    parser.next();
-                    ret.country = decodeString(parser.getText());
-                    Log.d(TAG, "xml country: ", ret.country);
-                    parser.next();
-                } else if (name.equals("provider")) {
-                    parser.next();
-                    ret.provider = decodeString(parser.getText());
-                    Log.d(TAG, "xml provider: ", ret.provider);
-                    parser.next();
-                } else if (name.equals("title")) {
-                    parser.next();
-                    ret.title = decodeString(parser.getText());
-                    Log.d(TAG, "xml title: ", ret.title);
-                    parser.next();
+                switch (name) {
+                    case "country":
+                        parser.next();
+                        ret.country = decodeString(parser.getText());
+                        Log.d(TAG, "xml country: ", ret.country);
+                        parser.next();
+                        break;
+                    case "provider":
+                        parser.next();
+                        ret.provider = decodeString(parser.getText());
+                        Log.d(TAG, "xml provider: ", ret.provider);
+                        parser.next();
+                        break;
+                    case "title":
+                        parser.next();
+                        ret.title = decodeString(parser.getText());
+                        Log.d(TAG, "xml title: ", ret.title);
+                        parser.next();
+                        break;
                 }
             }
         } catch (Exception e) {
@@ -702,7 +713,7 @@ public final class DataProvider extends ContentProvider {
         String provider;
         String title;
         HashMap<String, ArrayList<ContentValues>> lists
-                = new HashMap<String, ArrayList<ContentValues>>();
+                = new HashMap<>();
         try {
             parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
             parser.setInput(new StringReader(xml));
@@ -718,52 +729,54 @@ public final class DataProvider extends ContentProvider {
                 }
                 String name = parser.getName();
                 ArrayList<ContentValues> list = null;
-                if (name.equals("country")) {
-                    parser.next();
-                    country = decodeString(parser.getText());
-                    Log.d(TAG, "xml country: ", country);
-                    parser.next();
-                } else if (name.equals("provider")) {
-                    parser.next();
-                    provider = decodeString(parser.getText());
-                    Log.d(TAG, "xml provider: ", provider);
-                    parser.next();
-                } else if (name.equals("title")) {
-                    parser.next();
-                    title = decodeString(parser.getText());
-                    Log.d(TAG, "xml title: ", title);
-                    parser.next();
-                } else if (name.equals("plans")) {
-                    list = new ArrayList<ContentValues>();
-                    lists.put(DataProvider.Plans.TABLE, list);
-                    parser.next();
-                } else if (name.equals("rules")) {
-                    list = new ArrayList<ContentValues>();
-                    lists.put(DataProvider.Rules.TABLE, list);
-                    parser.next();
-                } else if (name.equals("hoursgroups")) {
-                    list = new ArrayList<ContentValues>();
-                    lists.put(DataProvider.HoursGroup.TABLE, list);
-                    parser.next();
-                } else if (name.equals("numbersgroups")) {
-                    list = new ArrayList<ContentValues>();
-                    lists.put(DataProvider.NumbersGroup.TABLE, list);
-                    parser.next();
-                } else if (name.equals("logs")) {
-                    list = new ArrayList<ContentValues>();
-                    lists.put(DataProvider.Logs.TABLE, list);
-                    parser.next();
-                } else if (name.equals("websmss")) {
-                    list = new ArrayList<ContentValues>();
-                    lists.put(DataProvider.WebSMS.TABLE, list);
-                    parser.next();
-                } else if (name.equals("sipcalls")) {
-                    list = new ArrayList<ContentValues>();
-                    lists.put(DataProvider.SipCall.TABLE, list);
-                    parser.next();
-                } else {
-                    parser.next();
+                switch (name) {
+                    case "country":
+                        parser.next();
+                        country = decodeString(parser.getText());
+                        Log.d(TAG, "xml country: ", country);
+                        break;
+                    case "provider":
+                        parser.next();
+                        provider = decodeString(parser.getText());
+                        Log.d(TAG, "xml provider: ", provider);
+                        break;
+                    case "title":
+                        parser.next();
+                        title = decodeString(parser.getText());
+                        Log.d(TAG, "xml title: ", title);
+                        break;
+                    case "plans":
+                        list = new ArrayList<>();
+                        lists.put(Plans.TABLE, list);
+                        break;
+                    case "rules":
+                        list = new ArrayList<>();
+                        lists.put(Rules.TABLE, list);
+                        break;
+                    case "hoursgroups":
+                        list = new ArrayList<>();
+                        lists.put(HoursGroup.TABLE, list);
+                        break;
+                    case "numbersgroups":
+                        list = new ArrayList<>();
+                        lists.put(NumbersGroup.TABLE, list);
+                        break;
+                    case "logs":
+                        list = new ArrayList<>();
+                        lists.put(Logs.TABLE, list);
+                        break;
+                    case "websmss":
+                        list = new ArrayList<>();
+                        lists.put(WebSMS.TABLE, list);
+                        break;
+                    case "sipcalls":
+                        list = new ArrayList<>();
+                        lists.put(SipCall.TABLE, list);
+                        break;
+                    default:
+                        break;
                 }
+                parser.next();
                 if (list != null) {
                     parseValues(parser, lists, name, list);
                 }
@@ -807,7 +820,7 @@ public final class DataProvider extends ContentProvider {
         final int l = lines.length;
         Log.d(TAG, "importData(db, #", l, ")");
         String table = null;
-        ArrayList<ContentValues> cvs = new ArrayList<ContentValues>();
+        ArrayList<ContentValues> cvs = new ArrayList<>();
         for (int i = 2; i < l; i++) {
             final String s = lines[i];
             if (s == null || s.length() == 0) {
@@ -1252,9 +1265,7 @@ public final class DataProvider extends ContentProvider {
                 db.insert(table, null, cv);
             }
             db.setTransactionSuccessful();
-        } catch (ClassNotFoundException e) {
-            Log.e(TAG, "error reloading row: " + table, e);
-        } catch (SQLException e) {
+        } catch (ClassNotFoundException | SQLException e) {
             Log.e(TAG, "error reloading row: " + table, e);
         } finally {
             db.endTransaction();
@@ -1825,7 +1836,7 @@ public final class DataProvider extends ContentProvider {
     }
 
     @Override
-    public int update(final Uri uri, final ContentValues values, final String selection,
+    public int update(@NonNull final Uri uri, final ContentValues values, final String selection,
                       final String[] selectionArgs) {
         Log.d(TAG, "update(", uri, ",", selection, ", values)");
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
@@ -1926,11 +1937,6 @@ public final class DataProvider extends ContentProvider {
         public static final int INDEX_PLAN_ID = 1;
 
         /**
-         * Index in projection: ID of rule this log was matched.
-         */
-        public static final int INDEX_RULE_ID = 2;
-
-        /**
          * Index in projection: Type of log.
          */
         public static final int INDEX_TYPE = 3;
@@ -1994,46 +2000,6 @@ public final class DataProvider extends ContentProvider {
          * Index in projection: Plan type.
          */
         public static final int INDEX_PLAN_TYPE = 15;
-
-        /**
-         * Index in projection - sum: Type of log.
-         */
-        public static final int INDEX_SUM_TYPE = 0;
-
-        /**
-         * Index in projection - sum: id of plan.
-         */
-        public static final int INDEX_SUM_PLAN_ID = 1;
-
-        /**
-         * Index in projection - sum: type of plan.
-         */
-        public static final int INDEX_SUM_PLAN_TYPE = 2;
-
-        /**
-         * Index in projection - sum: Amount.
-         */
-        public static final int INDEX_SUM_AMOUNT = 3;
-
-        /**
-         * Index in projection - sum: Billed amount.
-         */
-        public static final int INDEX_SUM_BILL_AMOUNT = 4;
-
-        /**
-         * Index in projection - sum: Cost.
-         */
-        public static final int INDEX_SUM_COST = 5;
-
-        /**
-         * Index in projection - sum: Cost (free).
-         */
-        public static final int INDEX_SUM_FREE = 6;
-
-        /**
-         * Index in projection - sum: count.
-         */
-        public static final int INDEX_SUM_COUNT = 7;
 
         /**
          * ID.
@@ -2115,13 +2081,21 @@ public final class DataProvider extends ContentProvider {
          * Projection used for join query.
          */
         public static final String[] PROJECTION_JOIN;
+
+        public static final String[] PROJECTION_DETAILS = new String[] {
+                TYPE, PLAN_ID,
+                TABLE + "." + DIRECTION + " AS " + DIRECTION,
+                TABLE + "." + DATE + " AS " + DATE,
+                AMOUNT, };
         /**
          * Projection used for query - sum.
          */
-        public static final String[] PROJECTION_SUM = new String[]{TYPE, PLAN_ID,
-                Plans.TABLE + "." + Plans.TYPE + " AS " + PLAN_TYPE, "sum(" + AMOUNT + ")",
-                "sum(" + BILL_AMOUNT + ")", "sum(" + COST + ")", "sum(" + FREE + ")",
-                "count(" + PLAN_ID + ")"};
+        public static final String[] PROJECTION_SUM = new String[]{
+                TYPE,
+                PLAN_ID,
+                TABLE + "." + DIRECTION + " AS " + DIRECTION,
+                "sum(" + AMOUNT + ")",
+                };
         /**
          * Content {@link Uri}.
          */
@@ -2171,10 +2145,11 @@ public final class DataProvider extends ContentProvider {
             Log.i(TAG, "create table: " + TABLE);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE);
             db.execSQL("CREATE TABLE " + TABLE + " (" + ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                    + PLAN_ID + " LONG, " + RULE_ID + " LONG, " + TYPE + " INTEGER, " + DIRECTION
-                    + " INTEGER, " + DATE + " LONG, " + AMOUNT + " LONG, " + BILL_AMOUNT
-                    + " FLOAT, " + REMOTE + " TEXT, " + ROAMED + " INTEGER, " + COST + " FLOAT, "
-                    + FREE + " FLOAT," + MYNUMBER + " TEXT" + ");");
+                    + PLAN_ID + " LONG, " + RULE_ID + " LONG, " + TYPE + " INTEGER, "
+                    + DIRECTION + " INTEGER, " + DATE + " LONG, " + AMOUNT + " LONG, "
+                    + BILL_AMOUNT + " FLOAT, " + REMOTE + " TEXT, "
+                    + ROAMED + " INTEGER, " + COST + " FLOAT, " + FREE + " FLOAT, "
+                    + MYNUMBER + " TEXT" + ");");
             db.execSQL("CREATE INDEX " + TABLE + "_idx on " + TABLE + " (" + ID + "," + PLAN_ID
                     + "," + DATE + ")");
         }
@@ -2237,14 +2212,6 @@ public final class DataProvider extends ContentProvider {
          */
         public static final int INDEX_ID = 0;
         /**
-         * Index in projection: Connector's name.
-         */
-        public static final int INDEX_CONNECTOR = 1;
-        /**
-         * Index in projection: date.
-         */
-        public static final int INDEX_DATE = 2;
-        /**
          * ID.
          */
         public static final String ID = "_id";
@@ -2268,10 +2235,6 @@ public final class DataProvider extends ContentProvider {
          * The MIME type of {@link #CONTENT_URI} providing a list.
          */
         public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.ub0r.websms";
-        /**
-         * The MIME type of a {@link #CONTENT_URI} single entry.
-         */
-        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.ub0r.websms";
         /**
          * Table name.
          */
@@ -2331,14 +2294,6 @@ public final class DataProvider extends ContentProvider {
          */
         public static final int INDEX_ID = 0;
         /**
-         * Index in projection: Provider's name.
-         */
-        public static final int INDEX_PROVIDER = 1;
-        /**
-         * Index in projection: date.
-         */
-        public static final int INDEX_DATE = 2;
-        /**
          * ID.
          */
         public static final String ID = "_id";
@@ -2362,10 +2317,6 @@ public final class DataProvider extends ContentProvider {
          * The MIME type of {@link #CONTENT_URI} providing a list.
          */
         public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.ub0r.sipcall";
-        /**
-         * The MIME type of a {@link #CONTENT_URI} single entry.
-         */
-        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.ub0r.sipcall";
         /**
          * Table name.
          */
@@ -3079,31 +3030,6 @@ public final class DataProvider extends ContentProvider {
         }
 
         /**
-         * Get the SQL {@link String} selecting the bill period.
-         *
-         * @param period type of period
-         * @param start  first bill day set.
-         * @param now    move now to some other time, null == real now
-         * @return SQL {@link String} selecting the bill period
-         */
-        public static String getBilldayWhere(final int period, final Calendar start,
-                                             final Calendar now) {
-            final Calendar bd = getBillDay(period, start, now, false);
-            if (bd == null) {
-                return null;
-            }
-            if (period == BILLPERIOD_INFINITE) {
-                return DataProvider.Logs.DATE + " > " + bd.getTimeInMillis();
-            }
-            String next = "";
-            if (now != null) {
-                next = " AND " + DataProvider.Logs.DATE + " < " + now.getTimeInMillis();
-            }
-            // final Calendar nbd = getBillDay(period, start, now, true);
-            return DataProvider.Logs.DATE + " > " + bd.getTimeInMillis() + next;
-        }
-
-        /**
          * Get the first bill day of this period.
          *
          * @param period type of period
@@ -3323,7 +3249,7 @@ public final class DataProvider extends ContentProvider {
         public static ArrayList<Long> getBillDays(final int period, final long start,
                                                   final long newerAs, final long offset) {
             Log.d(TAG, "getBillDays()");
-            ArrayList<Long> ret = new ArrayList<Long>();
+            ArrayList<Long> ret = new ArrayList<>();
 
             int f;
             int v;
@@ -3952,10 +3878,6 @@ public final class DataProvider extends ContentProvider {
          */
         public static final int INDEX_IS_SIPCALL = 15;
         /**
-         * Index in projection: is sipcall provider.
-         */
-        public static final int INDEX_IS_SIPCALL_PROVIDER = 16;
-        /**
          * Index in projection: my own number.
          */
         public static final int INDEX_MYNUMBER = 17;
@@ -4123,10 +4045,6 @@ public final class DataProvider extends ContentProvider {
          * Index in projection: ID.
          */
         public static final int INDEX_ID = 0;
-        /**
-         * Index in projection: ID for number block.
-         */
-        public static final int INDEX_GID = 1;
         /**
          * Index in projection: number.
          */
@@ -4309,10 +4227,6 @@ public final class DataProvider extends ContentProvider {
          * Index in projection: ID.
          */
         public static final int INDEX_ID = 0;
-        /**
-         * Index in projection: ID for block of hours.
-         */
-        public static final int INDEX_HOURS_ID = 1;
         /**
          * Index in projection: Day.
          */
@@ -4553,10 +4467,9 @@ public final class DataProvider extends ContentProvider {
          * Check, if wee need to unmatch() logs after updating the {@link SQLiteDatabase}.
          *
          * @param oldVersion old version
-         * @param newVersion new version
          * @return true, if unmatch() is needed
          */
-        private boolean needUnmatch(final int oldVersion, final int newVersion) {
+        private boolean needUnmatch(final int oldVersion) {
             for (int v : DATABASE_KNOWNGOOD) {
                 if (v == oldVersion) {
                     return false;
@@ -4620,7 +4533,7 @@ public final class DataProvider extends ContentProvider {
                     break;
             }
 
-            if (needUnmatch(oldVersion, newVersion)) {
+            if (needUnmatch(oldVersion)) {
                 unmatch(db);
             }
         }

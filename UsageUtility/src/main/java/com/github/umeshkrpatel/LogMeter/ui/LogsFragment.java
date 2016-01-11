@@ -27,6 +27,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
+import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ListFragment;
@@ -45,18 +47,20 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-import java.util.Date;
-
 import com.github.umeshkrpatel.LogMeter.R;
+import com.github.umeshkrpatel.LogMeter.data.ContactCache;
 import com.github.umeshkrpatel.LogMeter.data.ContactFinder;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
 import com.github.umeshkrpatel.LogMeter.data.LogRunnerService;
-import com.github.umeshkrpatel.LogMeter.data.ContactCache;
-import com.github.umeshkrpatel.LogMeter.prefs.Preferences;
+import com.github.umeshkrpatel.LogMeter.ui.prefs.Preferences;
+
+import java.util.Date;
+
 import de.ub0r.android.lib.DbUtils;
 import de.ub0r.android.logg0r.Log;
 
@@ -126,6 +130,7 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
      * Selected plan id.
      */
     private long planId = -1;
+    private OnFragmentInteractionListener mListener;
 
     /**
      * {@inheritDoc}
@@ -144,6 +149,23 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
         super.onActivityCreated(savedInstanceState);
         setListAdapter(new LogAdapter(getActivity()));
         getListView().setOnItemLongClickListener(this);
+        //getListView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        //    @Override
+        //    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        //        mListener.onLogFragmentInteraction("+918867630185");
+        //    }
+        //});
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof OnFragmentInteractionListener) {
+            mListener = (OnFragmentInteractionListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnFragmentInteractionListener");
+        }
     }
 
     /**
@@ -445,14 +467,25 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
                 holder = new ViewHolder();
                 holder.tvName = (TextView) view.findViewById(R.id.tvName);
                 holder.tvNumber = (TextView) view.findViewById(R.id.tvNumber);
+                holder.tvNumber.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (mListener != null) {
+                            mListener.onLogFragmentInteraction(((TextView)v).getText().toString());
+                        }
+                    }
+                });
                 holder.tvTime = (TextView) view.findViewById(R.id.tvTime);
                 holder.tvDuration = (TextView) view.findViewById(R.id.tvDuration);
+                holder.ivItem = (ImageView) view.findViewById(R.id.ivItem);
                 holder.ivType = (ImageView) view.findViewById(R.id.ivType);
+                holder.ivProfile = (ImageView) view.findViewById(R.id.ivProfile);
                 view.setTag(holder);
             } else if (holder.loader != null && !holder.loader.isCancelled()) {
                 holder.loader.cancel(true);
             }
 
+            GridLayout gridLayout = (GridLayout) view.findViewById(R.id.log_items);
             StringBuilder buf = new StringBuilder();
             final int t = cursor.getInt(DataProvider.Logs.INDEX_TYPE);
             final int pt = cursor.getInt(DataProvider.Logs.INDEX_PLAN_TYPE);
@@ -463,10 +496,20 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
             holder.tvTime.setText(buf.toString());
 
             String type = cursor.getString(idRuleName);
+            if (type == null)
+                return;
             if (type.contains("In")) {
                 holder.ivType.setImageResource(R.drawable.ic_incoming);
             } else {
                 holder.ivType.setImageResource(R.drawable.ic_outgoing);
+            }
+
+            if (type.contains("SMS") || type.contains("MMS")) {
+                holder.ivItem.setImageResource(R.drawable.ic_message);
+                gridLayout.setBackgroundColor(Color.argb(1, 0xFD, 0xC2, 0x0E));
+            } else {
+                holder.ivItem.setImageResource(R.drawable.ic_call);
+                gridLayout.setBackgroundColor(Color.argb(1, 0x56, 0x00, 0x64));
             }
 
             String s = cursor.getString(DataProvider.Logs.INDEX_REMOTE);
@@ -478,66 +521,30 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
                 holder.tvName.setVisibility(View.VISIBLE);
                 holder.tvNumber.setVisibility(View.VISIBLE);
                 String format = "%s <" + s + ">";
-                String name = ContactCache.getInstance().get(context, s, format);
+                String name = ContactCache.getInstance().getName(context, s, format);
                 if (name != null) {
+                    holder.tvName.setVisibility(View.VISIBLE);
                     holder.tvName.setText(name);
+                } else {
+                    holder.tvName.setVisibility(View.GONE);
+                }
+                String uri = ContactCache.getInstance().getPhotoUri(context, s, format);
+                holder.ivProfile.setVisibility(View.VISIBLE);
+                if (uri==null || uri.equals("<empty>")) {
+                    holder.ivProfile.setImageResource(R.drawable.ic_face_empty_photo_id);
+                } else {
+                    holder.ivProfile.setImageURI(Uri.parse(uri));
                 }
             }
 
-/*            s = cursor.getString(DataProvider.Logs.INDEX_MYNUMBER);
-            boolean b = s != null && s.length() <= 2 && Utils.parseInt(s, -1) >= 0;
-
-            if (LogsFragment.this.showMyNumber || b) {
-                holder.tvNumber.setText(b ? R.string.my_sim_id_ : R.string.my_number_);
-                //holder.tvMyNumber.setText(s);
-                holder.tvNumber.setVisibility(View.VISIBLE);
-                //holder.tvMyNumber.setVisibility(View.VISIBLE);
-            } else {
-                //holder.tvMyNumberLabel.setVisibility(View.GONE);
-                holder.tvNumber.setVisibility(View.GONE);
-            }
-*/
             final long amount = cursor.getLong(DataProvider.Logs.INDEX_AMOUNT);
             s = Common.formatAmount(t, amount, LogsFragment.this.showHours);
-            if (s == null || s.trim().length() == 0 || s.equals("1")) {
+            if (s == null || s.trim().length() == 0) {
                 holder.tvDuration.setVisibility(View.GONE);
             } else {
                 holder.tvDuration.setVisibility(View.VISIBLE);
                 holder.tvDuration.setText(s);
             }
-
-            /*
-            final float ba = cursor.getFloat(DataProvider.Logs.INDEX_BILL_AMOUNT);
-            if (amount != ba || pt == DataProvider.TYPE_MIXED) {
-                holder.tvBilledLength.setText(Common.formatAmount(pt, ba,
-                        LogsFragment.this.showHours));
-                holder.tvBilledLength.setVisibility(View.VISIBLE);
-                holder.tvBilledLengthLabel.setVisibility(View.VISIBLE);
-            } else {
-                holder.tvBilledLength.setVisibility(View.GONE);
-                holder.tvBilledLengthLabel.setVisibility(View.GONE);
-            }
-            final float cost = cursor.getFloat(DataProvider.Logs.INDEX_COST);
-            final float free = cursor.getFloat(DataProvider.Logs.INDEX_FREE);
-
-            if (cost > 0f) {
-                String c;
-                if (free == 0f) {
-                    c = String.format(LogsFragment.this.cformat, cost);
-                } else if (free >= cost) {
-                    c = "(" + String.format(LogsFragment.this.cformat, cost) + ")";
-                } else {
-                    c = "(" + String.format(LogsFragment.this.cformat, free) + ") "
-                            + String.format(LogsFragment.this.cformat, cost - free);
-                }
-                holder.tvCost.setText(c);
-                holder.tvCost.setVisibility(View.VISIBLE);
-                holder.tvCostLabel.setVisibility(View.VISIBLE);
-            } else {
-                holder.tvCost.setVisibility(View.GONE);
-                holder.tvCostLabel.setVisibility(View.GONE);
-            }
-            */
         }
 
         /**
@@ -552,11 +559,15 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
              */
             TextView tvName, tvNumber, tvTime, tvDuration;
 
-            ImageView ivType;
+            ImageView ivProfile, ivItem, ivType;
             /**
              * Hold {@link ContactFinder}.
              */
             ContactFinder loader;
         }
+    }
+
+    public interface OnFragmentInteractionListener {
+        void onLogFragmentInteraction(String number);
     }
 }

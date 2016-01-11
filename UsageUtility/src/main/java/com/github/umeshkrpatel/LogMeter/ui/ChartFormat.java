@@ -7,17 +7,19 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 
 import com.github.mikephil.charting.animation.Easing;
+import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.PieChart;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.github.mikephil.charting.utils.ViewPortHandler;
+import com.github.umeshkrpatel.LogMeter.data.DataProvider;
 
 import java.util.ArrayList;
-
-import com.github.umeshkrpatel.LogMeter.data.DataProvider;
 
 public class ChartFormat {
     public static final int[] CHART_COLORS = {
@@ -29,6 +31,58 @@ public class ChartFormat {
     public static float INVALID = (-1.0f);
     public static ArrayList<Integer> COLORS = null;
     public static ArrayList<Integer> GRAY_COLOR = null;
+
+    public static void SetupBarChart(BarChart barChart, ArrayList<BarDataSet> dataSets) {
+        barChart.setDescription("");
+
+        // scaling can now only be done on x- and y-axis separately
+        barChart.setPinchZoom(false);
+        barChart.setTouchEnabled(false);
+        barChart.setDrawBarShadow(false);
+        barChart.setDrawGridBackground(false);
+
+        barChart.getLegend().setEnabled(false);
+
+        barChart.getXAxis().setEnabled(false);
+        barChart.getAxisLeft().setEnabled(false);
+        barChart.getAxisRight().setEnabled(false);
+
+        BarData barData = new BarData(generateChartDateList(1, 1), dataSets);
+        barChart.setData(barData);
+    }
+
+    public static ArrayList<String> generateChartDateList(int startDate, int currentMonth) {
+        ArrayList<String> dateStrings = new ArrayList<>();
+        int endLimit = 30;
+        switch (currentMonth) {
+            case 1:
+            case 3:
+            case 5:
+            case 7:
+            case 8:
+            case 10:
+            case 12:
+                endLimit = 31;
+                break;
+            case 2:
+                endLimit = 28;
+                break;
+            case 4:
+            case 6:
+            case 9:
+            case 11:
+            default:
+                endLimit = 30;
+                break;
+        }
+        for (int i = startDate; i <= endLimit; i++) {
+            dateStrings.add(String.valueOf(i));
+        }
+        for (int i = 1; i < startDate; i++) {
+            dateStrings.add(String.valueOf(i));
+        }
+        return dateStrings;
+    }
 
     public static void SetupPieChart(PieChart pieChart, ArrayList<Entry> entries, String centerText, ValueFormatter format) {
         pieChart.setDescription("");

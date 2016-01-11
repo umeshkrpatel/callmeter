@@ -32,7 +32,7 @@
         android:layout_height="0dp"
         android:layout_weight="1" />
 
-    <com.google.android.gms.ads.AdView
+    <!-- <com.google.android.gms.ads.AdView
         android:id="@+id/ads"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -46,6 +46,6 @@
         android:layout_height="wrap_content"
         android:paddingLeft="8dp"
         android:paddingRight="8dp"
-        app:urlLeanMore="@string/privacy_policy_url" />
+        app:urlLeanMore="@string/privacy_policy_url" /> -->
 
 </LinearLayout>

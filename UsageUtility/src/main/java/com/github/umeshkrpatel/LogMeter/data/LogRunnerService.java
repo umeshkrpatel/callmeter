@@ -1,21 +1,3 @@
-/*
- * Copyright (C) 2009-2013 Felix Bechstein
- * 
- * This file is part of CallMeter 3G.
- * 
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation; either version 3 of the License, or (at your option) any later
- * version.
- * 
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
- * 
- * You should have received a copy of the GNU General Public License along with
- * this program; If not, see <http://www.gnu.org/licenses/>.
- */
 package com.github.umeshkrpatel.LogMeter.data;
 
 import android.Manifest;
@@ -26,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteException;
@@ -38,6 +21,7 @@ import android.os.PowerManager.WakeLock;
 import android.preference.DatePreference;
 import android.preference.PreferenceManager;
 import android.provider.CallLog.Calls;
+import android.support.v4.app.ActivityCompat;
 import android.telephony.SmsMessage;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -46,7 +30,7 @@ import android.widget.Toast;
 
 import com.github.umeshkrpatel.LogMeter.BuildConfig;
 import com.github.umeshkrpatel.LogMeter.LogMeter;
-import com.github.umeshkrpatel.LogMeter.prefs.Preferences;
+import com.github.umeshkrpatel.LogMeter.ui.prefs.Preferences;
 import com.github.umeshkrpatel.LogMeter.ui.AskForPlan;
 import com.github.umeshkrpatel.LogMeter.ui.Common;
 import com.github.umeshkrpatel.LogMeter.ui.UtilityActivity;
@@ -190,7 +174,7 @@ public final class LogRunnerService extends IntentService {
     /**
      * Service's {@link Handler}.
      */
-    private Handler handler = null;
+    private static Handler handler = null;
 
     /**
      * Default Constructor.
@@ -379,9 +363,9 @@ public final class LogRunnerService extends IntentService {
             long dateLastTx = getMaxDate(cr, DataProvider.TYPE_DATA, DataProvider.DIRECTION_OUT);
             final long updateinterval =
                     Utils.parseLong(
-                        p.getString(Preferences.PREFS_UPDATE_INTERVAL,
+                            p.getString(Preferences.PREFS_UPDATE_INTERVAL,
                                     String.valueOf(LogRunnerReceiver.DELAY)),
-                        LogRunnerReceiver.DELAY
+                            LogRunnerReceiver.DELAY
                     ) * LogRunnerReceiver.DELAY_FACTOR;
             final long n = System.currentTimeMillis();
             if (n - dateLastRx > updateinterval / 2) {
@@ -613,10 +597,16 @@ public final class LogRunnerService extends IntentService {
         Log.d(TAG, "maxdate: ", maxdate);
         Cursor cursor;
         try {
+            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
             cursor = cr.query(Calls.CONTENT_URI, null, Calls.DATE + " > ?",
                     new String[]{String.valueOf(maxdate)}, Calls.DATE + " DESC");
         } catch (SQLException e) {
             Log.e(TAG, "updateCalls(): SQLE", e);
+            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
             cursor = cr.query(Calls.CONTENT_URI, new String[]{Calls.TYPE, Calls.DURATION,
                             Calls.DATE, Calls.NUMBER}, Calls.DATE + " > ?",
                     new String[]{String.valueOf(maxdate)}, Calls.DATE + " DESC"
@@ -667,8 +657,7 @@ public final class LogRunnerService extends IntentService {
                 cv.put(DataProvider.Logs.RULE_ID, DataProvider.NO_ID);
                 cv.put(DataProvider.Logs.TYPE, DataProvider.TYPE_CALL);
                 cv.put(DataProvider.Logs.DATE, l);
-                cv.put(DataProvider.Logs.REMOTE,
-                        DataProvider.Logs.cleanNumber(cursor.getString(idNumber), false));
+                cv.put(DataProvider.Logs.REMOTE, cursor.getString(idNumber));
                 cv.put(DataProvider.Logs.AMOUNT, d);
                 if (roaming) {
                     cv.put(DataProvider.Logs.ROAMED, 1);
@@ -757,8 +746,7 @@ public final class LogRunnerService extends IntentService {
                 cv.put(DataProvider.Logs.TYPE, DataProvider.TYPE_SMS);
                 cv.put(DataProvider.Logs.DATE, cursor.getLong(idDate));
                 Log.d(TAG, "date: ", cursor.getLong(idDate));
-                cv.put(DataProvider.Logs.REMOTE,
-                        DataProvider.Logs.cleanNumber(cursor.getString(idAddress), false));
+                cv.put(DataProvider.Logs.REMOTE, cursor.getString(idAddress));
                 final String body = cursor.getString(idBody);
                 int l = 1;
                 if (!TextUtils.isEmpty(body)) {

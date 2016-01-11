@@ -20,12 +20,12 @@ package com.github.umeshkrpatel.LogMeter.ui;
 
 import android.content.Context;
 
-import java.text.DateFormat;
-import java.util.Calendar;
-
 import com.github.umeshkrpatel.LogMeter.LogMeter;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
-import com.github.umeshkrpatel.LogMeter.prefs.Preferences;
+import com.github.umeshkrpatel.LogMeter.ui.prefs.Preferences;
+
+import java.text.DateFormat;
+import java.util.Calendar;
 
 /**
  * Common UI methods.
@@ -263,21 +263,18 @@ public final class Common {
             if (h < LogMeter.kTenth) {
                 ret += "0";
             }
-            ret += h + ":";
+            ret += h + "h:";
         }
         if (m > 0 || h > 0 || d > 0) {
             if (m < LogMeter.kTenth && h > 0) {
                 ret += "0";
             }
-            ret += m + ":";
+            ret += m + "m:";
         }
         if (s < LogMeter.kTenth && (m > 0 || h > 0 || d > 0)) {
             ret += "0";
         }
-        ret += s;
-        if (d == 0 && h == 0 && m == 0) {
-            ret += "s";
-        }
+        ret += s + "s";
         return ret;
     }
 }

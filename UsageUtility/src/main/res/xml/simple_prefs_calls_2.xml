@@ -14,7 +14,7 @@
 -->
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <com.github.umeshkrpatel.LogMeter.prefs.BillModeListPreference
+    <com.github.umeshkrpatel.LogMeter.ui.prefs.BillModeListPreference
         android:entries="@array/billmodes"
         android:entryValues="@array/billmodes"
         android:key="sp_billmode_2"

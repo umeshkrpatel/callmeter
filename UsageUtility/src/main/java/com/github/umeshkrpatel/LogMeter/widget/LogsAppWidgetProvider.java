@@ -38,16 +38,15 @@ import android.text.format.DateFormat;
 import android.view.View;
 import android.widget.RemoteViews;
 
-import java.util.Date;
-
 import com.github.umeshkrpatel.LogMeter.R;
-import com.github.umeshkrpatel.LogMeter.data.ContactFinder;
+import com.github.umeshkrpatel.LogMeter.data.ContactCache;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
 import com.github.umeshkrpatel.LogMeter.data.LogRunnerService;
-import com.github.umeshkrpatel.LogMeter.data.ContactCache;
+import com.github.umeshkrpatel.LogMeter.ui.prefs.Preferences;
 import com.github.umeshkrpatel.LogMeter.ui.Common;
 import com.github.umeshkrpatel.LogMeter.ui.UtilityActivity;
-import com.github.umeshkrpatel.LogMeter.prefs.Preferences;
+
+import java.util.Date;
 
 import de.ub0r.android.lib.Utils;
 import de.ub0r.android.logg0r.Log;
@@ -64,21 +63,9 @@ public final class LogsAppWidgetProvider extends AppWidgetProvider {
      */
     public static final String WIDGET_PLANID = "logswidget_planid_";
     /**
-     * Hide name for widget.
-     */
-    static final String WIDGET_HIDETNAME = "logswidget_hidename_";
-    /**
-     * Show short name for widget.
-     */
-    static final String WIDGET_SHORTNAME = "logswidget_shortname_";
-    /**
      * Show cost for widget.
      */
     static final String WIDGET_COST = "logswidget_cost_";
-    /**
-     * Show progress of billing period for widget.
-     */
-    static final String WIDGET_BILLPERIOD = "logswidget_billp_";
     /**
      * Size of the plan name text.
      */
@@ -192,21 +179,14 @@ public final class LogsAppWidgetProvider extends AppWidgetProvider {
             final long date = c.getLong(DataProvider.Logs.INDEX_DATE);
             final float cost = c.getFloat(DataProvider.Logs.INDEX_COST);
             final float free = c.getFloat(DataProvider.Logs.INDEX_FREE);
-            StringBuilder buf0 = new StringBuilder();
             StringBuilder buf1 = new StringBuilder();
-            buf0.append(Common.formatDate(context, date));
-            buf0.append(" ");
-            buf0.append(DateFormat.getTimeFormat(context).format(new Date(date)));
             if (t == DataProvider.TYPE_MMS || t == DataProvider.TYPE_SMS
                     || t == DataProvider.TYPE_CALL) {
                 String number = c.getString(DataProvider.Logs.INDEX_REMOTE);
                 if (TextUtils.isEmpty(number)) {
                     buf1.append("???");
                 } else {
-                    String name = ContactCache.getInstance().get(number);
-                    if (name == null) {
-                        name = ContactFinder.findContactForNumber(context, number, null);
-                    }
+                    String name = ContactCache.getInstance().getName(context, number, null);
                     if (name == null) {
                         buf1.append(number);
                     } else {
@@ -229,7 +209,7 @@ public final class LogsAppWidgetProvider extends AppWidgetProvider {
                 }
             }
 
-            views.setTextViewText(R.id.plan, buf0.toString());
+            views.setTextViewText(R.id.plan, Common.formatDate(context, date) + " " + DateFormat.getTimeFormat(context).format(new Date(date)));
             views.setTextViewText(R.id.stats, buf1.toString());
             if (showIcon) {
                 views.setViewVisibility(R.id.widget_icon, View.VISIBLE);
@@ -251,7 +231,7 @@ public final class LogsAppWidgetProvider extends AppWidgetProvider {
                 }
             }
         } else {
-            views.setImageViewResource(R.id.widget_icon, R.drawable.icon);
+            views.setImageViewResource(R.id.widget_icon, R.mipmap.ic_launcher);
             views.setViewVisibility(R.id.widget_icon, View.VISIBLE);
             views.setTextViewText(R.id.plan, "");
             views.setTextViewText(R.id.stats, "");
@@ -306,7 +286,6 @@ public final class LogsAppWidgetProvider extends AppWidgetProvider {
             Log.d(TAG, "delete widget: ", id);
             e.remove(WIDGET_PLANID + id);
         }
-
-        e.commit();
+        e.apply();
     }
 }

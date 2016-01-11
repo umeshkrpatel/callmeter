@@ -46,7 +46,7 @@ import com.github.umeshkrpatel.LogMeter.ui.UtilityActivity;
 import com.github.umeshkrpatel.LogMeter.LogMeter;
 import com.github.umeshkrpatel.LogMeter.R;
 
-import com.github.umeshkrpatel.LogMeter.prefs.Preferences;
+import com.github.umeshkrpatel.LogMeter.ui.prefs.Preferences;
 
 import de.ub0r.android.lib.Utils;
 import de.ub0r.android.logg0r.Log;
@@ -916,12 +916,10 @@ public final class RuleMatcher {
              */
             boolean match(final Cursor log) {
                 String number = log.getString(DataProvider.Logs.INDEX_REMOTE);
-                if (number == null) {
+                if (number == null || number.length() == 0) {
                     return false;
                 }
-                if (number.length() == 0) {
-                    return false;
-                }
+
                 Log.d(TAG, "NumbersGroup.match(", number, ")");
                 if (number.length() > 1) {
                     if (stripLeadingZeros) {

@@ -9,6 +9,9 @@ import android.provider.ContactsContract.PhoneLookup;
 import android.widget.TextView;
 
 import com.github.umeshkrpatel.LogMeter.LogMeter;
+
+import java.util.ArrayList;
+
 import de.ub0r.android.logg0r.Log;
 
 /**
@@ -43,6 +46,9 @@ public class ContactFinder extends AsyncTask<Void, Void, String> {
      */
     private final String mFormat;
 
+    private String mPhotoUri;
+    private final String mEmptyPhotoUri = "<empty>";
+
     /**
      * Default constructor.
      *
@@ -67,17 +73,16 @@ public class ContactFinder extends AsyncTask<Void, Void, String> {
      * @param format  format to format the {@link String} with
      * @return name or formatted {@link String}
      */
-    public static String findContactForNumber(final Context context, final String number,
+    public static ArrayList<String> findContactForNumber(final Context context, final String number,
                                               final String format) {
         ContactFinder loader = new ContactFinder(context, number, format, null);
-        String result = loader.doInBackground((Void) null);
-        loader.onPostExecute(result);
-        ContactCache.getInstance().put(number, result);
-        if (format == null) {
-            return result;
-        } else {
-            return String.format(format, result);
-        }
+        String name = loader.doInBackground((Void) null);
+        String uri = loader.getPhotoUri();
+        loader.onPostExecute(name);
+        ArrayList<String> e = new ArrayList<>();
+        e.add(name);
+        e.add(uri);
+        return e;
     }
 
     @Override
@@ -92,10 +97,13 @@ public class ContactFinder extends AsyncTask<Void, Void, String> {
                 //noinspection ConstantConditions
                 Cursor c = mContext.getContentResolver().query(
                         Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI, getTenDigitNumber()),
-                        new String[]{PhoneLookup.DISPLAY_NAME}, null, null, null);
+                        new String[]{PhoneLookup.DISPLAY_NAME, PhoneLookup.PHOTO_THUMBNAIL_URI}, null, null, null);
                 if (c != null) {
                     if (c.moveToFirst()) {
                         ret = c.getString(0);
+                        mPhotoUri = c.getString(1);
+                        if (mPhotoUri == null)
+                            mPhotoUri = mEmptyPhotoUri;
                     }
                     c.close();
                 }
@@ -108,7 +116,10 @@ public class ContactFinder extends AsyncTask<Void, Void, String> {
 
     @Override
     protected void onPostExecute(final String result) {
-        ContactCache.getInstance().put(mNumber, result);
+        ArrayList<String> e = new ArrayList<>();
+        e.add(result);
+        e.add(mPhotoUri);
+        ContactCache.getInstance().put(mNumber, e);
         if (mTvView != null && !this.isCancelled()) {
             String s = result;
             if (mFormat != null) {
@@ -118,6 +129,9 @@ public class ContactFinder extends AsyncTask<Void, Void, String> {
         }
     }
 
+    protected String getPhotoUri() {
+        return mPhotoUri;
+    }
     private boolean validateNumber() {
         return (mNumber.length() >= 10);
     }
