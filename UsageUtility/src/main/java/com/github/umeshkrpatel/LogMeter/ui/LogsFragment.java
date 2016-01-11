@@ -54,7 +54,6 @@ import android.widget.ToggleButton;
 
 import com.github.umeshkrpatel.LogMeter.R;
 import com.github.umeshkrpatel.LogMeter.data.ContactCache;
-import com.github.umeshkrpatel.LogMeter.data.ContactFinder;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
 import com.github.umeshkrpatel.LogMeter.data.LogRunnerService;
 import com.github.umeshkrpatel.LogMeter.ui.prefs.Preferences;
@@ -481,8 +480,6 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
                 holder.ivType = (ImageView) view.findViewById(R.id.ivType);
                 holder.ivProfile = (ImageView) view.findViewById(R.id.ivProfile);
                 view.setTag(holder);
-            } else if (holder.loader != null && !holder.loader.isCancelled()) {
-                holder.loader.cancel(true);
             }
 
             GridLayout gridLayout = (GridLayout) view.findViewById(R.id.log_items);
@@ -553,17 +550,8 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
          * @author flx
          */
         private class ViewHolder {
-
-            /**
-             * Holder for item's view.
-             */
             TextView tvName, tvNumber, tvTime, tvDuration;
-
             ImageView ivProfile, ivItem, ivType;
-            /**
-             * Hold {@link ContactFinder}.
-             */
-            ContactFinder loader;
         }
     }
 

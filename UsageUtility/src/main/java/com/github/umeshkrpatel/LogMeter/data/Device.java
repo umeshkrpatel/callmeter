@@ -20,6 +20,8 @@
 package com.github.umeshkrpatel.LogMeter.data;
 
 import android.annotation.TargetApi;
+import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.net.TrafficStats;
 import android.os.Build;
 
@@ -27,6 +29,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashMap;
 
 import de.ub0r.android.logg0r.Log;
 
@@ -253,4 +256,28 @@ final class TargetDevice extends Device {
         }
         return la - l;
     }
+
+    private class TraficRecord {
+        long mIncoming = 0;
+        long mOutgoing = 0;
+        String appTag = null;
+        TraficRecord() {
+            mIncoming = TrafficStats.getTotalRxBytes();
+            mOutgoing = TrafficStats.getTotalTxBytes();
+        }
+        TraficRecord(int uid, String tag) {
+            mIncoming = TrafficStats.getUidRxBytes(uid);
+            mOutgoing = TrafficStats.getUidTxBytes(uid);
+            appTag = tag;
+        }
+    };
+
+    private class TrafficMonitor {
+        HashMap<Integer, TraficRecord> apps = new HashMap<>();
+        TrafficMonitor(Context context) {
+            for (ApplicationInfo app : context.getPackageManager().getInstalledApplications(0)) {
+                apps.put(app.uid, new TraficRecord(app.uid, app.packageName));
+            }
+        }
+    };
 }
