@@ -14,7 +14,10 @@ import android.preference.PreferenceCategory;
 import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
+import android.util.Log;
 import android.widget.Toast;
+
+import com.github.umeshkrpatel.LogMeter.R;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -25,9 +28,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 
-import com.github.umeshkrpatel.LogMeter.R;
 import de.ub0r.android.lib.Utils;
-import de.ub0r.android.logg0r.Log;
 
 public class PreferencesRules extends PreferenceActivity {
 

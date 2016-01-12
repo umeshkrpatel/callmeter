@@ -26,6 +26,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -43,10 +44,10 @@ import android.widget.SpinnerAdapter;
 
 import com.github.umeshkrpatel.LogMeter.R;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
-import de.ub0r.android.lib.Utils;
-import de.ub0r.android.logg0r.Log;
 import com.github.umeshkrpatel.LogMeter.utils.AmbilWarnaDialog;
 import com.github.umeshkrpatel.LogMeter.utils.AmbilWarnaDialog.OnAmbilWarnaListener;
+
+import de.ub0r.android.lib.Utils;
 
 /**
  * Configure a stats widget.
@@ -164,6 +165,11 @@ public final class StatsAppWidgetConfigure extends AppCompatActivity implements 
     private void setAdapter() {
         final Cursor c = getContentResolver().query(DataProvider.Plans.CONTENT_URI,
                 PROJ_ADAPTER, DataProvider.Plans.WHERE_PLANS, null, DataProvider.Plans.NAME);
+        if (c == null) {
+            Log.e(TAG, "Error cursor for Uri:" + DataProvider.Plans.CONTENT_URI);
+            return;
+        }
+
         String[] fieldName;
         if (cbShowShortname.isChecked()) {
             fieldName = new String[]{DataProvider.Plans.SHORTNAME};
@@ -172,12 +178,13 @@ public final class StatsAppWidgetConfigure extends AppCompatActivity implements 
         }
         final SimpleCursorAdapter adapter = new SimpleCursorAdapter(this,
                 android.R.layout.simple_spinner_item, c, fieldName,
-                new int[]{android.R.id.text1});
+                new int[]{android.R.id.text1}, 0);
         final int pos = spinner.getSelectedItemPosition();
         spinner.setAdapter(adapter);
         if (pos >= 0 && pos < spinner.getCount()) {
             spinner.setSelection(pos);
         }
+        c.close();
     }
 
     /**
@@ -290,9 +297,9 @@ public final class StatsAppWidgetConfigure extends AppCompatActivity implements 
         switch (buttonView.getId()) {
             case R.id.shortname:
                 setAdapter();
-                return;
+                break;
             default:
-                return;
+                Log.d(TAG, "Case default:");
         }
     }
 
@@ -302,15 +309,15 @@ public final class StatsAppWidgetConfigure extends AppCompatActivity implements 
     @Override
     public void onProgressChanged(final SeekBar seekBar, final int progress,
                                   final boolean fromUser) {
-        Log.d(TAG, "onProgressChanged(", progress, ")");
+        Log.d(TAG, "onProgressChanged(" + progress + ")");
         final int tp = 255 - progress;
         int c = getBgColor();
-        Log.d(TAG, "color: ", c);
+        Log.d(TAG, "color: " + c);
         c = c & BITMASK_COLOR;
-        Log.d(TAG, "color: ", c);
+        Log.d(TAG, "color: " + c);
         Log.i(TAG, "transparency: " + Integer.toHexString(tp << BITSHIFT_TRANSPARENCY));
         c = c | tp << BITSHIFT_TRANSPARENCY;
-        Log.d(TAG, "color: ", c);
+        Log.d(TAG, "color: " + c);
         setBgColor(c, true);
     }
 
@@ -416,21 +423,21 @@ public final class StatsAppWidgetConfigure extends AppCompatActivity implements 
      * @param fromProgressBar true, if setColor is called from onProgessChanged()
      */
     private void setBgColor(final int color, final boolean fromProgressBar) {
-        Log.d(TAG, "setBgColor(", color, ", ", fromProgressBar, ")");
+        Log.d(TAG, "setBgColor(" + color + ", " + fromProgressBar + ")");
         String hex = AmbilWarnaDialog.colorToString(color);
-        Log.d(TAG, "color: ", hex);
+        Log.d(TAG, "color: " + hex);
         while (hex.length() < 9) {
             hex = "#0" + hex.substring(1);
-            Log.d(TAG, "color: ", hex);
+            Log.d(TAG, "color: " + hex);
         }
         btnBgColor.setText(hex);
         vBgColor.setBackgroundColor(color);
         if (!fromProgressBar) {
             int trans = color >> BITSHIFT_TRANSPARENCY;
-            Log.d(TAG, "transparency: ", trans);
+            Log.d(TAG, "transparency: " + trans);
             if (trans < 0) {
                 trans = 256 + trans;
-                Log.d(TAG, "transparency: ", trans);
+                Log.d(TAG, "transparency: " + trans);
             }
             sbBgTransparency.setProgress(255 - trans);
         }
@@ -451,12 +458,12 @@ public final class StatsAppWidgetConfigure extends AppCompatActivity implements 
      * @param color color to set
      */
     private void setTextColor(final int color) {
-        Log.d(TAG, "setTextColor(", color, ")");
+        Log.d(TAG, "setTextColor(" + color + ")");
         String hex = AmbilWarnaDialog.colorToString(color);
-        Log.d(TAG, "color: ", hex);
+        Log.d(TAG, "color: " + hex);
         while (hex.length() < 9) {
             hex = "#0" + hex.substring(1);
-            Log.d(TAG, "color: ", hex);
+            Log.d(TAG, "color: " + hex);
         }
         btnTextColor.setText(hex);
         vTextColor.setBackgroundColor(color);

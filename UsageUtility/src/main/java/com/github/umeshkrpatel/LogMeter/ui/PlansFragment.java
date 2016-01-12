@@ -42,6 +42,7 @@ import android.support.v4.widget.ResourceCursorAdapter;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.StyleSpan;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -55,16 +56,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.PieChart;
-
-import java.util.UnknownFormatConversionException;
-
 import com.github.umeshkrpatel.LogMeter.LogMeter;
 import com.github.umeshkrpatel.LogMeter.R;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
 import com.github.umeshkrpatel.LogMeter.ui.prefs.PlanEdit;
 import com.github.umeshkrpatel.LogMeter.ui.prefs.Preferences;
 
-import de.ub0r.android.logg0r.Log;
+import java.util.UnknownFormatConversionException;
 
 /**
  * Show plans.
@@ -160,7 +158,7 @@ public final class PlansFragment extends ListFragment implements OnClickListener
     }
 
     private synchronized void setInProgress(final int add) {
-        Log.d(TAG, "setInProgress(", add, ")");
+        Log.d(TAG, "setInProgress(" + add + ")");
         if (add == 0) {
             ((UtilityActivity) getActivity()).setInProgress(add);
         } else if (add > 0 && !this.inProgress) {
@@ -173,7 +171,7 @@ public final class PlansFragment extends ListFragment implements OnClickListener
     }
 
     public void reQuery(final boolean forceUpdate) {
-        Log.d(TAG, "requery(", forceUpdate, ")");
+        Log.d(TAG, "requery(" + forceUpdate + ")");
         if (!this.ignoreQuery) {
             LoaderManager lm = getLoaderManager();
             if (forceUpdate && lm.getLoader(uid) != null) {
@@ -182,7 +180,7 @@ public final class PlansFragment extends ListFragment implements OnClickListener
                 lm.initLoader(uid, null, this);
             }
         } else {
-            Log.d(TAG, "requery(", forceUpdate, "): ignore");
+            Log.d(TAG, "requery(" + forceUpdate + "): ignore");
         }
     }
 
@@ -242,7 +240,7 @@ public final class PlansFragment extends ListFragment implements OnClickListener
 
     @Override
     public Loader<Cursor> onCreateLoader(final int id, final Bundle args) {
-        Log.d(TAG, "onCreateLoader(", id, ",", args, ")");
+        Log.d(TAG, "onCreateLoader(" + id + "," + args + ")");
         setInProgress(1);
         PlansAdapter adapter = (PlansAdapter) getListAdapter();
         if ((adapter == null || adapter.getCount() == 0) && vLoading != null) {
@@ -392,7 +390,7 @@ public final class PlansFragment extends ListFragment implements OnClickListener
             }
 
             boolean savePlan = false;
-            DataProvider.Plans.Plan plan = null;
+            DataProvider.Plans.Plan plan;
             if (cursor.getColumnIndex(DataProvider.Plans.SUM_COST) > 0) {
                 plan = new DataProvider.Plans.Plan(cursor);
                 savePlan = true;
@@ -421,8 +419,7 @@ public final class PlansFragment extends ListFragment implements OnClickListener
                             Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                     if (plan.type != DataProvider.TYPE_BILLPERIOD) {
                         if (showTotal) {
-                            spb.append(delimiter
-                                    + Common.formatValues(context, plan.now, plan.type,
+                            spb.append(delimiter).append(Common.formatValues(context, plan.now, plan.type,
                                     plan.atCount, plan.atBa, plan.billperiod, plan.billday,
                                     pShowHours));
                         }
@@ -448,7 +445,7 @@ public final class PlansFragment extends ListFragment implements OnClickListener
                                     + "' and free=" + free, ex);
                             s = "$";
                         }
-                        spb.append("(" + s + ")");
+                        spb.append("(").append(s).append(")");
                     }
                     if (cost > 0f) {
                         String s;
@@ -459,7 +456,7 @@ public final class PlansFragment extends ListFragment implements OnClickListener
                                     + "' and cost=" + cost, ex);
                             s = "$";
                         }
-                        spb.append(" " + s);
+                        spb.append(" ").append(s);
                     }
                 }
                 if (plan.limit > 0) {
@@ -467,13 +464,13 @@ public final class PlansFragment extends ListFragment implements OnClickListener
                 }
             }
 
-            Log.v(TAG, "plan id: ", plan.id);
-            Log.v(TAG, "plan name: ", plan.name);
-            Log.v(TAG, "type: ", plan.type);
-            Log.v(TAG, "cost: ", cost);
-            Log.v(TAG, "limit: ", plan.limit);
-            Log.v(TAG, "limitPos: ", plan.limitPos);
-            Log.v(TAG, "text: ", spb);
+            Log.v(TAG, "plan id: " + plan.id);
+            Log.v(TAG, "plan name: " + plan.name);
+            Log.v(TAG, "type: " + plan.type);
+            Log.v(TAG, "cost: " + cost);
+            Log.v(TAG, "limit: " + plan.limit);
+            Log.v(TAG, "limitPos: " + plan.limitPos);
+            Log.v(TAG, "text: " + spb);
 
             TextView tvCache = null;
             ProgressBar pbCache = null;
@@ -555,7 +552,7 @@ public final class PlansFragment extends ListFragment implements OnClickListener
                     pbCache.setMax((int) plan.limit);
                     pbCache.setProgress((int) plan.limitPos);
                     pbCache.setVisibility(progressBarVisability);
-                    int pbs = 0;
+                    int pbs;
                     if (plan.type == DataProvider.TYPE_BILLPERIOD) {
                         pbs = textSizePBarBP;
                     } else {

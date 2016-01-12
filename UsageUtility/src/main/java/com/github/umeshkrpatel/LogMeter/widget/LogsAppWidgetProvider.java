@@ -35,6 +35,7 @@ import android.graphics.RectF;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
 
@@ -42,14 +43,13 @@ import com.github.umeshkrpatel.LogMeter.R;
 import com.github.umeshkrpatel.LogMeter.data.ContactCache;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
 import com.github.umeshkrpatel.LogMeter.data.LogRunnerService;
-import com.github.umeshkrpatel.LogMeter.ui.prefs.Preferences;
 import com.github.umeshkrpatel.LogMeter.ui.Common;
 import com.github.umeshkrpatel.LogMeter.ui.UtilityActivity;
+import com.github.umeshkrpatel.LogMeter.ui.prefs.Preferences;
 
 import java.util.Date;
 
 import de.ub0r.android.lib.Utils;
-import de.ub0r.android.logg0r.Log;
 
 /**
  * Stats Widget.
@@ -107,7 +107,7 @@ public final class LogsAppWidgetProvider extends AppWidgetProvider {
         SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(context);
 
         for (int id : appWidgetIds) {
-            Log.d(TAG, "update widget: ", id);
+            Log.d(TAG, "update widget: " + id);
             if (p.getLong(WIDGET_PLANID + id, -1) <= 0) {
                 Log.w(TAG, "skip stale widget: " + id);
             } else {
@@ -139,7 +139,7 @@ public final class LogsAppWidgetProvider extends AppWidgetProvider {
      */
     static void updateWidget(final Context context, final AppWidgetManager appWidgetManager,
                              final int appWidgetId) {
-        Log.d(TAG, "updateWidget(", appWidgetId, ")");
+        Log.d(TAG, "updateWidget(" + appWidgetId + ")");
         final SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(context);
         final boolean showHours = p.getBoolean(Preferences.PREFS_SHOWHOURS, true);
         final String cformat = Preferences.getCurrencyFormat(context);
@@ -155,7 +155,7 @@ public final class LogsAppWidgetProvider extends AppWidgetProvider {
                 StatsAppWidgetConfigure.DEFAULT_TEXTCOLOR);
         final int bgColor = p.getInt(WIDGET_BGCOLOR + appWidgetId,
                 StatsAppWidgetConfigure.DEFAULT_BGCOLOR);
-        Log.d(TAG, "planid: ", pid);
+        Log.d(TAG, "planid: " + pid);
         int widgetLayout = R.layout.stats_appwidget;
         if (smallWidget) {
             widgetLayout = R.layout.stats_appwidget_small;
@@ -283,7 +283,7 @@ public final class LogsAppWidgetProvider extends AppWidgetProvider {
     public void onDeleted(final Context context, final int[] appWidgetIds) {
         Editor e = PreferenceManager.getDefaultSharedPreferences(context).edit();
         for (int id : appWidgetIds) {
-            Log.d(TAG, "delete widget: ", id);
+            Log.d(TAG, "delete widget: " + id);
             e.remove(WIDGET_PLANID + id);
         }
         e.apply();

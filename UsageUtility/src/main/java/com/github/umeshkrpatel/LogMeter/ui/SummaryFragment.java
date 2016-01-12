@@ -12,6 +12,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.ResourceCursorAdapter;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -31,8 +32,6 @@ import com.github.umeshkrpatel.LogMeter.data.LogRunnerService;
 import com.github.umeshkrpatel.LogMeter.ui.prefs.Preferences;
 
 import java.util.ArrayList;
-
-import de.ub0r.android.logg0r.Log;
 
 /**
  * Callmeter's Log {@link LogsFragment}.
@@ -265,7 +264,7 @@ public final class SummaryFragment extends ListFragment implements OnClickListen
 
     @Override
     public Loader<Cursor> onCreateLoader(final int id, final Bundle args) {
-        Log.d(TAG, "onCreateLoader(", id, ",", args, ")");
+        Log.d(TAG, "onCreateLoader(" + id + "," + args + ")");
         getActivity().setProgress(1);
         return null;
     }
@@ -286,7 +285,7 @@ public final class SummaryFragment extends ListFragment implements OnClickListen
         try {
             ((SummaryAdapter) getListAdapter()).swapCursor(null);
         } catch (Exception e) {
-            Log.w(TAG, "error removing cursor", e);
+            Log.w(TAG, "error removing cursor e:" + e.getMessage());
         }
     }
 

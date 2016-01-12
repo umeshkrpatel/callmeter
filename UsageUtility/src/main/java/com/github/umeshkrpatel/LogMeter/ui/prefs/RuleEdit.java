@@ -31,15 +31,16 @@ import android.preference.PreferenceScreen;
 import android.telephony.TelephonyManager;
 import android.text.InputType;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.github.umeshkrpatel.LogMeter.LogMeter;
 import com.github.umeshkrpatel.LogMeter.R;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
 import com.github.umeshkrpatel.LogMeter.data.LogRunnerService;
 import com.github.umeshkrpatel.LogMeter.data.RuleMatcher;
+
 import de.ub0r.android.lib.DbUtils;
 import de.ub0r.android.lib.Utils;
-import de.ub0r.android.logg0r.Log;
 
 /**
  * Edit a single Plan.
@@ -231,7 +232,7 @@ public final class RuleEdit extends PreferenceActivity implements UpdateListener
             } else {
                 w = c.getInt(DataProvider.Rules.INDEX_WHAT);
             }
-            Log.d(TAG, "what: ", w);
+            Log.d(TAG, "what: " + w);
             lp.setValue(String.valueOf(w));
             ps.addPreference(lp);
             int t = DataProvider.what2type(w);
@@ -446,7 +447,7 @@ public final class RuleEdit extends PreferenceActivity implements UpdateListener
                 break;
         }
         where = DbUtils.sqlAnd(where, DataProvider.Plans.MERGED_PLANS + " IS NULL");
-        Log.d(TAG, "plans.where: ", where);
+        Log.d(TAG, "plans.where: " + where);
         return where;
     }
 

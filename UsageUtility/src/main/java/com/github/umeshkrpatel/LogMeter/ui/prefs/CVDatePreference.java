@@ -17,7 +17,7 @@ import android.widget.TimePicker;
 import java.util.Calendar;
 
 import com.github.umeshkrpatel.LogMeter.R;
-import de.ub0r.android.logg0r.Log;
+import android.util.Log;
 
 /**
  * DatePreference holding it's value in {@link ContentValues}.

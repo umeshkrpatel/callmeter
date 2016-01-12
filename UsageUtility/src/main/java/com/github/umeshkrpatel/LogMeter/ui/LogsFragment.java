@@ -38,6 +38,7 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.ResourceCursorAdapter;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -61,7 +62,6 @@ import com.github.umeshkrpatel.LogMeter.ui.prefs.Preferences;
 import java.util.Date;
 
 import de.ub0r.android.lib.DbUtils;
-import de.ub0r.android.logg0r.Log;
 
 /**
  * Callmeter's Log {@link LogsFragment}.
@@ -114,17 +114,9 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
      */
     private ToggleButton tbCall, tbSMS, tbMMS, tbData, tbIn, tbOut, tbPlan;
     /**
-     * Show my number.
-     */
-    private boolean showMyNumber = false;
-    /**
      * Show hours and days.
      */
     private boolean showHours = true;
-    /**
-     * Currency format.
-     */
-    private String cformat;
     /**
      * Selected plan id.
      */
@@ -148,12 +140,6 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
         super.onActivityCreated(savedInstanceState);
         setListAdapter(new LogAdapter(getActivity()));
         getListView().setOnItemLongClickListener(this);
-        //getListView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
-        //    @Override
-        //    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        //        mListener.onLogFragmentInteraction("+918867630185");
-        //    }
-        //});
     }
 
     @Override
@@ -223,15 +209,14 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
                 .getContentResolver()
                 .query(DataProvider.Rules.CONTENT_URI, new String[]{DataProvider.Rules.ID},
                         DataProvider.Rules.MYNUMBER + " like '___%'", null, null);
+        /*
+      Show my number.
+     */
         if (c != null) {
-            showMyNumber = c.getCount() > 0;
             c.close();
-        } else {
-            showMyNumber = false;
         }
         showHours = PreferenceManager.getDefaultSharedPreferences(getActivity())
                 .getBoolean(Preferences.PREFS_SHOWHOURS, true);
-        cformat = Preferences.getCurrencyFormat(getActivity());
     }
 
     /**
@@ -247,7 +232,7 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
         e.putBoolean(PREF_DATA, tbData.isChecked());
         e.putBoolean(PREF_IN, tbIn.isChecked());
         e.putBoolean(PREF_OUT, tbOut.isChecked());
-        e.commit();
+        e.apply();
     }
 
     /**
@@ -287,7 +272,7 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
             String plans = DataProvider.Plans.parseMergerWhere(getActivity()
                     .getContentResolver(), planId);
             where = DbUtils.sqlAnd(plans, where);
-            Log.d(TAG, "where: ", where);
+            Log.d(TAG, "where: " + where);
         }
         Bundle args = new Bundle(1);
         args.putString("where", where);
@@ -394,7 +379,7 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
 
     @Override
     public Loader<Cursor> onCreateLoader(final int id, final Bundle args) {
-        Log.d(TAG, "onCreateLoader(", id, ",", args, ")");
+        Log.d(TAG, "onCreateLoader(" + id + "," + args + ")");
         getActivity().setProgress(1);
         String where = null;
         if (args != null) {
@@ -420,7 +405,7 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
         try {
             ((LogAdapter) getListAdapter()).swapCursor(null);
         } catch (Exception e) {
-            Log.w(TAG, "error removing cursor", e);
+            Log.w(TAG, "error removing cursor e:" + e.getMessage());
         }
     }
 
@@ -431,10 +416,7 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
      */
     public class LogAdapter extends ResourceCursorAdapter {
 
-        /**
-         * Column ids.
-         */
-        private int idPlanName, idRuleName;
+        private int idRuleName;
 
         /**
          * Default Constructor.
@@ -451,7 +433,6 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
         @Override
         public final Cursor swapCursor(final Cursor cursor) {
             Cursor c = super.swapCursor(cursor);
-            idPlanName = cursor.getColumnIndex(DataProvider.Plans.NAME);
             idRuleName = cursor.getColumnIndex(DataProvider.Rules.NAME);
             return c;
         }
@@ -485,7 +466,6 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
             GridLayout gridLayout = (GridLayout) view.findViewById(R.id.log_items);
             StringBuilder buf = new StringBuilder();
             final int t = cursor.getInt(DataProvider.Logs.INDEX_TYPE);
-            final int pt = cursor.getInt(DataProvider.Logs.INDEX_PLAN_TYPE);
             final long date = cursor.getLong(DataProvider.Logs.INDEX_DATE);
             buf.append(Common.formatDate(context, date));
             buf.append(" ");

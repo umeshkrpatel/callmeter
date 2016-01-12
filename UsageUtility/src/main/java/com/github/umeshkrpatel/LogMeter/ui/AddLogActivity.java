@@ -50,7 +50,7 @@ import com.github.umeshkrpatel.LogMeter.data.DataProvider;
 import com.github.umeshkrpatel.LogMeter.data.LogRunnerService;
 import com.github.umeshkrpatel.LogMeter.ui.prefs.Preferences;
 import de.ub0r.android.lib.Utils;
-import de.ub0r.android.logg0r.Log;
+import android.util.Log;
 
 /**
  * Add a log entry.

@@ -36,20 +36,19 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.SparseArray;
+
+import com.github.umeshkrpatel.LogMeter.LogMeter;
+import com.github.umeshkrpatel.LogMeter.R;
+import com.github.umeshkrpatel.LogMeter.ui.UtilityActivity;
+import com.github.umeshkrpatel.LogMeter.ui.prefs.Preferences;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
 
-import com.github.umeshkrpatel.LogMeter.ui.UtilityActivity;
-import com.github.umeshkrpatel.LogMeter.LogMeter;
-import com.github.umeshkrpatel.LogMeter.R;
-
-import com.github.umeshkrpatel.LogMeter.ui.prefs.Preferences;
-
 import de.ub0r.android.lib.Utils;
-import de.ub0r.android.logg0r.Log;
 
 /**
  * Class matching logs via rules to plans.
@@ -121,7 +120,7 @@ public final class RuleMatcher {
         final ContentResolver cr = context.getContentResolver();
 
         // load rules
-        rules = new ArrayList<Rule>();
+        rules = new ArrayList<>();
         Cursor cursor = cr.query(DataProvider.Rules.CONTENT_URI, DataProvider.Rules.PROJECTION,
                 DataProvider.Rules.ACTIVE + ">0", null, DataProvider.Rules.ORDER);
         if (cursor != null && cursor.moveToFirst()) {
@@ -134,7 +133,7 @@ public final class RuleMatcher {
         }
 
         // load plans
-        plans = new SparseArray<Plan>();
+        plans = new SparseArray<>();
         cursor = cr.query(DataProvider.Plans.CONTENT_URI, DataProvider.Plans.PROJECTION,
                 DataProvider.Plans.WHERE_REALPLANS, null, null);
         if (cursor != null && cursor.moveToFirst()) {
@@ -214,7 +213,7 @@ public final class RuleMatcher {
         }
         final long lid = log.getLong(DataProvider.Logs.INDEX_ID);
         final int t = log.getInt(DataProvider.Logs.INDEX_TYPE);
-        Log.d(TAG, "matchLog(cr, ", lid, ")");
+        Log.d(TAG, "matchLog(cr, " + lid + ")");
         boolean matched = false;
         if (rules == null) {
             Log.e(TAG, "rules = null");
@@ -228,12 +227,12 @@ public final class RuleMatcher {
             if (r == null || !r.match(cr, log) || plans == null) {
                 continue;
             }
-            Log.d(TAG, "matched rule: ", r.getId());
+            Log.d(TAG, "matched rule: " + r.getId());
             final Plan p = plans.get(r.getPlanId());
             if (p != null) {
                 final long pid = p.getId();
                 final long rid = r.getId();
-                Log.d(TAG, "found plan: ", pid);
+                Log.d(TAG, "found plan: " + pid);
                 p.checkBillday(log);
                 final float ba = p.getBilledAmount(log);
                 final float bc = p.getCost(log, ba);
@@ -280,7 +279,7 @@ public final class RuleMatcher {
             Log.e(TAG, "matchLog(cr, " + lid + "," + pid + ")");
             return;
         }
-        Log.d(TAG, "matchLog(cr, ", lid, ",", pid, ")");
+        Log.d(TAG, "matchLog(cr, " + lid + "," + pid + ")");
 
         if (plans == null) {
             Log.e(TAG, "plans = null");
@@ -324,7 +323,7 @@ public final class RuleMatcher {
      * @return true if a log was matched
      */
     static synchronized boolean match(final Context context, final boolean showStatus) {
-        Log.d(TAG, "match(ctx, ", showStatus, ")");
+        Log.d(TAG, "match(ctx, " + showStatus + ")");
         long start = System.currentTimeMillis();
         boolean ret = false;
         load(context);
@@ -345,7 +344,7 @@ public final class RuleMatcher {
                 }
             }
             try {
-                ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+                ArrayList<ContentProviderOperation> ops = new ArrayList<>();
                 int i = 1;
                 do {
                     ret |= matchLog(cr, ops, cursor);
@@ -356,10 +355,10 @@ public final class RuleMatcher {
                                     .obtainMessage(UtilityActivity.MSG_BACKGROUND_PROGRESS_MATCHER);
                             m.arg1 = i;
                             m.arg2 = l;
-                            Log.d(TAG, "send progress: ", i, "/", l);
+                            Log.d(TAG, "send progress: " + i + "/" + l);
                             m.sendToTarget();
                         } else {
-                            Log.d(TAG, "send progress: ", i, " handler=null");
+                            Log.d(TAG, "send progress: " + i + " handler=null");
                         }
                         Log.d(TAG, "save logs..");
                         cr.applyBatch(DataProvider.kAuthority, ops);
@@ -377,12 +376,8 @@ public final class RuleMatcher {
                 if (ops.size() > 0) {
                     cr.applyBatch(DataProvider.kAuthority, ops);
                 }
-            } catch (IllegalStateException e) {
-                Log.e(TAG, "illegal state in RuleMatcher's loop", e);
-            } catch (OperationApplicationException e) {
-                Log.e(TAG, "illegal operation in RuleMatcher's loop", e);
-            } catch (RemoteException e) {
-                Log.e(TAG, "remote exception in RuleMatcher's loop", e);
+            } catch (IllegalStateException | OperationApplicationException | RemoteException e) {
+                Log.e(TAG, "Exception in RuleMatcher's loop e:" + e.getMessage());
             }
         }
         try {
@@ -390,7 +385,7 @@ public final class RuleMatcher {
                 cursor.close();
             }
         } catch (IllegalStateException e) {
-            Log.e(TAG, "illegal state while closing cursor", e);
+            Log.e(TAG, "illegal state while closing cursor e:" + e.getMessage());
         }
 
         if (ret) {
@@ -409,7 +404,7 @@ public final class RuleMatcher {
                         continue;
                     }
                     if (plan.nextAlert > now) {
-                        Log.d(TAG, "%s: skip alert until: %d now=%d", plan, plan.nextAlert, now);
+                        Log.d(TAG, plan + ": skip alert until: " + plan.nextAlert + " now=" + now);
                         continue;
                     }
                     int used = DataProvider.Plans.getUsed(plan.type, plan.limitType,
@@ -458,7 +453,7 @@ public final class RuleMatcher {
             }
         }
         long end = System.currentTimeMillis();
-        Log.i(TAG, "match(): ", end - start, "ms");
+        Log.i(TAG, "match(): " + (end - start) + "ms");
         return ret;
     }
 
@@ -593,7 +588,7 @@ public final class RuleMatcher {
                 return null;
             }
             final String[] split = gids.split(",");
-            ArrayList<NumbersGroup> list = new ArrayList<NumbersGroup>();
+            ArrayList<NumbersGroup> list = new ArrayList<>();
             for (String s : split) {
                 if (s == null || s.length() == 0 || s.equals("-1")) {
                     continue;
@@ -621,7 +616,7 @@ public final class RuleMatcher {
                 return null;
             }
             final String[] split = gids.split(",");
-            ArrayList<HoursGroup> list = new ArrayList<HoursGroup>();
+            ArrayList<HoursGroup> list = new ArrayList<>();
             for (String s : split) {
                 if (s == null || s.length() == 0 || s.equals("-1")) {
                     continue;
@@ -659,10 +654,9 @@ public final class RuleMatcher {
          * @return matched?
          */
         boolean match(final ContentResolver cr, final Cursor log) {
-            Log.d(TAG, "match()");
-            Log.d(TAG, "what: ", what);
+            Log.d(TAG, "what: " + what);
             final int t = log.getInt(DataProvider.Logs.INDEX_TYPE);
-            Log.d(TAG, "type: ", t);
+            Log.d(TAG, "type: " + t);
             boolean ret = false;
 
             if (roamed == 0 || roamed == 1) {
@@ -671,7 +665,7 @@ public final class RuleMatcher {
                 // log.roamed=0: not roamed
                 // log.roamed=1: roamed
                 ret = log.getInt(DataProvider.Logs.INDEX_ROAMED) != roamed;
-                Log.d(TAG, "ret after romaing: ", ret);
+                Log.d(TAG, "ret after romaing: " + ret);
                 if (!ret) {
                     return false;
                 }
@@ -679,7 +673,7 @@ public final class RuleMatcher {
 
             if (direction >= 0 && direction != DataProvider.Rules.NO_MATTER) {
                 ret = log.getInt(DataProvider.Logs.INDEX_DIRECTION) == direction;
-                Log.d(TAG, "ret after direction: ", ret);
+                Log.d(TAG, "ret after direction: " + ret);
                 if (!ret) {
                     return false;
                 }
@@ -690,7 +684,7 @@ public final class RuleMatcher {
                     ret = (t == DataProvider.TYPE_CALL);
                     if (ret && issipcall != DataProvider.Rules.NO_MATTER) {
                         final long d = log.getLong(DataProvider.Logs.INDEX_DATE);
-                        Log.d(TAG, "match sipcall: ", issipcall);
+                        Log.d(TAG, "match sipcall: " + issipcall);
                         S1[0] = String.valueOf(d);
                         if (issipcall == 1) {
                             // match no sipcall
@@ -713,7 +707,7 @@ public final class RuleMatcher {
                                 c.close();
                             }
                         }
-                        Log.d(TAG, "match sipcall: ", issipcall, "; ", ret);
+                        Log.d(TAG, "match sipcall: " + issipcall + "; " + ret);
                     }
                     break;
                 case DataProvider.Rules.WHAT_DATA:
@@ -726,7 +720,7 @@ public final class RuleMatcher {
                     ret = (t == DataProvider.TYPE_SMS);
                     if (ret && iswebsms != DataProvider.Rules.NO_MATTER) {
                         final long d = log.getLong(DataProvider.Logs.INDEX_DATE);
-                        Log.d(TAG, "match websms: ", iswebsms);
+                        Log.d(TAG, "match websms: " + iswebsms);
                         S1[0] = String.valueOf(d);
                         if (iswebsms == 1) {
                             // match no websms
@@ -752,13 +746,13 @@ public final class RuleMatcher {
                                 c.close();
                             }
                         }
-                        Log.d(TAG, "match websms: ", iswebsms, "; ", ret);
+                        Log.d(TAG, "match websms: " + iswebsms + "; " + ret);
                     }
                     break;
                 default:
                     break;
             }
-            Log.d(TAG, "ret after type: ", ret);
+            Log.d(TAG, "ret after type: " + ret);
             if (!ret) {
                 return false;
             }
@@ -769,10 +763,10 @@ public final class RuleMatcher {
                     ret = p.getRemainingLimit() > 0f;
                 }
                 if (!ret) {
-                    Log.d(TAG, "limit reached: ", planId);
+                    Log.d(TAG, "limit reached: " + planId);
                 }
             }
-            Log.d(TAG, "ret after limit: ", ret);
+            Log.d(TAG, "ret after limit: " + ret);
             if (!ret) {
                 return false;
             }
@@ -780,7 +774,7 @@ public final class RuleMatcher {
             if (myNumber != null) {
                 // FIXME: do equals?
                 ret = myNumber.equals(log.getString(DataProvider.Logs.INDEX_MYNUMBER));
-                Log.d(TAG, "ret after mynumber: ", ret);
+                Log.d(TAG, "ret after mynumber: " + ret);
                 if (!ret) {
                     return false;
                 }
@@ -795,7 +789,7 @@ public final class RuleMatcher {
                     }
                 }
             }
-            Log.d(TAG, "ret after inhours: ", ret);
+            Log.d(TAG, "ret after inhours: " + ret);
             if (!ret) {
                 return false;
             }
@@ -807,7 +801,7 @@ public final class RuleMatcher {
                     }
                 }
             }
-            Log.d(TAG, "ret after exhours: ", ret);
+            Log.d(TAG, "ret after exhours: " + ret);
             if (!ret) {
                 return false;
             }
@@ -820,7 +814,7 @@ public final class RuleMatcher {
                     }
                 }
             }
-            Log.d(TAG, "ret after innumbers: ", ret);
+            Log.d(TAG, "ret after innumbers: " + ret);
             if (!ret) {
                 return false;
             }
@@ -832,7 +826,7 @@ public final class RuleMatcher {
                     }
                 }
             }
-            Log.d(TAG, "ret after exnumbers: ", ret);
+            Log.d(TAG, "ret after exnumbers: " + ret);
             return ret;
         }
 
@@ -844,7 +838,7 @@ public final class RuleMatcher {
             /**
              * List of numbers.
              */
-            private final ArrayList<String> numbers = new ArrayList<String>();
+            private final ArrayList<String> numbers = new ArrayList<>();
 
             /**
              * Default Constructor.
@@ -920,7 +914,7 @@ public final class RuleMatcher {
                     return false;
                 }
 
-                Log.d(TAG, "NumbersGroup.match(", number, ")");
+                Log.d(TAG, "NumbersGroup.match(" + number + ")");
                 if (number.length() > 1) {
                     if (stripLeadingZeros) {
                         number = number.replaceFirst("^00*", "");
@@ -933,41 +927,41 @@ public final class RuleMatcher {
                 for (int i = 0; i < l; i++) {
                     String n = numbers.get(i);
                     if (n == null) {
-                        Log.w(TAG, "numbers[", i, "] = null");
+                        Log.w(TAG, "numbers[" + i + "] = null");
                         return false;
                     }
                     int nl = n.length();
                     if (nl <= 1) {
-                        Log.w(TAG, "#numbers[", i, "] = ", nl);
+                        Log.w(TAG, "#numbers[" + i + "] = " + nl);
                         return false;
                     }
 
                     if (n.startsWith("%")) {
                         if (n.endsWith("%")) {
                             if (nl == 2) {
-                                Log.w(TAG, "numbers[", i, "] = ", n);
+                                Log.w(TAG, "numbers[" + i + "] = " + n);
                                 return false;
                             }
                             if (number.contains(n.substring(1, nl - 1))) {
-                                Log.d(TAG, "match: ", n);
+                                Log.d(TAG, "match: " + n);
                                 return true;
                             }
                         } else {
                             if (number.endsWith(n.substring(1))) {
-                                Log.d(TAG, "match: ", n);
+                                Log.d(TAG, "match: " + n);
                                 return true;
                             }
                         }
                     } else if (n.endsWith("%")) {
                         if (number.startsWith(n.substring(0, nl - 1))) {
-                            Log.d(TAG, "match: ", n);
+                            Log.d(TAG, "match: " + n);
                             return true;
                         }
                     } else if (PhoneNumberUtils.compare(number, n)) {
-                        Log.d(TAG, "match: ", n);
+                        Log.d(TAG, "match: " + n);
                         return true;
                     }
-                    Log.v(TAG, "no match: ", n);
+                    Log.v(TAG, "no match: " + n);
                 }
                 return false;
             }
@@ -1013,7 +1007,7 @@ public final class RuleMatcher {
             /**
              * List of hours.
              */
-            private final SparseArray<HashSet<Integer>> hours = new SparseArray<HashSet<Integer>>();
+            private final SparseArray<HashSet<Integer>> hours = new SparseArray<>();
 
             /**
              * Default Constructor.
@@ -1032,7 +1026,7 @@ public final class RuleMatcher {
                         final int h = cursor.getInt(DataProvider.Hours.INDEX_HOUR);
                         HashSet<Integer> hs = hours.get(d);
                         if (hs == null) {
-                            hs = new HashSet<Integer>();
+                            hs = new HashSet<>();
                             hs.add(h);
                             hours.put(d, hs);
                         } else {
@@ -1338,18 +1332,18 @@ public final class RuleMatcher {
          * @return remaining limit before it is reached.
          */
         float getRemainingLimit() {
-            Log.d(TAG, "getRemainingLimit(): ", id);
+            Log.d(TAG, "getRemainingLimit(): " + id);
             if (parent != null && limitType == DataProvider.LIMIT_TYPE_NONE) {
                 Log.d(TAG, "check parent");
                 return parent.getRemainingLimit();
             } else {
-                Log.d(TAG, "ltype: ", limitType);
+                Log.d(TAG, "ltype: " + limitType);
                 switch (limitType) {
                     case DataProvider.LIMIT_TYPE_COST:
-                        Log.d(TAG, "bc<lt ", billedCost * LogMeter.kHundredth, "<", limit);
+                        Log.d(TAG, "bc<lt " + (billedCost * LogMeter.kHundredth) + "<" + limit);
                         return limit - billedCost * LogMeter.kHundredth;
                     case DataProvider.LIMIT_TYPE_UNITS:
-                        Log.d(TAG, "ba<lt ", billedAmount, "<", limit);
+                        Log.d(TAG, "ba<lt " + billedAmount + "<" + limit);
                         return limit - billedAmount;
                     default:
                         return 0;

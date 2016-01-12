@@ -29,6 +29,7 @@ import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -40,8 +41,8 @@ import com.github.umeshkrpatel.LogMeter.R;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
 import com.github.umeshkrpatel.LogMeter.data.RuleMatcher;
 import com.github.umeshkrpatel.LogMeter.ui.prefs.Preferences;
+
 import de.ub0r.android.lib.Utils;
-import de.ub0r.android.logg0r.Log;
 
 /**
  * Display Ask for plan {@link Activity}.
@@ -171,14 +172,14 @@ public final class AskForPlan extends Activity implements OnClickListener, OnDis
             defaultPlanId = p.getInt(Preferences.PREFS_ASK_FOR_PLAN_DEFAULT, -1);
         } catch (ClassCastException e) {
             // TODO: delete me in some later version
-            Log.e(TAG, "legacy error hanling", e);
+            Log.e(TAG, "legacy error hanling e:" + e.getMessage());
             defaultPlanId = (int) p.getLong(Preferences.PREFS_ASK_FOR_PLAN_DEFAULT, -1);
-            p.edit().putInt(Preferences.PREFS_ASK_FOR_PLAN_DEFAULT, defaultPlanId).commit();
+            p.edit().putInt(Preferences.PREFS_ASK_FOR_PLAN_DEFAULT, defaultPlanId).apply();
         }
         for (i = 0; i < MAX_PLANS; i++) {
             if (planIds[i] == defaultPlanId) {
                 final int bid = PLAN_BTNS[i];
-                Log.d(TAG, "request focus: ", bid);
+                Log.d(TAG, "request focus: " + bid);
                 final Button v = (Button) d.findViewById(bid);
                 v.requestFocus();
                 v.setTextAppearance(this, android.R.style.TextAppearance_Large);
@@ -197,7 +198,7 @@ public final class AskForPlan extends Activity implements OnClickListener, OnDis
                         try {
                             Thread.sleep(LogMeter.kMilliSecondsPerSecond);
                         } catch (InterruptedException e) {
-                            Log.e(TAG, "intr. count=" + count, e);
+                            Log.e(TAG, "intr. count=" + count + " e:" + e.getMessage());
                         }
                         --this.count;
                         publishProgress((Void) null);
@@ -261,13 +262,13 @@ public final class AskForPlan extends Activity implements OnClickListener, OnDis
                 for (int i = 0; i < MAX_PLANS; i++) {
                     if (vid == PLAN_BTNS[i]) {
                         final int pid = planIds[i];
-                        Log.d(TAG, "setPlan(", pid, ")");
+                        Log.d(TAG, "setPlan(" + pid + ")");
                         RuleMatcher.matchLog(getContentResolver(), id, pid);
                         if (cbSetDefault.isChecked()) {
                             final Editor e = PreferenceManager.getDefaultSharedPreferences(this)
                                     .edit();
                             e.putInt(Preferences.PREFS_ASK_FOR_PLAN_DEFAULT, pid);
-                            e.commit();
+                            e.apply();
                         }
                         d.cancel();
                         finish();

@@ -40,12 +40,13 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Xml;
 import android.widget.Toast;
 
+import com.github.umeshkrpatel.LogMeter.LogMeter;
 import com.github.umeshkrpatel.LogMeter.R;
 import com.github.umeshkrpatel.LogMeter.ui.prefs.Preferences;
-import com.github.umeshkrpatel.LogMeter.LogMeter;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -65,7 +66,6 @@ import java.util.regex.Pattern;
 
 import de.ub0r.android.lib.DbUtils;
 import de.ub0r.android.lib.Utils;
-import de.ub0r.android.logg0r.Log;
 
 /**
  * @author flx
@@ -589,7 +589,7 @@ public final class DataProvider extends ContentProvider {
     private static void parseValues(final XmlPullParser parser,
                                     final HashMap<String, ArrayList<ContentValues>> lists, final String name,
                                     final ArrayList<ContentValues> list) throws XmlPullParserException, IOException {
-        Log.d(TAG, "parseValues(..,", name, ", #", list.size(), ")");
+        Log.d(TAG, "parseValues(..," + name + ", #" + list.size() + ")");
         String element = name.substring(0, name.length() - 1);
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) {
@@ -651,7 +651,7 @@ public final class DataProvider extends ContentProvider {
      * @return metadata
      */
     public static XmlMetaData parseXml(final Context context, final String xml) {
-        Log.d(TAG, "parseXml(db, #", xml.length(), ")");
+        Log.d(TAG, "parseXml(db, #" + xml.length() + ")");
         XmlPullParser parser = Xml.newPullParser();
         XmlMetaData ret = new XmlMetaData();
         try {
@@ -660,9 +660,9 @@ public final class DataProvider extends ContentProvider {
             parser.nextTag();
             parser.require(XmlPullParser.START_TAG, null, null);
             ret.version = parser.getAttributeValue(null, "version");
-            Log.d(TAG, "xml version: ", ret.version);
+            Log.d(TAG, "xml version: " + ret.version);
             String base = parser.getName();
-            Log.d(TAG, "xml base element: ", base);
+            Log.d(TAG, "xml base element: " + base);
             while (parser.next() != XmlPullParser.END_TAG && !ret.isSet()) {
                 if (parser.getEventType() != XmlPullParser.START_TAG) {
                     continue;
@@ -672,25 +672,25 @@ public final class DataProvider extends ContentProvider {
                     case "country":
                         parser.next();
                         ret.country = decodeString(parser.getText());
-                        Log.d(TAG, "xml country: ", ret.country);
+                        Log.d(TAG, "xml country: " + ret.country);
                         parser.next();
                         break;
                     case "provider":
                         parser.next();
                         ret.provider = decodeString(parser.getText());
-                        Log.d(TAG, "xml provider: ", ret.provider);
+                        Log.d(TAG, "xml provider: " + ret.provider);
                         parser.next();
                         break;
                     case "title":
                         parser.next();
                         ret.title = decodeString(parser.getText());
-                        Log.d(TAG, "xml title: ", ret.title);
+                        Log.d(TAG, "xml title: " + ret.title);
                         parser.next();
                         break;
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG, "error parsing xml", e);
+            Log.e(TAG, "error parsing xml" + e.getMessage());
             Toast.makeText(context, R.string.err_export_read, Toast.LENGTH_LONG).show();
             return null;
         }
@@ -705,7 +705,7 @@ public final class DataProvider extends ContentProvider {
      * @return true, if import was successful
      */
     private static boolean importXml(final SQLiteDatabase db, final String xml) {
-        Log.d(TAG, "importXml(db, #", xml.length(), ")");
+        Log.d(TAG, "importXml(db, #" + xml.length() + ")");
         boolean ret = true;
         XmlPullParser parser = Xml.newPullParser();
         String version;
@@ -720,9 +720,9 @@ public final class DataProvider extends ContentProvider {
             parser.nextTag();
             parser.require(XmlPullParser.START_TAG, null, null);
             version = parser.getAttributeValue(null, "version");
-            Log.d(TAG, "xml version: ", version);
+            Log.d(TAG, "xml version: " + version);
             String base = parser.getName();
-            Log.d(TAG, "xml base element: ", base);
+            Log.d(TAG, "xml base element: " + base);
             while (parser.next() != XmlPullParser.END_TAG || !parser.getName().equals(base)) {
                 if (parser.getEventType() != XmlPullParser.START_TAG) {
                     continue;
@@ -733,17 +733,17 @@ public final class DataProvider extends ContentProvider {
                     case "country":
                         parser.next();
                         country = decodeString(parser.getText());
-                        Log.d(TAG, "xml country: ", country);
+                        Log.d(TAG, "xml country: " + country);
                         break;
                     case "provider":
                         parser.next();
                         provider = decodeString(parser.getText());
-                        Log.d(TAG, "xml provider: ", provider);
+                        Log.d(TAG, "xml provider: " + provider);
                         break;
                     case "title":
                         parser.next();
                         title = decodeString(parser.getText());
-                        Log.d(TAG, "xml title: ", title);
+                        Log.d(TAG, "xml title: " + title);
                         break;
                     case "plans":
                         list = new ArrayList<>();
@@ -790,7 +790,7 @@ public final class DataProvider extends ContentProvider {
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG, "error parsing xml", e);
+            Log.e(TAG, "error parsing xml " + e.getMessage());
             ret = false;
         }
         return ret;
@@ -818,7 +818,7 @@ public final class DataProvider extends ContentProvider {
      */
     private static void importData(final SQLiteDatabase db, final String[] lines) {
         final int l = lines.length;
-        Log.d(TAG, "importData(db, #", l, ")");
+        Log.d(TAG, "importData(db, #" + l + ")");
         String table = null;
         ArrayList<ContentValues> cvs = new ArrayList<>();
         for (int i = 2; i < l; i++) {
@@ -938,7 +938,7 @@ public final class DataProvider extends ContentProvider {
 
             }
         } catch (IOException e) {
-            Log.e(TAG, "error reading raw data", e);
+            Log.e(TAG, "error reading raw data " + e.getMessage());
         }
         importXml(db, sb.toString());
 
@@ -1145,11 +1145,11 @@ public final class DataProvider extends ContentProvider {
         for (String pkg : pkgs) {
             try {
                 if (pm.getPackageInfo(pkg, PackageManager.GET_META_DATA) != null) {
-                    Log.d(TAG, "found package: ", pkg);
+                    Log.d(TAG, "found package: " + pkg);
                     return true;
                 }
             } catch (NameNotFoundException e) {
-                Log.d(TAG, "package not found: ", pkg, e);
+                Log.d(TAG, "package not found: " + pkg, e);
             }
         }
         return false;
@@ -1171,7 +1171,7 @@ public final class DataProvider extends ContentProvider {
     private static ContentValues[] backup(final SQLiteDatabase db, final String table,
                                           final String[] cols, final String selection, final String[] selectionArgs,
                                           final String strip, final ObjectOutputStream os) throws IOException {
-        Log.d(TAG, "backup(db,", table, ",cols,sel,args,", strip, ")");
+        Log.d(TAG, "backup(db," + table + ",cols,sel,args," + strip + ")");
         ArrayList<ContentValues> ret = null;
         if (os == null) {
             ret = new ArrayList<ContentValues>();
@@ -1181,7 +1181,7 @@ public final class DataProvider extends ContentProvider {
             ArrayList<String> a = new ArrayList<String>(cols.length);
             for (String c : cols) {
                 if (strip.equals(c)) {
-                    Log.d(TAG, "ignore column: ", c);
+                    Log.d(TAG, "ignore column: " + c);
                     continue;
                 }
                 a.add(c);
@@ -1248,7 +1248,7 @@ public final class DataProvider extends ContentProvider {
         if (is == null) {
             return;
         }
-        Log.d(TAG, "reload(db, ", table, ", stream])");
+        Log.d(TAG, "reload(db, " + table + ", stream])");
         db.beginTransaction();
         try {
             while (true) {
@@ -1261,7 +1261,7 @@ public final class DataProvider extends ContentProvider {
                 for (String k : map.keySet()) {
                     cv.put(k, map.get(k));
                 }
-                Log.d(TAG, "reload: ", table, " insert: ", cv);
+                Log.d(TAG, "reload: " + table + " insert: " + cv);
                 db.insert(table, null, cv);
             }
             db.setTransactionSuccessful();
@@ -1284,11 +1284,11 @@ public final class DataProvider extends ContentProvider {
         if (values == null || values.length == 0) {
             return;
         }
-        Log.d(TAG, "reload(db, ", table, ", cv[", values.length, "])");
+        Log.d(TAG, "reload(db, " + table + ", cv[" + values.length + "])");
         db.beginTransaction();
         try {
             for (ContentValues cv : values) {
-                Log.d(TAG, "reload: ", table, " insert: ", cv);
+                Log.d(TAG, "reload: " + table + " insert: " + cv);
                 db.insert(table, null, cv);
             }
             db.setTransactionSuccessful();
@@ -1335,8 +1335,8 @@ public final class DataProvider extends ContentProvider {
     }
 
     @Override
-    public int delete(final Uri uri, final String selection, final String[] selectionArgs) {
-        Log.d(TAG, "delete(", uri, ",", selection, ")");
+    public int delete(@NonNull final Uri uri, final String selection, final String[] selectionArgs) {
+        Log.d(TAG, "delete(" + uri + "," + selection + ")");
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         assert db != null;
         //noinspection ConstantConditions
@@ -1419,7 +1419,7 @@ public final class DataProvider extends ContentProvider {
     }
 
     @Override
-    public String getType(final Uri uri) {
+    public String getType(@NonNull final Uri uri) {
         switch (URI_MATCHER.match(uri)) {
             case LOGS:
                 return Logs.CONTENT_TYPE;
@@ -1466,7 +1466,7 @@ public final class DataProvider extends ContentProvider {
     public ContentProviderResult[] applyBatch(
             @NonNull final ArrayList<ContentProviderOperation> operations)
             throws OperationApplicationException {
-        Log.d(TAG, "applyBatch(#", operations.size(), ")");
+        Log.d(TAG, "applyBatch(#" + operations.size() + ")");
         ContentProviderResult[] ret = null;
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         assert db != null;
@@ -1485,7 +1485,7 @@ public final class DataProvider extends ContentProvider {
 
     @Override
     public int bulkInsert(final Uri uri, @NonNull final ContentValues[] values) {
-        Log.d(TAG, "bulkInsert(", uri, ", #", values.length, ")");
+        Log.d(TAG, "bulkInsert(" + uri + ", #" + values.length + ")");
         if (values.length == 0) {
             return 0;
         }
@@ -1509,8 +1509,8 @@ public final class DataProvider extends ContentProvider {
     }
 
     @Override
-    public Uri insert(final Uri uri, final ContentValues values) {
-        Log.d(TAG, "insert(", uri, ",", values, ")");
+    public Uri insert(@NonNull final Uri uri, final ContentValues values) {
+        Log.d(TAG, "insert(" + uri + "," + values + ")");
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         assert db != null;
         long ret;
@@ -1572,7 +1572,7 @@ public final class DataProvider extends ContentProvider {
             //noinspection ConstantConditions
             getContext().getContentResolver().notifyChange(uri, null);
             final Uri u = ContentUris.withAppendedId(uri, ret);
-            Log.d(TAG, "insert(): ", u);
+            Log.d(TAG, "insert(): " + u);
             return u;
         }
     }
@@ -1584,9 +1584,9 @@ public final class DataProvider extends ContentProvider {
     }
 
     @Override
-    public Cursor query(final Uri uri, final String[] projection, final String selection,
+    public Cursor query(@NonNull final Uri uri, final String[] projection, final String selection,
                         final String[] selectionArgs, final String sortOrder) {
-        Log.d(TAG, "query(", uri, ",", selection, ")");
+        Log.d(TAG, "query(" + uri + "," + selection + ")");
         final SQLiteDatabase db = mOpenHelper.getReadableDatabase();
         SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
         final int uid = URI_MATCHER.match(uri);
@@ -1765,7 +1765,7 @@ public final class DataProvider extends ContentProvider {
                     } else {
                         proj[i] = projection[i];
                     }
-                    Log.d(TAG, "proj[", i, "]: ", proj[i]);
+                    Log.d(TAG, "proj[" + i + "]: " + proj[i]);
                 }
                 if (projection == Plans.PROJECTION_SUM) {
                     if (hideToday) {
@@ -1824,21 +1824,21 @@ public final class DataProvider extends ContentProvider {
             proj = projection;
         }
         // Run the query
-        Log.d(TAG, "qb.query() start: ", selection);
+        Log.d(TAG, "qb.query() start: " + selection);
         c = qb.query(db, proj, selection, selectionArgs, groupBy, having, orderBy);
-        Log.d(TAG, "qb.query() end: ", selection);
+        Log.d(TAG, "qb.query() end: " + selection);
 
         // Tell the cursor what uri to watch, so it knows when its source data
         // changes
         c.setNotificationUri(getContext().getContentResolver(), uri);
-        Log.d(TAG, "query(", uri, ", sel): ", c.getCount());
+        Log.d(TAG, "query(" + uri + ", sel): " + c.getCount());
         return c;
     }
 
     @Override
     public int update(@NonNull final Uri uri, final ContentValues values, final String selection,
                       final String[] selectionArgs) {
-        Log.d(TAG, "update(", uri, ",", selection, ", values)");
+        Log.d(TAG, "update(" + uri + "," + selection + ", values)");
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         assert db != null;
         //noinspection ConstantConditions
@@ -1910,7 +1910,7 @@ public final class DataProvider extends ContentProvider {
         if (ret > 0) {
             cr.notifyChange(uri, null);
         }
-        Log.d(TAG, "update(): ", ret);
+        Log.d(TAG, "update(): " + ret);
         return ret;
     }
 
@@ -2060,11 +2060,6 @@ public final class DataProvider extends ContentProvider {
          * Cost (free).
          */
         public static final String FREE = "_logs_cost_free";
-
-        /**
-         * Type of plan. Only available in sum query.
-         */
-        public static final String PLAN_TYPE = "_plan_type";
 
         /**
          * My own number.
@@ -3268,7 +3263,7 @@ public final class DataProvider extends ContentProvider {
                     c.set(Calendar.MILLISECOND, 0);
                     long l = c.getTimeInMillis();
                     do {
-                        Log.d(TAG, "day: return ", (l + offset));
+                        Log.d(TAG, "day: return " + (l + offset));
                         ret.add(l + offset);
                         l -= Utils.DAY_IN_MILLIS;
                     } while (l > newerAs);
@@ -3294,7 +3289,7 @@ public final class DataProvider extends ContentProvider {
                         c.add(f, -1 * v);
                         //noinspection ResourceType
                         c.add(j, -1 * k);
-                        Log.d(TAG, "return ", (c.getTimeInMillis() + offset));
+                        Log.d(TAG, "return " + (c.getTimeInMillis() + offset));
                         ret.add(c.getTimeInMillis() + offset);
                     } while (c.getTimeInMillis() > newerAs);
             }
@@ -3465,7 +3460,7 @@ public final class DataProvider extends ContentProvider {
              * @param cursor {@link Cursor}
              */
             public Plan(final Cursor cursor) {
-                Log.d(TAG, "new Plan(", cursor, ")");
+                Log.d(TAG, "new Plan(" + cursor + ")");
                 id = cursor.getLong(INDEX_ID);
                 type = cursor.getInt(INDEX_TYPE);
                 name = cursor.getString(INDEX_NAME);
@@ -3535,13 +3530,13 @@ public final class DataProvider extends ContentProvider {
                 } else {
                     usage = (float) limitPos / (float) limit;
                 }
-                Log.v(TAG, "new Plan(): pid=", id);
-                Log.v(TAG, "new Plan(): count=", bpCount);
-                Log.v(TAG, "new Plan(): ba=", bpBa);
-                Log.v(TAG, "new Plan(): at.count=", atCount);
-                Log.v(TAG, "new Plan(): at.ba=", atBa);
-                Log.v(TAG, "new Plan(): cost=", cost);
-                Log.v(TAG, "new Plan(): free=", free);
+                Log.v(TAG, "new Plan(): pid=" + id);
+                Log.v(TAG, "new Plan(): count=" + bpCount);
+                Log.v(TAG, "new Plan(): ba=" + bpBa);
+                Log.v(TAG, "new Plan(): at.count=" + atCount);
+                Log.v(TAG, "new Plan(): at.ba=" + atBa);
+                Log.v(TAG, "new Plan(): cost=" + cost);
+                Log.v(TAG, "new Plan(): free=" + free);
             }
 
             /**
@@ -3552,7 +3547,7 @@ public final class DataProvider extends ContentProvider {
              * @param p      {@link SharedPreferences}
              */
             public Plan(final Cursor cursor, final SharedPreferences p) {
-                Log.d(TAG, "new Plan(", cursor, ", ", p, ")");
+                Log.d(TAG, "new Plan(" + cursor + ", " + p + ")");
                 id = cursor.getLong(INDEX_ID);
                 type = cursor.getInt(INDEX_TYPE);
                 name = cursor.getString(INDEX_NAME);
@@ -3683,7 +3678,7 @@ public final class DataProvider extends ContentProvider {
              * @return {@link Editor}
              */
             public Editor save(final Editor e) {
-                Log.d(TAG, "save(): ", id);
+                Log.d(TAG, "save(): " + id);
 
                 e.putFloat(PREF_PREFIX + SUM_COST + id, cost);
                 e.putFloat(PREF_PREFIX + SUM_FREE + id, free);

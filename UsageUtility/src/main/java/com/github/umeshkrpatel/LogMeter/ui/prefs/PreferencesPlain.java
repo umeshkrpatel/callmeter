@@ -33,7 +33,16 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
+import android.util.Log;
 import android.widget.Toast;
+
+import com.github.umeshkrpatel.LogMeter.R;
+import com.github.umeshkrpatel.LogMeter.data.ExportProvider;
+import com.github.umeshkrpatel.LogMeter.ui.HelpActivity;
+import com.github.umeshkrpatel.LogMeter.widget.LogsAppWidgetConfigure;
+import com.github.umeshkrpatel.LogMeter.widget.LogsAppWidgetProvider;
+import com.github.umeshkrpatel.LogMeter.widget.StatsAppWidgetConfigure;
+import com.github.umeshkrpatel.LogMeter.widget.StatsAppWidgetProvider;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -50,15 +59,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 
-import com.github.umeshkrpatel.LogMeter.R;
-import com.github.umeshkrpatel.LogMeter.data.ExportProvider;
-import com.github.umeshkrpatel.LogMeter.ui.HelpActivity;
-import com.github.umeshkrpatel.LogMeter.widget.LogsAppWidgetConfigure;
-import com.github.umeshkrpatel.LogMeter.widget.LogsAppWidgetProvider;
-import com.github.umeshkrpatel.LogMeter.widget.StatsAppWidgetConfigure;
-import com.github.umeshkrpatel.LogMeter.widget.StatsAppWidgetProvider;
 import de.ub0r.android.lib.Utils;
-import de.ub0r.android.logg0r.Log;
 
 /**
  * Show simple preferences.

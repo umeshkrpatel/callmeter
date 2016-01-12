@@ -22,16 +22,13 @@ package com.github.umeshkrpatel.LogMeter.data;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.graphics.drawable.Drawable;
 import android.net.TrafficStats;
 import android.os.Build;
+import android.util.Log;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
-
-import de.ub0r.android.logg0r.Log;
 
 /**
  * Representation of a device.
@@ -44,11 +41,6 @@ public abstract class Device {
     private static final String TAG = "Device";
 
     /**
-     * Size of read buffer.
-     */
-    private static final int BUFSIZE = 8;
-
-    /**
      * Single instance.
      */
     private static Device instance = null;
@@ -57,9 +49,9 @@ public abstract class Device {
      * @return single instance
      */
     public static synchronized Device getDevice() {
-        Log.d(TAG, "Device: ", Build.DEVICE);
+        Log.d(TAG, "Device: " + Build.DEVICE);
         if (instance == null) {
-            Log.d(TAG, "Device: ", Build.DEVICE);
+            Log.d(TAG, "Device: " + Build.DEVICE);
             if (Build.PRODUCT.equals("sdk")) {
                 instance = new EmulatorDevice();
             } else {
@@ -125,7 +117,7 @@ final class EmulatorDevice extends Device {
      */
     @Override
     protected String getCell() {
-        Log.d(TAG, "Cell interface: ", mCell);
+        Log.d(TAG, "Cell interface: " + mCell);
         return mCell;
     }
 
@@ -134,7 +126,7 @@ final class EmulatorDevice extends Device {
      */
     @Override
     protected String getWiFi() {
-        Log.d(TAG, "WiFi interface: ", mCell);
+        Log.d(TAG, "WiFi interface: " + mCell);
         return "ethh0";
     }
 
@@ -167,11 +159,7 @@ final class EmulatorDevice extends Device {
      */
     @Override
     public long getWiFiRxBytes() throws IOException {
-        String dev = getWiFi();
-        if (dev == null) {
-            return 0L;
-        }
-        return SysClassNet.getRxBytes(dev);
+        return SysClassNet.getRxBytes(getWiFi());
     }
 
     /**
@@ -256,28 +244,60 @@ final class TargetDevice extends Device {
         }
         return la - l;
     }
-
-    private class TraficRecord {
-        long mIncoming = 0;
-        long mOutgoing = 0;
-        String appTag = null;
-        TraficRecord() {
-            mIncoming = TrafficStats.getTotalRxBytes();
-            mOutgoing = TrafficStats.getTotalTxBytes();
-        }
-        TraficRecord(int uid, String tag) {
-            mIncoming = TrafficStats.getUidRxBytes(uid);
-            mOutgoing = TrafficStats.getUidTxBytes(uid);
-            appTag = tag;
-        }
-    };
-
-    private class TrafficMonitor {
-        HashMap<Integer, TraficRecord> apps = new HashMap<>();
-        TrafficMonitor(Context context) {
-            for (ApplicationInfo app : context.getPackageManager().getInstalledApplications(0)) {
-                apps.put(app.uid, new TraficRecord(app.uid, app.packageName));
-            }
-        }
-    };
 }
+
+class TraficRecord {
+    long mIncoming = 0;
+    long mOutgoing = 0;
+    String appTag = null;
+    Drawable mIcon = null;
+    String mName = null;
+    TraficRecord() {
+        mIncoming = TrafficStats.getTotalRxBytes();
+        mOutgoing = TrafficStats.getTotalTxBytes();
+    }
+    TraficRecord(int uid, String tag, Drawable icon, String name) {
+        mIncoming = TrafficStats.getUidRxBytes(uid);
+        mOutgoing = TrafficStats.getUidTxBytes(uid);
+        appTag = tag;
+        mIcon = icon;
+        mName = name;
+    }
+};
+
+class TrafficMonitor {
+    HashMap<Integer, TraficRecord> apps = new HashMap<>();
+    TrafficMonitor(Context context) {
+        for (ApplicationInfo app : context.getPackageManager().getInstalledApplications(0)) {
+            apps.put(app.uid, new TraficRecord(app.uid, app.packageName, app.loadLogo(context.getPackageManager()), app.name));
+        }
+    }
+
+    public long getRxBytes(Integer uid) {
+        TraficRecord tr = apps.get(uid);
+        return tr.mIncoming;
+    }
+
+    public long getTxBytes(Integer uid) {
+        TraficRecord tr = apps.get(uid);
+        return tr.mOutgoing;
+    }
+
+    public long getRxBytes() {
+        long sum = 0;
+        for (Integer uid : apps.keySet()) {
+            TraficRecord tr = apps.get(uid);
+            sum += tr.mIncoming;
+        }
+        return sum;
+    }
+
+    public long getTxBytes() {
+        long sum = 0;
+        for (Integer uid : apps.keySet()) {
+            TraficRecord tr = apps.get(uid);
+            sum += tr.mOutgoing;
+        }
+        return sum;
+    }
+};

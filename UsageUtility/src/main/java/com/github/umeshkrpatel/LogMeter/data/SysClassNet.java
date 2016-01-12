@@ -1,11 +1,11 @@
 
 package com.github.umeshkrpatel.LogMeter.data;
 
+import android.util.Log;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-
-import de.ub0r.android.logg0r.Log;
 
 /**
  * Acces /sys/class/net/ files.
@@ -73,14 +73,14 @@ public final class SysClassNet {
      * @return bytes received or sent
      */
     private static long readLong(final String inter, final String file) {
-        Log.d(TAG, "readLong(", inter, ",", file, ")");
+        Log.d(TAG, "readLong(" + inter + "," + file + ")");
         StringBuilder sb = new StringBuilder();
         sb.append(SYS_CLASS_NET).append(inter).append(file);
         RandomAccessFile raf = null;
         try {
             raf = getFile(sb.toString());
             String l = raf.readLine();
-            Log.d(TAG, "readLong(): ", l);
+            Log.d(TAG, "readLong(): " + l);
             return Long.valueOf(l);
         } catch (Exception e) {
             Log.e(TAG, e.getMessage() + " / error reading long for inter: " + inter);

@@ -14,7 +14,7 @@ import com.github.umeshkrpatel.LogMeter.LogMeter;
 
 import java.util.ArrayList;
 
-import de.ub0r.android.logg0r.Log;
+import android.util.Log;
 
 /**
  * {@link LruCache} Holding the Contact Name and Photo_ID for Number

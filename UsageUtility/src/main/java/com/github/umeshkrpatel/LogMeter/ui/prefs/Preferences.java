@@ -41,6 +41,7 @@ import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
@@ -69,7 +70,6 @@ import java.util.Currency;
 import java.util.Locale;
 
 import de.ub0r.android.lib.Utils;
-import de.ub0r.android.logg0r.Log;
 
 /**
  * Preferences.
@@ -380,7 +380,7 @@ public final class Preferences extends PreferenceActivity implements
                     defaultCurrencySymbol = cur.getSymbol();
                     defaultCurrencyDigits = cur.getDefaultFractionDigits();
                 } catch (IllegalArgumentException e) {
-                    Log.e(TAG, "error getting currency", e);
+                    Log.e(TAG, "error getting currency e:" + e.getMessage());
                     defaultCurrencySymbol = "$";
                     defaultCurrencyDigits = 2;
                 }
@@ -407,30 +407,30 @@ public final class Preferences extends PreferenceActivity implements
                     defaultCurrencySymbol = cur.getSymbol();
                     defaultCurrencyDigits = cur.getDefaultFractionDigits();
                 } catch (IllegalArgumentException e) {
-                    Log.e(TAG, "error getting currency", e);
+                    Log.e(TAG, "error getting currency e:" + e.getMessage());
                     defaultCurrencySymbol = "$";
                     defaultCurrencyDigits = 2;
                 }
             }
             return "%." + defaultCurrencyDigits + "f" + getCurrencySymbol(context);
         } else {
-            Log.d(TAG, "custom currency format: ", pcs);
+            Log.d(TAG, "custom currency format: " + pcs);
             String c = getCurrencySymbol(context);
-            Log.d(TAG, "custom currency symbol: ", c);
+            Log.d(TAG, "custom currency symbol: " + c);
             if (c.equals("$")) {
                 c = "\\$";
-                Log.d(TAG, "custom currency symbol: ", c);
+                Log.d(TAG, "custom currency symbol: " + c);
             } else if (c.equals("%")) {
                 c = "%%";
-                Log.d(TAG, "custom currency symbol: ", c);
+                Log.d(TAG, "custom currency symbol: " + c);
             }
             String ret = "$%.2f";
             try {
                 ret = pcs.replaceAll("\\$", c).replaceAll("\u20AC", c).replaceAll("\u0440", c);
             } catch (ArrayIndexOutOfBoundsException e) {
-                Log.e(TAG, "could not parse currency format", e);
+                Log.e(TAG, "could not parse currency format" + e);
             }
-            Log.d(TAG, "custom currency format: ", ret);
+            Log.d(TAG, "custom currency format: " + ret);
             return ret;
         }
     }
@@ -546,7 +546,7 @@ public final class Preferences extends PreferenceActivity implements
 
                 @Override
                 protected void onPostExecute(final String result) {
-                    Log.d(TAG, "export:\n", result);
+                    Log.d(TAG, "export:\n" + result);
                     System.out.println("\n" + result);
                     d.dismiss();
                     if (result != null && result.length() > 0) {
@@ -609,7 +609,7 @@ public final class Preferences extends PreferenceActivity implements
                                         context.getString(resChooser)));
                             }
                         } catch (IOException e) {
-                            Log.e(TAG, "error writing export file", e);
+                            Log.e(TAG, "error writing export file e:" + e.getMessage());
                             Toast.makeText(context, R.string.err_export_write, Toast.LENGTH_LONG)
                                     .show();
                         }
@@ -685,18 +685,18 @@ public final class Preferences extends PreferenceActivity implements
                     // return file name
                     return f.getAbsolutePath();
                 } catch (IOException e) {
-                    Log.e(TAG, "error writing csv file", e);
+                    Log.e(TAG, "error writing csv file e:" + e.getMessage());
                 }
                 return null;
             }
 
             @Override
             protected void onPostExecute(final String result) {
-                Log.d(TAG, "csv.task.onPostExecute(", result, ")");
+                Log.d(TAG, "csv.task.onPostExecute(" + result + ")");
                 try {
                     d.dismiss();
                 } catch (Exception e) {
-                    Log.w(TAG, "activity already finished?", e);
+                    Log.w(TAG, "activity already finished? e:" + e.getMessage());
                 }
                 if (TextUtils.isEmpty(result)) {
                     Log.e(TAG, "error writing export file: " + result);
@@ -847,7 +847,7 @@ public final class Preferences extends PreferenceActivity implements
             try {
                 return cr.openInputStream(uri);
             } catch (IOException e) {
-                Log.e(TAG, "error in reading export: " + uri.toString(), e);
+                Log.e(TAG, "error in reading export: " + uri.toString() + " e:" + e.getMessage());
                 return null;
             }
         } else if (scheme.equals("http") || scheme.equals("https")) {
@@ -872,7 +872,7 @@ public final class Preferences extends PreferenceActivity implements
      * @param uri     {@link Uri}
      */
     private void importData(final Context context, final Uri uri) {
-        Log.d(TAG, "importData(ctx, ", uri, ")");
+        Log.d(TAG, "importData(ctx, " + uri + ")");
         final ProgressDialog d1 = new ProgressDialog(this);
         d1.setCancelable(true);
         d1.setMessage(getString(R.string.import_progr));
@@ -912,11 +912,11 @@ public final class Preferences extends PreferenceActivity implements
             @SuppressWarnings("deprecation")
             @Override
             protected void onPostExecute(final String result) {
-                Log.d(TAG, "import:\n", result);
+                Log.d(TAG, "import: " + result);
                 try {
                     d1.dismiss();
                 } catch (Exception e) { // ignore any exception
-                    Log.e(TAG, "cannot dismiss dialog", e);
+                    Log.e(TAG, "cannot dismiss dialog e:" + e.getMessage());
                 }
                 if (result == null || result.length() == 0) {
                     Toast.makeText(Preferences.this, R.string.err_export_read, Toast.LENGTH_LONG)
@@ -980,7 +980,7 @@ public final class Preferences extends PreferenceActivity implements
                                     }
                                     d1.dismiss();
                                 } catch (Exception e) {
-                                    Log.w(TAG, "activity already finished?", e);
+                                    Log.w(TAG, "activity already finished? e:" + e.getMessage());
                                 }
                                 Preferences.this.checkSimplePrefs();
                             }
@@ -990,7 +990,7 @@ public final class Preferences extends PreferenceActivity implements
                 try {
                     builder.show();
                 } catch (Exception e) {
-                    Log.w(TAG, "activity already finished?", e);
+                    Log.w(TAG, "activity already finished? e:" + e.getMessage());
                 }
             }
         }.execute((Void) null);
@@ -1003,13 +1003,13 @@ public final class Preferences extends PreferenceActivity implements
     protected void onNewIntent(final Intent intent) {
         final Uri uri = intent.getData();
         String a = intent.getAction();
-        Log.d(TAG, "new intent: ", a);
-        Log.d(TAG, "intent: ", uri);
+        Log.d(TAG, "new intent: " + a);
+        Log.d(TAG, "intent: " + uri);
         if (ACTION_EXPORT_CSV.equals(a)) {
             Log.d(TAG, "export csv");
             exportLogsCsv(this);
         } else if (uri != null) {
-            Log.d(TAG, "importing: ", uri.toString());
+            Log.d(TAG, "importing: " + uri.toString());
             importData(this, uri);
         }
     }

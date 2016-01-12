@@ -30,16 +30,16 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.text.InputType;
-
-import java.util.Calendar;
+import android.util.Log;
 
 import com.github.umeshkrpatel.LogMeter.LogMeter;
 import com.github.umeshkrpatel.LogMeter.R;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
 import com.github.umeshkrpatel.LogMeter.data.RuleMatcher;
 
+import java.util.Calendar;
+
 import de.ub0r.android.lib.Utils;
-import de.ub0r.android.logg0r.Log;
 
 /**
  * Edit a single Plan.
@@ -440,7 +440,7 @@ public final class PlanEdit extends PreferenceActivity implements UpdateListener
         }
         where += " AND " + DataProvider.Plans.ID + " != " + pid + " AND "
                 + DataProvider.Plans.MERGED_PLANS + " IS NULL";
-        Log.d(TAG, "selection: ", where);
+        Log.d(TAG, "selection: " + where);
         return where;
     }
 

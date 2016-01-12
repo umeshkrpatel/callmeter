@@ -14,7 +14,7 @@ import android.support.v4.content.ContextCompat;
 
 import com.github.umeshkrpatel.LogMeter.R;
 import de.ub0r.android.lib.Utils;
-import de.ub0r.android.logg0r.Log;
+import android.util.Log;
 
 /**
  * @author flx

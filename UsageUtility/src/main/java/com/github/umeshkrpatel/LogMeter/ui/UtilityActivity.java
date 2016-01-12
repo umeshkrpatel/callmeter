@@ -20,6 +20,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
@@ -38,7 +39,6 @@ import java.util.Arrays;
 import java.util.Calendar;
 
 import de.ub0r.android.lib.Utils;
-import de.ub0r.android.logg0r.Log;
 
 /**
  * Callmeter's Main Activity
@@ -133,7 +133,7 @@ public final class UtilityActivity
         }
         @Override
         public synchronized void handleMessage(final Message msg) {
-            Log.d(TAG, "handleMessage(", msg.what, ")");
+            Log.d(TAG, "handleMessage(" + msg.what + ")");
 
             UtilityActivity activity = mActivity.get();
             if (activity == null || activity.getSupportActionBar() == null)
@@ -166,7 +166,7 @@ public final class UtilityActivity
                     }
                     if (statusMatcher == null
                             || (!this.statusMatcherProgress || statusMatcher.isShowing())) {
-                        Log.d(TAG, "matcher progress: ", msg.arg1);
+                        Log.d(TAG, "matcher progress: " + msg.arg1);
                         if (statusMatcher == null || !this.statusMatcherProgress) {
                             final ProgressDialog dold = statusMatcher;
                             statusMatcher = new ProgressDialog(activity);
@@ -186,7 +186,7 @@ public final class UtilityActivity
                                     dold.dismiss();
                                 }
                             } catch (Exception e) {
-                                Log.w(TAG, "activity already finished?", e);
+                                Log.w(TAG, "activity already finished? e:" + e.getMessage());
                             }
                         }
                         statusMatcher.setProgress(msg.arg1);
@@ -212,7 +212,7 @@ public final class UtilityActivity
                     try {
                         statusMatcher.show();
                     } catch (Exception e) {
-                        Log.w(TAG, "activity already finished?", e);
+                        Log.e(TAG, "activity already finished? e:" + e.getMessage());
                     }
                 }
             } else {
@@ -220,7 +220,7 @@ public final class UtilityActivity
                     try {
                         statusMatcher.dismiss();
                     } catch (IllegalArgumentException e) {
-                        Log.e(TAG, "error dismissing dialog", e);
+                        Log.e(TAG, "error dismissing dialog e:" + e.getMessage());
                     }
                     statusMatcher = null;
                 }
@@ -442,7 +442,7 @@ public final class UtilityActivity
      */
     @Override
     public void onPageSelected(final int position) {
-        Log.d(TAG, "onPageSelected(", position, ")");
+        Log.d(TAG, "onPageSelected(" + position + ")");
         if (position == fadapter.getLogsFragmentPos()) {
             Fragment f = fadapter.getActiveFragment(pager,
                     fadapter.getLogsFragmentPos());
@@ -477,7 +477,7 @@ public final class UtilityActivity
      * @param add add number of running tasks
      */
     public synchronized void setInProgress(final int add) {
-        Log.d(TAG, "setInProgress(", add, ")");
+        Log.d(TAG, "setInProgress(" + add + ")");
         progressCount += add;
 
         if (progressCount < 0) {
@@ -560,7 +560,7 @@ public final class UtilityActivity
                     ArrayList<Long> bps = DataProvider.Plans.getBillDays(bptype,
                             c.getLong(DataProvider.Plans.INDEX_BILLDAY), minDate, -1);
                     if (bps != null) {
-                        Log.d(TAG, "bill periods: ", bps.size());
+                        Log.d(TAG, "bill periods: " + bps.size());
                         if (!bps.isEmpty()) {
                             bps.remove(bps.size() - 1);
                             list.addAll(bps);

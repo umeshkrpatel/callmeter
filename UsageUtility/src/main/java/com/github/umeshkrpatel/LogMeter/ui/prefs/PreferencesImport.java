@@ -31,15 +31,16 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceGroup;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.Window;
 import android.widget.Toast;
 
-import java.io.File;
-
 import com.github.umeshkrpatel.LogMeter.LogMeter;
 import com.github.umeshkrpatel.LogMeter.R;
+
+import java.io.File;
+
 import de.ub0r.android.lib.Utils;
-import de.ub0r.android.logg0r.Log;
 
 /**
  * Show a list of ready to import rule sets.
@@ -181,11 +182,11 @@ public final class PreferencesImport extends PreferenceActivity {
                         || s.equals("DCIM") || s.equals("Music") || s.equals("TitaniumBackup")
                         || s.equals("openfeint") || s.equals("soundhound") || s.equals("WhatsApp")
                         || s.equals("Pictures") || s.equals("SMSBackupRestore")) {
-                    Log.d(TAG, "skip: ", s);
+                    Log.d(TAG, "skip: " + s);
                     continue;
                 }
                 File f = new File(d.getAbsoluteFile(), s);
-                Log.d(TAG, "try file: ", f.getAbsolutePath());
+                Log.d(TAG, "try file: " + f.getAbsolutePath());
                 if (f.isDirectory()) {
                     if (depth > 0) {
                         ret |= addExport(f, depth - 1);
