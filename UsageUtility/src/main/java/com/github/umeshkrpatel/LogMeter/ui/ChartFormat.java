@@ -203,7 +203,7 @@ public class ChartFormat {
         public String getFormattedValue(float v, Entry e, int i, ViewPortHandler h) {
             if (v == INVALID)
                 return "";
-            return Common.formatAmount(DataProvider.TYPE_DATA, v, false);
+            return Common.formatAmount(DataProvider.TYPE_DATA_MOBILE, v, false);
         }
     }
 

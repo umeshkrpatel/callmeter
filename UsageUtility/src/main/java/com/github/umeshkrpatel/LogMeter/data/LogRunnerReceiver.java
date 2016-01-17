@@ -26,9 +26,12 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
+import android.provider.Telephony;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
@@ -89,6 +92,9 @@ public final class LogRunnerReceiver extends BroadcastReceiver {
      * Extra holding name of provider.
      */
     private static final String EXTRA_SIP_PROVIDER = "provider";
+
+    public static final int NO_DATA_NET = -1;
+    public static int CONNECT_STATUS = NO_DATA_NET;
 
     /**
      * Schedule next update.
@@ -228,12 +234,35 @@ public final class LogRunnerReceiver extends BroadcastReceiver {
                     }
                     break;
                 }
-                case TelephonyManager.ACTION_PHONE_STATE_CHANGED:
+                case TelephonyManager.ACTION_PHONE_STATE_CHANGED: {
                     final String state = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
                     if (state != null && !state.equals(TelephonyManager.EXTRA_STATE_IDLE)) {
                         return;
                     }
                     Log.d(TAG, "PHONE_STATE_CHANGE with state=" + state);
+                    break;
+                }
+                case ConnectivityManager.CONNECTIVITY_ACTION: {
+                    CONNECT_STATUS = intent.getIntExtra(ConnectivityManager.EXTRA_NETWORK_TYPE, -1);
+                    if (CONNECT_STATUS == ConnectivityManager.TYPE_MOBILE
+                            || CONNECT_STATUS == ConnectivityManager.TYPE_WIFI) {
+                        ConnectivityManager connMgr =
+                                (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+                        NetworkInfo net = connMgr.getNetworkInfo(CONNECT_STATUS);
+                        if (net.getState() == NetworkInfo.State.CONNECTED) {
+                            LogRunnerService.update(context, LogRunnerService.ACTION_UPDATE_WIFI_DATA);
+                        } else {
+                            CONNECT_STATUS = NO_DATA_NET;
+                        }
+                    } else {
+                        CONNECT_STATUS = NO_DATA_NET;
+                    }
+                    return;
+                }
+                case Telephony.Sms.Intents.SMS_RECEIVED_ACTION:
+                    LogRunnerService.update(context, LogRunnerService.ACTION_UPDATE_SMS_MMS);
+                    return;
+                default:
                     break;
             }
         }

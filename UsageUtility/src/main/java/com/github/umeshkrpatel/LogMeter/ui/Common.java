@@ -143,7 +143,7 @@ public final class Common {
     public static String formatAmount(final int pType, final float amount,
                                       final boolean showHours) {
         switch (pType) {
-            case DataProvider.TYPE_DATA:
+            case DataProvider.TYPE_DATA_MOBILE:
                 return prettyBytes(amount);
             case DataProvider.TYPE_CALL:
                 return prettySeconds(amount, showHours);
@@ -195,7 +195,7 @@ public final class Common {
                 return formatDate(context, billperiod, billDay);
             case DataProvider.TYPE_CALL:
                 return formatAmount(pType, amount, showHours) + " (" + count + ")";
-            case DataProvider.TYPE_DATA:
+            case DataProvider.TYPE_DATA_MOBILE:
             case DataProvider.TYPE_SMS:
             case DataProvider.TYPE_MMS:
             case DataProvider.TYPE_MIXED:

@@ -3,7 +3,7 @@ package com.github.umeshkrpatel.LogMeter.ui;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Color;
-import android.net.Uri;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -19,8 +19,8 @@ import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.data.Entry;
 import com.github.umeshkrpatel.LogMeter.R;
-import com.github.umeshkrpatel.LogMeter.data.ContactCache;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
+import com.github.umeshkrpatel.LogMeter.data.NameCache;
 
 import java.util.ArrayList;
 
@@ -112,12 +112,12 @@ public class DetailFragment extends Fragment {
         mNumber = number;
         try {
             tvNumber.setText(mNumber);
-            tvProfileName.setText(ContactCache.getInstance().getName(getContext(), mNumber, null));
-            String uri = ContactCache.getInstance().getPhotoUri(getContext(), mNumber, null);
-            if (uri == null || uri.equals("<empty>")) {
+            tvProfileName.setText(NameCache.getInstance().getName(getContext(), mNumber, 0));
+            Drawable drawable = NameCache.getInstance().getDrawableIcon(getContext(), mNumber, 0);
+            if (drawable == null) {
                 ivProfilePic.setImageResource(R.drawable.ic_face_empty_photo_id);
             } else {
-                ivProfilePic.setImageURI(Uri.parse(uri));
+                ivProfilePic.setImageDrawable(drawable);
             }
 
             Cursor cursor =

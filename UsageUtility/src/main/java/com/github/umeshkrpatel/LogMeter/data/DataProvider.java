@@ -104,7 +104,8 @@ public final class DataProvider extends ContentProvider {
     /**
      * Type of log: data.
      */
-    public static final int TYPE_DATA = 7;
+    public static final int TYPE_DATA_MOBILE = 7;
+    public static final int TYPE_DATA_WIFI = 8;
     /**
      * Direction of log: in.
      */
@@ -935,7 +936,6 @@ public final class DataProvider extends ContentProvider {
             while ((line = reader.readLine()) != null) {
                 sb.append(line);
                 sb.append("\n");
-
             }
         } catch (IOException e) {
             Log.e(TAG, "error reading raw data " + e.getMessage());
@@ -945,74 +945,74 @@ public final class DataProvider extends ContentProvider {
         // translate default rule set:
         ContentValues cv = new ContentValues();
         // bill period: 12
-        cv.put(Plans.NAME,
-                context.getResources().getStringArray(R.array.plans_type)[TYPE_BILLPERIOD]);
-        cv.put(Plans.SHORTNAME, context.getString(R.string.billperiod_sn));
+        //cv.put(Plans.NAME,
+        //        context.getResources().getStringArray(R.array.plans_type)[TYPE_BILLPERIOD]);
+        //cv.put(Plans.SHORTNAME, context.getString(R.string.billperiod_sn));
         // set 1st day of billing (including TZ)
-        Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.DAY_OF_MONTH, 1);
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 1);
-        cal.set(Calendar.SECOND, 1);
-        cal.set(Calendar.MILLISECOND, 0);
-        cv.put(Plans.BILLDAY, cal.getTimeInMillis());
-        updatePlans(db, cv, 12);
-        cv.clear();
+        //Calendar cal = Calendar.getInstance();
+        //cal.set(Calendar.DAY_OF_MONTH, 1);
+        //cal.set(Calendar.HOUR_OF_DAY, 0);
+        //cal.set(Calendar.MINUTE, 1);
+        //cal.set(Calendar.SECOND, 1);
+        //cal.set(Calendar.MILLISECOND, 0);
+        //cv.put(Plans.BILLDAY, cal.getTimeInMillis());
+        //updatePlans(db, cv, 12);
+        //cv.clear();
         // spacer: 13, 17, 21
-        cv.put(Plans.NAME, context.getResources().getStringArray(R.array.plans_type)[TYPE_SPACING]);
-        updatePlans(db, cv, 13);
-        updatePlans(db, cv, 17);
-        updatePlans(db, cv, 21);
-        cv.clear();
+        //cv.put(Plans.NAME, context.getResources().getStringArray(R.array.plans_type)[TYPE_SPACING]);
+        //updatePlans(db, cv, 13);
+        //updatePlans(db, cv, 17);
+        //updatePlans(db, cv, 21);
+        //cv.clear();
         // calls: 14
-        cv.put(Plans.NAME, context.getString(R.string.calls));
-        cv.put(Plans.SHORTNAME, context.getString(R.string.calls));
-        updatePlans(db, cv, 14);
-        cv.clear();
+        //cv.put(Plans.NAME, context.getString(R.string.calls));
+        //cv.put(Plans.SHORTNAME, context.getString(R.string.calls));
+        //updatePlans(db, cv, 14);
+        //cv.clear();
         // calls in: 15
         cv.put(Plans.NAME, context.getString(R.string.calls_in));
         cv.put(Plans.SHORTNAME, context.getString(R.string.calls_in_));
-        updatePlans(db, cv, 15);
+        updatePlans(db, cv, 12);
         cv.clear();
         // calls out: 16
         cv.put(Plans.NAME, context.getString(R.string.calls_out));
         cv.put(Plans.SHORTNAME, context.getString(R.string.calls_out_));
-        updatePlans(db, cv, 16);
+        updatePlans(db, cv, 13);
         cv.clear();
         // messages: 18
-        cv.put(Plans.NAME, context.getString(R.string.messages));
-        cv.put(Plans.SHORTNAME, context.getString(R.string.messages_));
-        updatePlans(db, cv, 18);
-        cv.clear();
+        //cv.put(Plans.NAME, context.getString(R.string.messages));
+        //cv.put(Plans.SHORTNAME, context.getString(R.string.messages_));
+        //updatePlans(db, cv, 18);
+        //cv.clear();
         // sms in: 19
         cv.put(Plans.NAME, context.getString(R.string.sms_in));
         cv.put(Plans.SHORTNAME, context.getString(R.string.sms_in_));
-        updatePlans(db, cv, 19);
+        updatePlans(db, cv, 14);
         cv.clear();
         // sms out: 20
         cv.put(Plans.NAME, context.getString(R.string.sms_out));
         cv.put(Plans.SHORTNAME, context.getString(R.string.sms_out_));
-        updatePlans(db, cv, 20);
+        updatePlans(db, cv, 15);
         cv.clear();
         // mms in: 27
         cv.put(Plans.NAME, context.getString(R.string.mms_in));
         cv.put(Plans.SHORTNAME, context.getString(R.string.mms_in_));
-        updatePlans(db, cv, 27);
+        updatePlans(db, cv, 16);
         cv.clear();
         // mms out: 28
         cv.put(Plans.NAME, context.getString(R.string.mms_out));
         cv.put(Plans.SHORTNAME, context.getString(R.string.mms_out_));
-        updatePlans(db, cv, 28);
+        updatePlans(db, cv, 17);
         cv.clear();
         // data: 22
-        cv.put(Plans.NAME, context.getString(R.string.data_));
-        cv.put(Plans.SHORTNAME, context.getString(R.string.data));
-        updatePlans(db, cv, 22);
-        cv.clear();
+        //cv.put(Plans.NAME, context.getString(R.string.data_));
+        //cv.put(Plans.SHORTNAME, context.getString(R.string.data));
+        //updatePlans(db, cv, 22);
+        //cv.clear();
         // data in/out: 23
         cv.put(Plans.NAME, context.getString(R.string.data_inout));
         cv.put(Plans.SHORTNAME, context.getString(R.string.data_inout_));
-        updatePlans(db, cv, 23);
+        updatePlans(db, cv, 18);
         cv.clear();
         // rules
         // data
@@ -1068,29 +1068,29 @@ public final class DataProvider extends ContentProvider {
             // rename call * 2 plans/rules
             cv.put(Plans.NAME, context.getString(R.string.calls_out) + " 2");
             cv.put(Plans.SHORTNAME, context.getString(R.string.calls_out_) + "2");
-            updatePlans(db, cv, 31);
+            updatePlans(db, cv, 21);
             cv.put(Plans.NAME, context.getString(R.string.calls_in) + " 2");
             cv.put(Plans.SHORTNAME, context.getString(R.string.calls_in_) + "2");
-            updatePlans(db, cv, 32);
+            updatePlans(db, cv, 22);
             cv.clear();
             cv.put(Rules.NAME, context.getString(R.string.calls_out) + " 2");
-            db.update(Rules.TABLE, cv, Rules.PLAN_ID + "=?", getIdMapping(31));
+            db.update(Rules.TABLE, cv, Rules.PLAN_ID + "=?", getIdMapping(21));
             cv.put(Rules.NAME, context.getString(R.string.calls_in) + " 2");
-            db.update(Rules.TABLE, cv, Rules.PLAN_ID + "=?", getIdMapping(32));
+            db.update(Rules.TABLE, cv, Rules.PLAN_ID + "=?", getIdMapping(22));
             cv.clear();
             // if second sim is found, change rules
             if (simId > 0) {
                 cv.put(Rules.MYNUMBER, simId);
-                db.update(Rules.TABLE, cv, Rules.PLAN_ID + "=?", getIdMapping(31));
-                db.update(Rules.TABLE, cv, Rules.PLAN_ID + "=?", getIdMapping(32));
+                db.update(Rules.TABLE, cv, Rules.PLAN_ID + "=?", getIdMapping(21));
+                db.update(Rules.TABLE, cv, Rules.PLAN_ID + "=?", getIdMapping(22));
                 cv.clear();
             }
         } else {
             // remove unused call * 2 plans/rules
-            db.delete(Plans.TABLE, Plans.ID + "=?", getIdMapping(31));
-            db.delete(Plans.TABLE, Plans.ID + "=?", getIdMapping(32));
-            db.delete(Rules.TABLE, Rules.PLAN_ID + "=?", getIdMapping(31));
-            db.delete(Rules.TABLE, Rules.PLAN_ID + "=?", getIdMapping(32));
+            db.delete(Plans.TABLE, Plans.ID + "=?", getIdMapping(21));
+            db.delete(Plans.TABLE, Plans.ID + "=?", getIdMapping(22));
+            db.delete(Rules.TABLE, Rules.PLAN_ID + "=?", getIdMapping(21));
+            db.delete(Rules.TABLE, Rules.PLAN_ID + "=?", getIdMapping(22));
         }
 
         // sms out 2: 34
@@ -1099,43 +1099,43 @@ public final class DataProvider extends ContentProvider {
             // rename sms * 2 plans/rules
             cv.put(Plans.NAME, context.getString(R.string.sms_out) + " 2");
             cv.put(Plans.SHORTNAME, context.getString(R.string.sms_out_) + "2");
-            updatePlans(db, cv, 34);
+            updatePlans(db, cv, 24);
             cv.put(Plans.NAME, context.getString(R.string.sms_in) + " 2");
             cv.put(Plans.SHORTNAME, context.getString(R.string.sms_in_) + "2");
-            updatePlans(db, cv, 33);
+            updatePlans(db, cv, 23);
             cv.clear();
             cv.put(Rules.NAME, context.getString(R.string.sms_out) + " 2");
-            db.update(Rules.TABLE, cv, Rules.PLAN_ID + "=?", getIdMapping(34));
+            db.update(Rules.TABLE, cv, Rules.PLAN_ID + "=?", getIdMapping(24));
             cv.put(Rules.NAME, context.getString(R.string.sms_in) + " 2");
-            db.update(Rules.TABLE, cv, Rules.PLAN_ID + "=?", getIdMapping(33));
+            db.update(Rules.TABLE, cv, Rules.PLAN_ID + "=?", getIdMapping(23));
             cv.clear();
             // if second sim is found, change rules
             if (simId > 0) {
                 cv.put(Rules.MYNUMBER, simId);
-                db.update(Rules.TABLE, cv, Rules.PLAN_ID + "=?", getIdMapping(34));
-                db.update(Rules.TABLE, cv, Rules.PLAN_ID + "=?", getIdMapping(33));
+                db.update(Rules.TABLE, cv, Rules.PLAN_ID + "=?", getIdMapping(24));
+                db.update(Rules.TABLE, cv, Rules.PLAN_ID + "=?", getIdMapping(23));
                 cv.clear();
             }
         } else {
             // remove unused sms * 2 plans/rules
-            db.delete(Plans.TABLE, Plans.ID + "=?", getIdMapping(33));
-            db.delete(Plans.TABLE, Plans.ID + "=?", getIdMapping(34));
-            db.delete(Rules.TABLE, Rules.PLAN_ID + "=?", getIdMapping(33));
-            db.delete(Rules.TABLE, Rules.PLAN_ID + "=?", getIdMapping(34));
+            db.delete(Plans.TABLE, Plans.ID + "=?", getIdMapping(23));
+            db.delete(Plans.TABLE, Plans.ID + "=?", getIdMapping(24));
+            db.delete(Rules.TABLE, Rules.PLAN_ID + "=?", getIdMapping(23));
+            db.delete(Rules.TABLE, Rules.PLAN_ID + "=?", getIdMapping(24));
         }
 
         PackageManager pm = context.getPackageManager();
 
         // websms: 29
         if (!isPackageExists(pm, "de.ub0r.android.websms")) {
-            db.delete(Plans.TABLE, Plans.ID + "=?", getIdMapping(29));
-            db.delete(Rules.TABLE, Rules.PLAN_ID + "=?", getIdMapping(29));
+            db.delete(Plans.TABLE, Plans.ID + "=?", getIdMapping(19));
+            db.delete(Rules.TABLE, Rules.PLAN_ID + "=?", getIdMapping(19));
         }
 
         // voip: 30
         if (!isPackageExists(pm, "org.sipdroid.sipua", "com.csipsimple")) {
-            db.delete(Plans.TABLE, Plans.ID + "=?", getIdMapping(30));
-            db.delete(Rules.TABLE, Rules.PLAN_ID + "=?", getIdMapping(30));
+            db.delete(Plans.TABLE, Plans.ID + "=?", getIdMapping(20));
+            db.delete(Rules.TABLE, Rules.PLAN_ID + "=?", getIdMapping(20));
         }
 
         Preferences.setDefaultPlan(context, true);
@@ -1324,7 +1324,7 @@ public final class DataProvider extends ContentProvider {
     public static int what2type(final int what) {
         switch (what) {
             case Rules.WHAT_DATA:
-                return TYPE_DATA;
+                return TYPE_DATA_MOBILE;
             case Rules.WHAT_MMS:
                 return TYPE_MMS;
             case Rules.WHAT_SMS:
@@ -2082,6 +2082,13 @@ public final class DataProvider extends ContentProvider {
                 TABLE + "." + DIRECTION + " AS " + DIRECTION,
                 TABLE + "." + DATE + " AS " + DATE,
                 AMOUNT, };
+        public static final String[] PROJECTION_LOG = new String[] {
+                TYPE,
+                DIRECTION,
+                DATE,
+                REMOTE,
+                AMOUNT,
+                ID,};
         /**
          * Projection used for query - sum.
          */
@@ -2770,7 +2777,7 @@ public final class DataProvider extends ContentProvider {
                         + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_SMS
                         + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + TYPE_MMS + " THEN "
                         + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_MMS
-                        + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + TYPE_DATA + " THEN "
+                        + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + TYPE_DATA_MOBILE + " THEN "
                         + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "."
                         + MIXED_UNITS_DATA + "/" + LogMeter.kBytesPerMegaByte + " ELSE " + Logs.TABLE + "."
                         + Logs.BILL_AMOUNT + " END) AS " + SUM_TD_BILLED_AMOUNT,
@@ -2787,7 +2794,7 @@ public final class DataProvider extends ContentProvider {
                         + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_SMS
                         + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + TYPE_MMS + " THEN "
                         + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_MMS
-                        + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + TYPE_DATA + " THEN "
+                        + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + TYPE_DATA_MOBILE + " THEN "
                         + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "."
                         + MIXED_UNITS_DATA + "/" + LogMeter.kBytesPerMegaByte + " ELSE " + Logs.TABLE + "."
                         + Logs.BILL_AMOUNT + " END) AS " + SUM_BP_BILLED_AMOUNT,
@@ -2802,7 +2809,7 @@ public final class DataProvider extends ContentProvider {
                         + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_SMS
                         + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + TYPE_MMS + " THEN "
                         + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_MMS
-                        + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + TYPE_DATA + " THEN "
+                        + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + TYPE_DATA_MOBILE + " THEN "
                         + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "."
                         + MIXED_UNITS_DATA + "/" + LogMeter.kBytesPerMegaByte + " ELSE " + Logs.TABLE + "."
                         + Logs.BILL_AMOUNT + " END) AS " + SUM_AT_BILLED_AMOUNT,
@@ -2822,6 +2829,29 @@ public final class DataProvider extends ContentProvider {
                 TABLE + "." + MIXED_UNITS_DATA + " AS " + MIXED_UNITS_DATA,
                 TABLE + "." + MIXED_UNITS_MMS + " AS " + MIXED_UNITS_MMS,
                 TABLE + "." + MIXED_UNITS_SMS + " AS " + MIXED_UNITS_SMS};
+        /**
+         * Projection used for sum query.
+         */
+        public static final String[] PROJECTION_SUM_EX = new String[]{
+                TABLE + "." + ID + " AS " + ID,
+                TABLE + "." + TYPE + " AS " + TYPE,
+                TABLE + "." + SHORTNAME + " AS " + SHORTNAME,
+                "sum(CASE WHEN " + Logs.TABLE + "." + Logs.DATE + " is null or " + Logs.TABLE + "."
+                        + Logs.DATE + ">{" + SUM_NOW + "} THEN 0 ELSE 1 END) as " + SUM_AT_COUNT,
+                "sum(CASE WHEN " + Logs.TABLE + "." + Logs.DATE + ">{" + SUM_NOW + "} THEN 0 WHEN "
+                        + TABLE + "." + MERGED_PLANS + " is null or " + TABLE + "." + TYPE + "!="
+                        + TYPE_MIXED + " THEN " + Logs.TABLE + "." + Logs.BILL_AMOUNT + " WHEN  "
+                        + Logs.TABLE + "." + Logs.TYPE + "=" + TYPE_CALL + " THEN " + Logs.TABLE
+                        + "." + Logs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_CALL + "/60"
+                        + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + TYPE_SMS + " THEN "
+                        + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_SMS
+                        + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + TYPE_MMS + " THEN "
+                        + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_MMS
+                        + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + TYPE_DATA_MOBILE + " THEN "
+                        + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "."
+                        + MIXED_UNITS_DATA + "/" + LogMeter.kBytesPerMegaByte + " ELSE " + Logs.TABLE + "."
+                        + Logs.BILL_AMOUNT + " END) AS " + SUM_AT_BILLED_AMOUNT,
+        };
         /**
          * Projection used for query id and (short)name.
          */
@@ -2980,7 +3010,7 @@ public final class DataProvider extends ContentProvider {
                 case DataProvider.LIMIT_TYPE_COST:
                     return (int) (cost * LogMeter.kHundredth);
                 case DataProvider.LIMIT_TYPE_UNITS:
-                    if (pType == DataProvider.TYPE_DATA) {
+                    if (pType == DataProvider.TYPE_DATA_MOBILE) {
                         return (int) (amount / LogMeter.kBytesPerKiloByte);
                     } else {
                         return (int) amount;
@@ -3009,7 +3039,7 @@ public final class DataProvider extends ContentProvider {
             switch (lType) {
                 case DataProvider.LIMIT_TYPE_UNITS:
                     switch (pType) {
-                        case DataProvider.TYPE_DATA:
+                        case DataProvider.TYPE_DATA_MOBILE:
                             return (long) (limit * LogMeter.kBytesPerKiloByte);
                         case DataProvider.TYPE_CALL:
                             return (long) (limit * LogMeter.kSecondsPerMinute);

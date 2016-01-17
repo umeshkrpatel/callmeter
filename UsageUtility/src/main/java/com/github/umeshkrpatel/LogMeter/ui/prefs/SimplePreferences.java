@@ -206,7 +206,7 @@ public final class SimplePreferences extends PreferenceActivity implements
 
         // data
         c = cr.query(DataProvider.Plans.CONTENT_URI, DataProvider.Plans.PROJECTION, SELECTION_TYPE,
-                new String[]{String.valueOf(DataProvider.TYPE_DATA)}, null);
+                new String[]{String.valueOf(DataProvider.TYPE_DATA_MOBILE)}, null);
         if (c == null)
             return;
 
@@ -334,7 +334,7 @@ public final class SimplePreferences extends PreferenceActivity implements
         cv.put(DataProvider.Plans.COST_PER_AMOUNT1, f);
         cv.put(DataProvider.Plans.COST_PER_AMOUNT2, f);
         cr.update(DataProvider.Plans.CONTENT_URI, cv, SELECTION_TYPE,
-                new String[]{String.valueOf(DataProvider.TYPE_DATA)});
+                new String[]{String.valueOf(DataProvider.TYPE_DATA_MOBILE)});
     }
 
     @SuppressWarnings("deprecation")

@@ -101,7 +101,7 @@ public final class RuleEdit extends PreferenceActivity implements UpdateListener
                 return R.array.direction_sms;
             case DataProvider.TYPE_MMS:
                 return R.array.direction_mms;
-            case DataProvider.TYPE_DATA:
+            case DataProvider.TYPE_DATA_MOBILE:
                 return R.array.direction_data;
             default:
                 return R.array.direction_calls;
@@ -433,7 +433,7 @@ public final class RuleEdit extends PreferenceActivity implements UpdateListener
                         + DataProvider.Plans.TYPE + " = " + DataProvider.TYPE_MIXED;
                 break;
             case DataProvider.Rules.WHAT_DATA:
-                where = DataProvider.Plans.TYPE + " = " + DataProvider.TYPE_DATA + " OR "
+                where = DataProvider.Plans.TYPE + " = " + DataProvider.TYPE_DATA_MOBILE + " OR "
                         + DataProvider.Plans.TYPE + " = " + DataProvider.TYPE_MIXED;
                 break;
             case DataProvider.Rules.WHAT_SMS:

@@ -54,8 +54,8 @@
     <string name="appearance_" formatted="false">Appearance</string>
     <string name="behavior_" formatted="false">Behavior</string>
     <string name="appearance_and_behavior_" formatted="false">Appearance &amp; behavior</string>
-    <string name="widget_stats_title" formatted="false">Call Meter (stats)</string>
-    <string name="widget_logs_title" formatted="false">Call Meter (last log)</string>
+    <string name="widget_stats_title" formatted="false">Usage Utility (stats)</string>
+    <string name="widget_logs_title" formatted="false">Usage Utility (last log)</string>
     <string name="widget_" formatted="false">Widget</string>
     <string name="widgets_" formatted="false">Widgets</string>
     <string name="widgets_no_widgets_" formatted="false">No widgets added</string>

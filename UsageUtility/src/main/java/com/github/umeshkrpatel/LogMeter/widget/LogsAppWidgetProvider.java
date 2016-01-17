@@ -40,7 +40,7 @@ import android.view.View;
 import android.widget.RemoteViews;
 
 import com.github.umeshkrpatel.LogMeter.R;
-import com.github.umeshkrpatel.LogMeter.data.ContactCache;
+import com.github.umeshkrpatel.LogMeter.data.NameCache;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
 import com.github.umeshkrpatel.LogMeter.data.LogRunnerService;
 import com.github.umeshkrpatel.LogMeter.ui.Common;
@@ -186,7 +186,7 @@ public final class LogsAppWidgetProvider extends AppWidgetProvider {
                 if (TextUtils.isEmpty(number)) {
                     buf1.append("???");
                 } else {
-                    String name = ContactCache.getInstance().getName(context, number, null);
+                    String name = NameCache.getInstance().getName(context, number, 0);
                     if (name == null) {
                         buf1.append(number);
                     } else {
@@ -214,7 +214,7 @@ public final class LogsAppWidgetProvider extends AppWidgetProvider {
             if (showIcon) {
                 views.setViewVisibility(R.id.widget_icon, View.VISIBLE);
                 switch (t) {
-                    case DataProvider.TYPE_DATA:
+                    case DataProvider.TYPE_DATA_MOBILE:
                         views.setImageViewResource(R.id.widget_icon, R.drawable.ic_widget_data);
                         break;
                     case DataProvider.TYPE_CALL:

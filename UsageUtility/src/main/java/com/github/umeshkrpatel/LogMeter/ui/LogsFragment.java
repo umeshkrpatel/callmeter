@@ -28,7 +28,6 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ListFragment;
@@ -54,9 +53,9 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import com.github.umeshkrpatel.LogMeter.R;
-import com.github.umeshkrpatel.LogMeter.data.ContactCache;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
 import com.github.umeshkrpatel.LogMeter.data.LogRunnerService;
+import com.github.umeshkrpatel.LogMeter.data.NameCache;
 import com.github.umeshkrpatel.LogMeter.ui.prefs.Preferences;
 
 import java.util.Date;
@@ -207,8 +206,9 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
         Cursor c = this
                 .getActivity()
                 .getContentResolver()
-                .query(DataProvider.Rules.CONTENT_URI, new String[]{DataProvider.Rules.ID},
-                        DataProvider.Rules.MYNUMBER + " like '___%'", null, null);
+                .query(/*DataProvider.Rules.CONTENT_URI, new String[]{DataProvider.Rules.ID},
+                        DataProvider.Rules.MYNUMBER + " like '___%'", null, null*/
+                DataProvider.Logs.CONTENT_URI, DataProvider.Logs.PROJECTION_LOG, null, null, DataProvider.Logs.DATE + " DESC");
         /*
       Show my number.
      */
@@ -257,7 +257,7 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
             where += "," + DataProvider.TYPE_MMS;
         }
         if (tbData != null && tbData.isChecked()) {
-            where += "," + DataProvider.TYPE_DATA;
+            where += "," + DataProvider.TYPE_DATA_MOBILE;
         }
         where += ") and " + DataProvider.Logs.TABLE + "." + DataProvider.Logs.DIRECTION + " in (-1";
         if (tbIn != null && tbIn.isChecked()) {
@@ -385,8 +385,8 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
         if (args != null) {
             where = args.getString("where");
         }
-        return new CursorLoader(getActivity(), DataProvider.Logs.CONTENT_URI_JOIN,
-                DataProvider.Logs.PROJECTION_JOIN, where, null, DataProvider.Logs.DATE + " DESC");
+        return new CursorLoader(getActivity(), DataProvider.Logs.CONTENT_URI,
+                DataProvider.Logs.PROJECTION_LOG, where, null, DataProvider.Logs.DATE + " DESC");
     }
 
     @Override
@@ -416,8 +416,6 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
      */
     public class LogAdapter extends ResourceCursorAdapter {
 
-        private int idRuleName;
-
         /**
          * Default Constructor.
          *
@@ -432,9 +430,7 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
          */
         @Override
         public final Cursor swapCursor(final Cursor cursor) {
-            Cursor c = super.swapCursor(cursor);
-            idRuleName = cursor.getColumnIndex(DataProvider.Rules.NAME);
-            return c;
+            return super.swapCursor(cursor);
         }
 
         /**
@@ -465,31 +461,32 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
 
             GridLayout gridLayout = (GridLayout) view.findViewById(R.id.log_items);
             StringBuilder buf = new StringBuilder();
-            final int t = cursor.getInt(DataProvider.Logs.INDEX_TYPE);
-            final long date = cursor.getLong(DataProvider.Logs.INDEX_DATE);
+            final int type = cursor.getInt(0);
+            final int dir = cursor.getInt(1);
+            final long date = cursor.getLong(2);
             buf.append(Common.formatDate(context, date));
             buf.append(" ");
             buf.append(DateFormat.getTimeFormat(context).format(new Date(date)));
             holder.tvTime.setText(buf.toString());
 
-            String type = cursor.getString(idRuleName);
-            if (type == null)
-                return;
-            if (type.contains("In")) {
+            if (dir == DataProvider.DIRECTION_IN) {
                 holder.ivType.setImageResource(R.drawable.ic_incoming);
             } else {
                 holder.ivType.setImageResource(R.drawable.ic_outgoing);
             }
 
-            if (type.contains("SMS") || type.contains("MMS")) {
+            if (type == DataProvider.TYPE_SMS || type == DataProvider.TYPE_MMS) {
                 holder.ivItem.setImageResource(R.drawable.ic_message);
-                gridLayout.setBackgroundColor(Color.argb(1, 0xFD, 0xC2, 0x0E));
-            } else {
+                view.setBackgroundColor(Color.argb(1, 0xFD, 0xC2, 0x0E));
+            } else if (type == DataProvider.TYPE_CALL) {
                 holder.ivItem.setImageResource(R.drawable.ic_call);
-                gridLayout.setBackgroundColor(Color.argb(1, 0x56, 0x00, 0x64));
+                view.setBackgroundColor(Color.argb(1, 0x56, 0x00, 0x64));
+            } else {
+                holder.ivItem.setImageResource(R.drawable.ic_data);
+                view.setBackgroundColor(Color.argb(1, 0x56, 0x00, 0x64));
             }
 
-            String s = cursor.getString(DataProvider.Logs.INDEX_REMOTE);
+            String s = cursor.getString(3);
             if (s == null || s.trim().length() == 0) {
                 holder.tvNumber.setVisibility(View.GONE);
             } else {
@@ -497,25 +494,24 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
                 holder.tvNumber.setText(s);
                 holder.tvName.setVisibility(View.VISIBLE);
                 holder.tvNumber.setVisibility(View.VISIBLE);
-                String format = "%s <" + s + ">";
-                String name = ContactCache.getInstance().getName(context, s, format);
-                if (name != null) {
+                NameCache.NameCacheItem nameCacheItem =
+                        NameCache.getInstance().getNameCacheItem(context, s, type);
+                if (nameCacheItem != null) {
                     holder.tvName.setVisibility(View.VISIBLE);
-                    holder.tvName.setText(name);
+                    holder.tvName.setText(nameCacheItem.mName);
                 } else {
                     holder.tvName.setVisibility(View.GONE);
                 }
-                String uri = ContactCache.getInstance().getPhotoUri(context, s, format);
                 holder.ivProfile.setVisibility(View.VISIBLE);
-                if (uri==null || uri.equals("<empty>")) {
+                if (nameCacheItem == null || nameCacheItem.mDrawable == null) {
                     holder.ivProfile.setImageResource(R.drawable.ic_face_empty_photo_id);
                 } else {
-                    holder.ivProfile.setImageURI(Uri.parse(uri));
+                    holder.ivProfile.setImageDrawable(nameCacheItem.mDrawable);
                 }
             }
 
-            final long amount = cursor.getLong(DataProvider.Logs.INDEX_AMOUNT);
-            s = Common.formatAmount(t, amount, LogsFragment.this.showHours);
+            final long amount = cursor.getLong(4);
+            s = Common.formatAmount(type, amount, LogsFragment.this.showHours);
             if (s == null || s.trim().length() == 0) {
                 holder.tvDuration.setVisibility(View.GONE);
             } else {

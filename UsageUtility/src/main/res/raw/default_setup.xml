@@ -4,7 +4,7 @@
     <provider>all</provider>
     <title>default rule set</title>
     <plans>
-        <plan>
+         <!-- <plan>
             <_id>12</_id>
             <_plan_name>Billing period</_plan_name>
             <_shortname>BillPeriod</_shortname>
@@ -18,8 +18,8 @@
             <_next_alert>0</_next_alert>
             <_strip_seconds>0</_strip_seconds>
             <_order>0</_order>
-        </plan>
-        <plan>
+        </plan> -->
+        <!-- <plan>
             <_id>13</_id>
             <_plan_name>Spacer</_plan_name>
             <_shortname>space</_shortname>
@@ -32,8 +32,8 @@
             <_billperiod_id>12</_billperiod_id>
             <_next_alert>0</_next_alert>
             <_order>1</_order>
-        </plan>
-        <plan>
+        </plan> -->
+        <!--<plan>
             <_id>14</_id>
             <_plan_name>Calls</_plan_name>
             <_shortname>Calls</_shortname>
@@ -46,9 +46,9 @@
             <_billperiod_id>12</_billperiod_id>
             <_next_alert>0</_next_alert>
             <_order>2</_order>
-        </plan>
+        </plan> -->
         <plan>
-            <_id>15</_id>
+            <_id>12</_id>
             <_plan_name>Calls In</_plan_name>
             <_shortname>CallsIn</_shortname>
             <_plan_type>4</_plan_type>
@@ -62,7 +62,7 @@
             <_order>3</_order>
         </plan>
         <plan>
-            <_id>16</_id>
+            <_id>13</_id>
             <_plan_name>Calls Out</_plan_name>
             <_shortname>CallsOut</_shortname>
             <_plan_type>4</_plan_type>
@@ -75,7 +75,7 @@
             <_next_alert>0</_next_alert>
             <_order>4</_order>
         </plan>
-        <plan>
+        <!--<plan>
             <_id>17</_id>
             <_plan_name>Spacer</_plan_name>
             <_shortname>spacer</_shortname>
@@ -88,8 +88,8 @@
             <_billperiod_id>12</_billperiod_id>
             <_next_alert>0</_next_alert>
             <_order>8</_order>
-        </plan>
-        <plan>
+        </plan> -->
+        <!-- <plan>
             <_id>18</_id>
             <_plan_name>Messages</_plan_name>
             <_shortname>SMS/MMS</_shortname>
@@ -103,9 +103,9 @@
             <_next_alert>0</_next_alert>
             <_strip_seconds>0</_strip_seconds>
             <_order>9</_order>
-        </plan>
+        </plan> -->
         <plan>
-            <_id>19</_id>
+            <_id>14</_id>
             <_plan_name>SMS In</_plan_name>
             <_shortname>SMSIn</_shortname>
             <_plan_type>5</_plan_type>
@@ -119,7 +119,7 @@
             <_order>10</_order>
         </plan>
         <plan>
-            <_id>20</_id>
+            <_id>15</_id>
             <_plan_name>SMS Out</_plan_name>
             <_shortname>SMSOut</_shortname>
             <_plan_type>5</_plan_type>
@@ -132,7 +132,7 @@
             <_next_alert>0</_next_alert>
             <_order>11</_order>
         </plan>
-        <plan>
+        <!-- <plan>
             <_id>21</_id>
             <_plan_name>Spacer</_plan_name>
             <_plan_type>1</_plan_type>
@@ -144,8 +144,8 @@
             <_billperiod_id>12</_billperiod_id>
             <_next_alert>0</_next_alert>
             <_order>17</_order>
-        </plan>
-        <plan>
+        </plan> -->
+        <!-- <plan>
             <_id>22</_id>
             <_plan_name>Data (2G/3G/4G)</_plan_name>
             <_shortname>Data</_shortname>
@@ -158,9 +158,9 @@
             <_billperiod_id>12</_billperiod_id>
             <_next_alert>0</_next_alert>
             <_order>18</_order>
-        </plan>
+        </plan> -->
         <plan>
-            <_id>23</_id>
+            <_id>18</_id>
             <_plan_name>Data In/Out</_plan_name>
             <_shortname>DataInOut</_shortname>
             <_plan_type>7</_plan_type>
@@ -174,7 +174,7 @@
             <_order>19</_order>
         </plan>
         <plan>
-            <_id>27</_id>
+            <_id>16</_id>
             <_plan_name>MMS In</_plan_name>
             <_shortname>MMSIn</_shortname>
             <_plan_type>6</_plan_type>
@@ -198,7 +198,7 @@
             <_order>15</_order>
         </plan>
         <plan>
-            <_id>28</_id>
+            <_id>17</_id>
             <_plan_name>MMS Out</_plan_name>
             <_shortname>MMSOut</_shortname>
             <_plan_type>6</_plan_type>
@@ -222,7 +222,7 @@
             <_order>16</_order>
         </plan>
         <plan>
-            <_id>29</_id>
+            <_id>19</_id>
             <_plan_name>WebSMS</_plan_name>
             <_shortname>websms</_shortname>
             <_plan_type>5</_plan_type>
@@ -232,7 +232,7 @@
             <_order>14</_order>
         </plan>
         <plan>
-            <_id>30</_id>
+            <_id>20</_id>
             <_plan_name>VoIP Out</_plan_name>
             <_shortname>voip</_shortname>
             <_plan_type>4</_plan_type>
@@ -242,7 +242,7 @@
             <_order>7</_order>
         </plan>
         <plan>
-            <_id>31</_id>
+            <_id>21</_id>
             <_plan_name>Calls Out 2</_plan_name>
             <_shortname>CallsOut2</_shortname>
             <_plan_type>4</_plan_type>
@@ -252,7 +252,7 @@
             <_order>6</_order>
         </plan>
         <plan>
-            <_id>32</_id>
+            <_id>22</_id>
             <_plan_name>Calls In 2</_plan_name>
             <_shortname>CallsIn2</_shortname>
             <_plan_type>4</_plan_type>
@@ -262,7 +262,7 @@
             <_order>5</_order>
         </plan>
         <plan>
-            <_id>33</_id>
+            <_id>23</_id>
             <_plan_name>SMS In 2</_plan_name>
             <_shortname>SMSIn2</_shortname>
             <_plan_type>5</_plan_type>
@@ -272,7 +272,7 @@
             <_order>12</_order>
         </plan>
         <plan>
-            <_id>34</_id>
+            <_id>24</_id>
             <_plan_name>SMS Out 2</_plan_name>
             <_shortname>SMSOut2</_shortname>
             <_plan_type>5</_plan_type>

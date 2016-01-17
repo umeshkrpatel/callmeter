@@ -269,7 +269,7 @@ public final class Preferences extends PreferenceActivity implements
         if (p == null) {
             return -1L;
         }
-        final long dlb = Utils.parseLong(p.getString(PREFS_DELETE_OLD_LOGS, "90"), -1L);
+        final long dlb = Utils.parseLong(p.getString(PREFS_DELETE_OLD_LOGS, "-1"), -1L);
         if (dlb < 0L) {
             return dlb;
         }

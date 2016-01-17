@@ -81,17 +81,9 @@ public final class SummaryFragment extends ListFragment implements OnClickListen
         if (planId >= 0L) {
             setPlanId(planId);
         }
-        Cursor cursor = getActivity().getContentResolver().query(DataProvider.Plans.CONTENT_URI_SUM
-                        .buildUpon()
-                        .appendQueryParameter(DataProvider.Plans.PARAM_HIDE_ZERO,
-                                String.valueOf(false))
-                        .appendQueryParameter(DataProvider.Plans.PARAM_HIDE_NOCOST,
-                                String.valueOf(false))
-                        .appendQueryParameter(DataProvider.Plans.PARAM_HIDE_TODAY,
-                                String.valueOf(false))
-                        .appendQueryParameter(DataProvider.Plans.PARAM_HIDE_ALLTIME,
-                                String.valueOf(false)).build(), DataProvider.Plans.PROJECTION_SUM,
-                null, null, null);
+
+        Cursor cursor = getActivity().getContentResolver().query(DataProvider.Logs.SUM_URI,
+                        DataProvider.Logs.PROJECTION_SUM, null, null, null);
 
         PieChart pcCallDuration = (PieChart) v.findViewById(R.id.callDurationChart);
         PieChart pcCallCount = (PieChart) v.findViewById(R.id.callCountChart);
@@ -103,26 +95,70 @@ public final class SummaryFragment extends ListFragment implements OnClickListen
         ArrayList<Entry> entriesSmsMms = new ArrayList<>();
         ArrayList<Entry> entriesData = new ArrayList<>();
 
-        int calli = 1, smsi = 1, mmsi = 1, datai = 1;
+        int calli = 0, smsi = 0, mmsi = 0, datai = 0;
         if (cursor != null) {
             while (cursor.moveToNext()) {
-                DataProvider.Plans.Plan plan =
-                        new DataProvider.Plans.Plan(cursor);
-                if (plan.name.contains("2") || plan.type < 4 || plan.type > 6 || plan.atBa <= 0) {
-                    Log.d(TAG, "No data");
-                } else if (plan.type == 4) {
-                    entriesCallDuration.add(new Entry(plan.atBa, calli));
-                    entriesCallCount.add(new Entry(plan.atCount, calli));
+//                DataProvider.Plans.Plan plan =
+//                        new DataProvider.Plans.Plan(cursor);
+//                if (plan.name.contains("2") || plan.type < 4 || plan.type > 6 || plan.atBa <= 0) {
+//                    Log.d(TAG, "No data");
+//                } else if (plan.type == 4) {
+//                    entriesCallDuration.add(new Entry(plan.atBa, calli));
+//                    entriesCallCount.add(new Entry(plan.atCount, calli));
+//                    calli++;
+//                } else if (plan.type == 5) {
+//                    entriesSmsMms.add(new Entry(plan.atBa, smsi));
+//                    smsi++;
+//                } else if (plan.type == 6) {
+//                    entriesSmsMms.set(mmsi,
+//                            new Entry(plan.atBa + entriesSmsMms.get(mmsi).getVal(), mmsi));
+//                    mmsi++;
+//                } else if (plan.type == 7) {
+//                    entriesData.add(new Entry(plan.atBa, datai));
+//                    datai++;
+//                }
+//                if (type == null)
+//                    continue;
+//                switch (type) {
+//                    case "CallsIn":
+//                    //case "CallsIn2":
+//                    case "CallsOut":
+//                    //case "CallsOut2":
+//                        entriesCallDuration.add(new Entry(cursor.getLong(4), calli));
+//                        entriesCallCount.add(new Entry(cursor.getLong(3), calli));
+//                        calli++;
+//                        break;
+//                    case "SMSIn":
+//                    //case "SMSIn2":
+//                    case "SMSOut":
+//                    //case "SMSOut2":
+//                        entriesSmsMms.add(new Entry(cursor.getLong(3), smsi));
+//                        smsi++;
+//                        break;
+//                    case "MMSIn":
+//                    case "MMSOut":
+//                        //entriesSmsMms.set(mmsi,
+//                        //    new Entry(cursor.getLong(3) + entriesSmsMms.get(mmsi).getVal(), mmsi));
+//                        //mmsi++;
+//                        break;
+//                    case "DataInOut":
+//                        entriesData.add(new Entry(cursor.getLong(3), datai));
+//                        datai++;
+//                        break;
+//                }
+                if (cursor.getInt(0) == DataProvider.TYPE_CALL) {
+                    entriesCallDuration.add(new Entry(cursor.getLong(3), calli));
+                    entriesCallCount.add(new Entry(cursor.getLong(2), calli));
                     calli++;
-                } else if (plan.type == 5) {
-                    entriesSmsMms.add(new Entry(plan.atBa, smsi));
+                } else if (cursor.getInt(0) == DataProvider.TYPE_SMS) {
+                    entriesSmsMms.add(new Entry(cursor.getLong(3), smsi));
                     smsi++;
-                } else if (plan.type == 6) {
+                } else if (cursor.getInt(0) == DataProvider.TYPE_MMS) {
                     entriesSmsMms.set(mmsi,
-                            new Entry(plan.atBa + entriesSmsMms.get(mmsi).getVal(), mmsi));
+                            new Entry(cursor.getLong(3) + entriesSmsMms.get(mmsi).getVal(), mmsi));
                     mmsi++;
-                } else if (plan.type == 7) {
-                    entriesData.add(new Entry(plan.atBa, datai));
+                } else if (cursor.getInt(0) == DataProvider.TYPE_DATA_MOBILE) {
+                    entriesData.add(new Entry(cursor.getLong(3), datai));
                     datai++;
                 }
             }
@@ -156,14 +192,6 @@ public final class SummaryFragment extends ListFragment implements OnClickListen
     @Override
     public void onStop() {
         super.onStop();
-        //final Editor e = PreferenceManager.getDefaultSharedPreferences(getActivity()).edit();
-        //e.putBoolean(PREF_CALL, tbCall.isChecked());
-        //e.putBoolean(PREF_SMS, tbSMS.isChecked());
-        //e.putBoolean(PREF_MMS, tbMMS.isChecked());
-        //e.putBoolean(PREF_DATA, tbData.isChecked());
-        //e.putBoolean(PREF_IN, tbIn.isChecked());
-        //e.putBoolean(PREF_OUT, tbOut.isChecked());
-        //e.commit();
     }
 
     /**

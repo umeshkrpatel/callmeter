@@ -114,7 +114,7 @@ public final class Rules extends PreferenceActivity
                         strs = r.getStringArray(R.array.direction_sms);
                     } else if (t == DataProvider.TYPE_MMS) {
                         strs = r.getStringArray(R.array.direction_mms);
-                    } else if (t == DataProvider.TYPE_DATA) {
+                    } else if (t == DataProvider.TYPE_DATA_MOBILE) {
                         strs = r.getStringArray(R.array.direction_data);
                     } else {
                         strs = r.getStringArray(R.array.direction_calls);

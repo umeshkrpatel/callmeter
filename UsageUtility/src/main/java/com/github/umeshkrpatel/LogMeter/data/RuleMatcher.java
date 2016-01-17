@@ -711,7 +711,7 @@ public final class RuleMatcher {
                     }
                     break;
                 case DataProvider.Rules.WHAT_DATA:
-                    ret = (t == DataProvider.TYPE_DATA);
+                    ret = (t == DataProvider.TYPE_DATA_MOBILE);
                     break;
                 case DataProvider.Rules.WHAT_MMS:
                     ret = (t == DataProvider.TYPE_MMS);
@@ -1196,7 +1196,7 @@ public final class RuleMatcher {
             final long l = DataProvider.Plans.getLimit(type, limitType,
                     cursor.getFloat(DataProvider.Plans.INDEX_LIMIT));
             if (limitType == DataProvider.LIMIT_TYPE_UNITS
-                    && type == DataProvider.TYPE_DATA) {
+                    && type == DataProvider.TYPE_DATA_MOBILE) {
                 // normally amount is saved as kB, here it is B
                 limit = l * LogMeter.kBytesPerKiloByte;
             } else {
@@ -1272,7 +1272,7 @@ public final class RuleMatcher {
             switch (logType) {
                 case DataProvider.TYPE_CALL:
                     return upc;
-                case DataProvider.TYPE_DATA:
+                case DataProvider.TYPE_DATA_MOBILE:
                     return upd;
                 case DataProvider.TYPE_MMS:
                     return upm;
@@ -1454,7 +1454,7 @@ public final class RuleMatcher {
                     case DataProvider.TYPE_MMS:
                         ret = ret * upm;
                         break;
-                    case DataProvider.TYPE_DATA:
+                    case DataProvider.TYPE_DATA_MOBILE:
                         ret = ret * upd / LogMeter.kBytesPerMegaByte;
                     default:
                         break;
@@ -1487,7 +1487,7 @@ public final class RuleMatcher {
                         case DataProvider.TYPE_CALL:
                             f *= LogMeter.kSecondsPerMinute;
                             break;
-                        case DataProvider.TYPE_DATA:
+                        case DataProvider.TYPE_DATA_MOBILE:
                             f *= LogMeter.kBytesPerMegaByte;
                             break;
                         default:
@@ -1552,7 +1552,7 @@ public final class RuleMatcher {
                                 / LogMeter.kSecondsPerMinute;
                     }
                     break;
-                case DataProvider.TYPE_DATA:
+                case DataProvider.TYPE_DATA_MOBILE:
                     ret += (as0 * costPerAmountInLimit1 + as1 * costPerAmount1)
                             / LogMeter.kBytesPerMegaByte;
                     break;

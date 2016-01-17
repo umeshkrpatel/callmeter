@@ -22,13 +22,13 @@ package com.github.umeshkrpatel.LogMeter.data;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
-import android.graphics.drawable.Drawable;
 import android.net.TrafficStats;
 import android.os.Build;
 import android.util.Log;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Set;
 
 /**
  * Representation of a device.
@@ -247,55 +247,75 @@ final class TargetDevice extends Device {
 }
 
 class TraficRecord {
+    Integer mUid = 0;
     long mIncoming = 0;
     long mOutgoing = 0;
     String appTag = null;
-    Drawable mIcon = null;
-    String mName = null;
     TraficRecord() {
         mIncoming = TrafficStats.getTotalRxBytes();
         mOutgoing = TrafficStats.getTotalTxBytes();
     }
-    TraficRecord(int uid, String tag, Drawable icon, String name) {
+    TraficRecord(int uid, String tag) {
+        mUid = uid;
         mIncoming = TrafficStats.getUidRxBytes(uid);
         mOutgoing = TrafficStats.getUidTxBytes(uid);
         appTag = tag;
-        mIcon = icon;
-        mName = name;
+    }
+    public void updateState() {
+        mIncoming = TrafficStats.getUidRxBytes(mUid);
+        mOutgoing = TrafficStats.getUidTxBytes(mUid);
     }
 };
 
 class TrafficMonitor {
-    HashMap<Integer, TraficRecord> apps = new HashMap<>();
-    TrafficMonitor(Context context) {
+    private static TrafficMonitor instance = null;
+    private HashMap<String, TraficRecord> apps = new HashMap<>();
+    public static TrafficMonitor getInstance(Context context) {
+        if (instance == null) {
+            instance = new TrafficMonitor(context);
+        }
+        return instance;
+    }
+
+    private TrafficMonitor(Context context) {
         for (ApplicationInfo app : context.getPackageManager().getInstalledApplications(0)) {
-            apps.put(app.uid, new TraficRecord(app.uid, app.packageName, app.loadLogo(context.getPackageManager()), app.name));
+            apps.put(app.packageName, new TraficRecord(app.uid, app.packageName));
         }
     }
 
-    public long getRxBytes(Integer uid) {
-        TraficRecord tr = apps.get(uid);
+    public long getRxBytes(final String pkgName) {
+        TraficRecord tr = apps.get(pkgName);
         return tr.mIncoming;
     }
 
-    public long getTxBytes(Integer uid) {
-        TraficRecord tr = apps.get(uid);
+    public long getTxBytes(final String pkgName) {
+        TraficRecord tr = apps.get(pkgName);
         return tr.mOutgoing;
     }
 
     public long getRxBytes() {
         long sum = 0;
-        for (Integer uid : apps.keySet()) {
-            TraficRecord tr = apps.get(uid);
+        for (String pkgName : apps.keySet()) {
+            TraficRecord tr = apps.get(pkgName);
             sum += tr.mIncoming;
         }
         return sum;
     }
 
+    public void updateAppsState() {
+        for (String pkgName : apps.keySet()) {
+            apps.get(pkgName).updateState();
+        }
+    }
+
+    public Set<String> appList() {
+        return apps.keySet();
+    }
+
     public long getTxBytes() {
         long sum = 0;
-        for (Integer uid : apps.keySet()) {
-            TraficRecord tr = apps.get(uid);
+        for (String pkgName : apps.keySet()) {
+            TraficRecord tr = apps.get(pkgName);
             sum += tr.mOutgoing;
         }
         return sum;

@@ -36,7 +36,6 @@ import com.viewpagerindicator.TitlePageIndicator;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 
 import de.ub0r.android.lib.Utils;
 
@@ -254,14 +253,14 @@ public final class UtilityActivity
 
         SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(this);
         //noinspection ConstantConditions
-        if (p.getAll().isEmpty()) {
-            // set date of recordings to beginning of last month
-            Calendar c = Calendar.getInstance();
-            c.set(Calendar.DAY_OF_MONTH, 0);
-            c.add(Calendar.MONTH, -1);
-            Log.i(TAG, "set date of recording: " + c);
-            p.edit().putLong(Preferences.PREFS_DATE_BEGIN, c.getTimeInMillis()).apply();
-        }
+//        if (p.getAll().isEmpty()) {
+//            // set date of recordings to beginning of last month
+//            Calendar c = Calendar.getInstance();
+//            c.set(Calendar.DAY_OF_MONTH, 0);
+//            c.add(Calendar.MONTH, -1);
+//            Log.i(TAG, "set date of recording: " + c);
+//            p.edit().putLong(Preferences.PREFS_DATE_BEGIN, c.getTimeInMillis()).apply();
+//        }
 
         pager = (ViewPager) findViewById(R.id.pager);
         initAdapter();
@@ -370,9 +369,6 @@ public final class UtilityActivity
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
-        /* if (prefsNoAds) {
-            menu.removeItem(R.id.item_donate);
-        } */
         return true;
     }
 

@@ -371,7 +371,7 @@ public final class PlanEdit extends PreferenceActivity implements UpdateListener
                 ep.setInputType(InputType.TYPE_CLASS_NUMBER);
                 ps.addPreference(ep);
             }
-            if (merged == null && (t == DataProvider.TYPE_CALL || t == DataProvider.TYPE_DATA)) {
+            if (merged == null && (t == DataProvider.TYPE_CALL || t == DataProvider.TYPE_DATA_MOBILE)) {
                 if (lt != DataProvider.LIMIT_TYPE_NONE || ppid > 0L) {
                     // cost per amount in limit
                     CV2EditTextPreference ep2 = new CV2EditTextPreference(this, values,
@@ -434,7 +434,7 @@ public final class PlanEdit extends PreferenceActivity implements UpdateListener
         if (t == DataProvider.TYPE_MIXED) {
             where = "(" + DataProvider.Plans.TYPE + " in (" + DataProvider.TYPE_CALL + ","
                     + DataProvider.TYPE_SMS + "," + DataProvider.TYPE_MMS + ","
-                    + DataProvider.TYPE_DATA + "))";
+                    + DataProvider.TYPE_DATA_MOBILE + "))";
         } else {
             where = DataProvider.Plans.TYPE + " = " + t;
         }
@@ -459,7 +459,7 @@ public final class PlanEdit extends PreferenceActivity implements UpdateListener
                 switch (t) {
                     case DataProvider.TYPE_CALL:
                         return R.string.units_minutes;
-                    case DataProvider.TYPE_DATA:
+                    case DataProvider.TYPE_DATA_MOBILE:
                         return R.string.units_mbyte;
                     case DataProvider.TYPE_MIXED:
                         return R.string.units_units;
@@ -504,7 +504,7 @@ public final class PlanEdit extends PreferenceActivity implements UpdateListener
         switch (t) {
             case DataProvider.TYPE_CALL:
                 return R.string.units_cost_per_minute;
-            case DataProvider.TYPE_DATA:
+            case DataProvider.TYPE_DATA_MOBILE:
                 return R.string.units_cost_per_mbyte;
             default:
                 return -1;

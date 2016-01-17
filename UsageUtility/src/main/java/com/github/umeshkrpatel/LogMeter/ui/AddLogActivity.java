@@ -179,7 +179,7 @@ public final class AddLogActivity extends AppCompatActivity implements OnClickLi
                         cv.put(DataProvider.Logs.TYPE, DataProvider.TYPE_CALL);
                         break;
                     case DataProvider.Rules.WHAT_DATA:
-                        cv.put(DataProvider.Logs.TYPE, DataProvider.TYPE_DATA);
+                        cv.put(DataProvider.Logs.TYPE, DataProvider.TYPE_DATA_MOBILE);
                         l *= LogMeter.kBytesPerKiloByte;
                         break;
                     case DataProvider.Rules.WHAT_MMS:

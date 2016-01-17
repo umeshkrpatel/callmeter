@@ -288,7 +288,7 @@ public final class StatsAppWidgetProvider extends AppWidgetProvider {
         if (showIcon) {
             views.setViewVisibility(R.id.widget_icon, View.VISIBLE);
             switch (plan.type) {
-                case DataProvider.TYPE_DATA:
+                case DataProvider.TYPE_DATA_MOBILE:
                     views.setImageViewResource(R.id.widget_icon, R.drawable.ic_widget_data);
                     break;
                 case DataProvider.TYPE_CALL:
