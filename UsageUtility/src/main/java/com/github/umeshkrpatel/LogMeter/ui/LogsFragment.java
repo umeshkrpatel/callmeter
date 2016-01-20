@@ -358,6 +358,7 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
     @Override
     public boolean onItemLongClick(final AdapterView<?> parent, final View view,
                                    final int position, final long id) {
+        /*
         final Builder b = new Builder(getActivity());
         b.setCancelable(true);
         b.setItems(R.array.dialog_delete, new DialogInterface.OnClickListener() {
@@ -374,6 +375,7 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
         });
         b.setNegativeButton(android.R.string.cancel, null);
         b.show();
+        */
         return true;
     }
 

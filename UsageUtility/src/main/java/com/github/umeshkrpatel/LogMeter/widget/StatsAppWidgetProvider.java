@@ -37,7 +37,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
 
-import com.github.umeshkrpatel.LogMeter.LogMeter;
+import com.github.umeshkrpatel.LogMeter.IDefs;
 import com.github.umeshkrpatel.LogMeter.R;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider.Plans.Plan;
@@ -224,7 +224,7 @@ public final class StatsAppWidgetProvider extends AppWidgetProvider {
         Log.d(TAG, "cost: " + cost);
         Log.d(TAG, "billedAmount: " + plan.bpBa);
 
-        int bpos = (int) (plan.getBillPlanUsage() * LogMeter.kHundredth);
+        int bpos = (int) (plan.getBillPlanUsage() * IDefs.kHundredth);
         int bmax;
         if (bpos < 0) {
             bpos = 0;
@@ -233,7 +233,7 @@ public final class StatsAppWidgetProvider extends AppWidgetProvider {
             bpos = 0;
             bmax = 0;
         } else {
-            bmax = LogMeter.kHundredth;
+            bmax = IDefs.kHundredth;
         }
         Log.d(TAG, "bpos/bmax: " + bpos + "/" + bmax);
 
@@ -245,7 +245,7 @@ public final class StatsAppWidgetProvider extends AppWidgetProvider {
                     plan.billperiod, bd, false);
         }
         if (plan.limit > 0) {
-            stats += "\n" + ((int) (plan.usage * LogMeter.kHundredth)) + "%";
+            stats += "\n" + ((int) (plan.usage * IDefs.kHundredth)) + "%";
         }
         if (!plan.hasBa && showCost && free > 0F) {
             stats += "\n(" + String.format(Preferences.getCurrencyFormat(context), free) + ")";
@@ -372,21 +372,21 @@ public final class StatsAppWidgetProvider extends AppWidgetProvider {
             //noinspection SuspiciousNameCombination
             bitmapPb = Bitmap.createBitmap(WIDGET_WIDTH, WIDGET_WIDTH, Bitmap.Config.ARGB_8888);
             canvasPb = new Canvas(bitmapPb);
-            int u = (int) ((used * LogMeter.kHundredth) / limit);
-            if (u >= LogMeter.kHundredth) {
+            int u = (int) ((used * IDefs.kHundredth) / limit);
+            if (u >= IDefs.kHundredth) {
                 paintPb.setColor(PB_COLOR_RED);
-            } else if (bmax < 0 && u >= LogMeter.kEightyth || bmax > 0
+            } else if (bmax < 0 && u >= IDefs.kEightyth || bmax > 0
                     && (float) used / limit >= (float) bpos / bmax) {
                 paintPb.setColor(PB_COLOR_YELLOW);
             } else {
                 paintPb.setColor(PB_COLOR_GREEN);
             }
-            if (u > LogMeter.kHundredth) {
-                u = LogMeter.kHundredth;
+            if (u > IDefs.kHundredth) {
+                u = IDefs.kHundredth;
             }
             canvasPb.drawRoundRect(base, WIDGET_RCORNER, WIDGET_RCORNER, paintPb);
             //noinspection SuspiciousNameCombination
-            copy = new Rect(0, WIDGET_WIDTH - PB_HEIGHT, (WIDGET_WIDTH * u) / LogMeter.kHundredth,
+            copy = new Rect(0, WIDGET_WIDTH - PB_HEIGHT, (WIDGET_WIDTH * u) / IDefs.kHundredth,
                     WIDGET_WIDTH);
             canvas.drawBitmap(bitmapPb, copy, copy, null);
         }
@@ -404,7 +404,7 @@ public final class StatsAppWidgetProvider extends AppWidgetProvider {
         Common.setDateFormat(context);
 
         // Update logs and run rule matcher
-        LogRunnerService.update(context, LogRunnerService.ACTION_RUN_MATCHER);
+        // LogRunnerService.update(context, LogRunnerService.ACTION_RUN_MATCHER);
 
         updateWidgets(context, appWidgetManager, appWidgetIds);
     }

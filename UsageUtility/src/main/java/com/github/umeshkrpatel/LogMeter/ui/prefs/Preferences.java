@@ -48,7 +48,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.github.umeshkrpatel.LogMeter.BuildConfig;
-import com.github.umeshkrpatel.LogMeter.LogMeter;
+import com.github.umeshkrpatel.LogMeter.IDefs;
 import com.github.umeshkrpatel.LogMeter.R;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider.XmlMetaData;
@@ -273,7 +273,7 @@ public final class Preferences extends PreferenceActivity implements
         if (dlb < 0L) {
             return dlb;
         }
-        return System.currentTimeMillis() - (dlb * LogMeter.kMilliSecondsPerSecond * LogMeter.kSecondsPerDay);
+        return System.currentTimeMillis() - (dlb * IDefs.kMilliSecondsPerSecond * IDefs.kSecondsPerDay);
     }
 
     /**

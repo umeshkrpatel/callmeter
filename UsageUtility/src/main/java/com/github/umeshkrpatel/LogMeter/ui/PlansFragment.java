@@ -56,7 +56,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.PieChart;
-import com.github.umeshkrpatel.LogMeter.LogMeter;
+import com.github.umeshkrpatel.LogMeter.IDefs;
 import com.github.umeshkrpatel.LogMeter.R;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
 import com.github.umeshkrpatel.LogMeter.ui.prefs.PlanEdit;
@@ -460,7 +460,7 @@ public final class PlansFragment extends ListFragment implements OnClickListener
                     }
                 }
                 if (plan.limit > 0) {
-                    spb.insert(0, ((int) (plan.usage * LogMeter.kHundredth)) + "%" + delimiter);
+                    spb.insert(0, ((int) (plan.usage * IDefs.kHundredth)) + "%" + delimiter);
                 }
             }
 

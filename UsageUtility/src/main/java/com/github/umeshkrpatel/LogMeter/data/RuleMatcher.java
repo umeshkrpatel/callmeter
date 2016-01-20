@@ -39,7 +39,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 
-import com.github.umeshkrpatel.LogMeter.LogMeter;
+import com.github.umeshkrpatel.LogMeter.IDefs;
 import com.github.umeshkrpatel.LogMeter.R;
 import com.github.umeshkrpatel.LogMeter.ui.UtilityActivity;
 import com.github.umeshkrpatel.LogMeter.ui.prefs.Preferences;
@@ -348,7 +348,7 @@ public final class RuleMatcher {
                 int i = 1;
                 do {
                     ret |= matchLog(cr, ops, cursor);
-                    if (i % PROGRESS_STEPS == 0 || (i < PROGRESS_STEPS && i % LogMeter.kTenth == 0)) {
+                    if (i % PROGRESS_STEPS == 0 || (i < PROGRESS_STEPS && i % IDefs.kTenth == 0)) {
                         h = UtilityActivity.getHandler();
                         if (h != null) {
                             final Message m = h
@@ -365,7 +365,7 @@ public final class RuleMatcher {
                         ops.clear();
                         Log.d(TAG, "sleeping..");
                         try {
-                            Thread.sleep(LogMeter.kMilliSecondsPerSecond);
+                            Thread.sleep(IDefs.kMilliSecondsPerSecond);
                         } catch (InterruptedException e) {
                             Log.e(TAG, "sleep interrupted", e);
                         }
@@ -410,12 +410,12 @@ public final class RuleMatcher {
                     int used = DataProvider.Plans.getUsed(plan.type, plan.limitType,
                             plan.billedAmount, plan.billedCost);
                     int usedRate = plan.limit > 0 ?
-                            (int) ((used * LogMeter.kHundredth) / plan.limit)
+                            (int) ((used * IDefs.kHundredth) / plan.limit)
                             : 0;
-                    if (a100 && usedRate >= LogMeter.kHundredth) {
+                    if (a100 && usedRate >= IDefs.kHundredth) {
                         alert = usedRate;
                         alertPlan = plan;
-                    } else if (a80 && alert < LogMeter.kEightyth && usedRate >= LogMeter.kEightyth) {
+                    } else if (a80 && alert < IDefs.kEightyth && usedRate >= IDefs.kEightyth) {
                         alert = usedRate;
                         alertPlan = plan;
                     }
@@ -1198,7 +1198,7 @@ public final class RuleMatcher {
             if (limitType == DataProvider.LIMIT_TYPE_UNITS
                     && type == DataProvider.TYPE_DATA_MOBILE) {
                 // normally amount is saved as kB, here it is B
-                limit = l * LogMeter.kBytesPerKiloByte;
+                limit = l * IDefs.kBytesPerKiloByte;
             } else {
                 limit = l;
             }
@@ -1340,8 +1340,8 @@ public final class RuleMatcher {
                 Log.d(TAG, "ltype: " + limitType);
                 switch (limitType) {
                     case DataProvider.LIMIT_TYPE_COST:
-                        Log.d(TAG, "bc<lt " + (billedCost * LogMeter.kHundredth) + "<" + limit);
-                        return limit - billedCost * LogMeter.kHundredth;
+                        Log.d(TAG, "bc<lt " + (billedCost * IDefs.kHundredth) + "<" + limit);
+                        return limit - billedCost * IDefs.kHundredth;
                     case DataProvider.LIMIT_TYPE_UNITS:
                         Log.d(TAG, "ba<lt " + billedAmount + "<" + limit);
                         return limit - billedAmount;
@@ -1397,7 +1397,7 @@ public final class RuleMatcher {
                 if (type != DataProvider.TYPE_MIXED && pp.type == DataProvider.TYPE_MIXED) {
                     switch (t) {
                         case DataProvider.TYPE_CALL:
-                            pp.billedAmount += amount * pp.upc / LogMeter.kSecondsPerMinute;
+                            pp.billedAmount += amount * pp.upc / IDefs.kSecondsPerMinute;
                             break;
                         case DataProvider.TYPE_MMS:
                             pp.billedAmount += amount * pp.upm;
@@ -1446,7 +1446,7 @@ public final class RuleMatcher {
             if (type == DataProvider.TYPE_MIXED) {
                 switch (t) {
                     case DataProvider.TYPE_CALL:
-                        ret = ret * upc / LogMeter.kSecondsPerMinute;
+                        ret = ret * upc / IDefs.kSecondsPerMinute;
                         break;
                     case DataProvider.TYPE_SMS:
                         ret = ret * ups;
@@ -1455,7 +1455,7 @@ public final class RuleMatcher {
                         ret = ret * upm;
                         break;
                     case DataProvider.TYPE_DATA_MOBILE:
-                        ret = ret * upd / LogMeter.kBytesPerMegaByte;
+                        ret = ret * upd / IDefs.kBytesPerMegaByte;
                     default:
                         break;
                 }
@@ -1485,10 +1485,10 @@ public final class RuleMatcher {
                     f = 1f / p.getUP(t);
                     switch (t) {
                         case DataProvider.TYPE_CALL:
-                            f *= LogMeter.kSecondsPerMinute;
+                            f *= IDefs.kSecondsPerMinute;
                             break;
                         case DataProvider.TYPE_DATA_MOBILE:
-                            f *= LogMeter.kBytesPerMegaByte;
+                            f *= IDefs.kBytesPerMegaByte;
                             break;
                         default:
                             // nothing to do
@@ -1522,39 +1522,39 @@ public final class RuleMatcher {
                     if (bAmount <= billModeFirstLength) {
                         // bAmount is most likely < remaining
                         ret += (as0 * costPerAmountInLimit1 + as1 * costPerAmount1)
-                                / LogMeter.kSecondsPerMinute;
+                                / IDefs.kSecondsPerMinute;
                     } else if (as0 == 0f) {
                         ret += costPerAmount1 * billModeFirstLength
-                                / LogMeter.kSecondsPerMinute;
+                                / IDefs.kSecondsPerMinute;
                         ret += costPerAmount2 * (bAmount - billModeFirstLength)
-                                / LogMeter.kSecondsPerMinute;
+                                / IDefs.kSecondsPerMinute;
                     } else if (as1 == 0f) {
                         ret += costPerAmountInLimit1 * billModeFirstLength
-                                / LogMeter.kSecondsPerMinute;
+                                / IDefs.kSecondsPerMinute;
                         ret += costPerAmountInLimit2 * (bAmount - billModeFirstLength)
-                                / LogMeter.kSecondsPerMinute;
+                                / IDefs.kSecondsPerMinute;
                     } else if (as0 == billModeFirstLength) {
                         ret += costPerAmountInLimit1 * billModeFirstLength
-                                / LogMeter.kSecondsPerMinute;
+                                / IDefs.kSecondsPerMinute;
                         ret += costPerAmount2 * (bAmount - billModeFirstLength)
-                                / LogMeter.kSecondsPerMinute;
+                                / IDefs.kSecondsPerMinute;
                     } else if (as0 > billModeFirstLength) {
                         ret += costPerAmountInLimit1 * billModeFirstLength
-                                / LogMeter.kSecondsPerMinute;
+                                / IDefs.kSecondsPerMinute;
                         ret += (as0 - billModeFirstLength) * costPerAmountInLimit2
-                                / LogMeter.kSecondsPerMinute;
-                        ret += as1 * costPerAmount2 / LogMeter.kSecondsPerMinute;
+                                / IDefs.kSecondsPerMinute;
+                        ret += as1 * costPerAmount2 / IDefs.kSecondsPerMinute;
                     } else { // as0 < billModeFirstLength && as0 > 0 && as1 > 0
-                        ret += as0 * costPerAmountInLimit1 / LogMeter.kSecondsPerMinute;
+                        ret += as0 * costPerAmountInLimit1 / IDefs.kSecondsPerMinute;
                         ret += (billModeFirstLength - as0) * costPerAmount1
-                                / LogMeter.kSecondsPerMinute;
+                                / IDefs.kSecondsPerMinute;
                         ret += costPerAmount2 * (bAmount - billModeFirstLength)
-                                / LogMeter.kSecondsPerMinute;
+                                / IDefs.kSecondsPerMinute;
                     }
                     break;
                 case DataProvider.TYPE_DATA_MOBILE:
                     ret += (as0 * costPerAmountInLimit1 + as1 * costPerAmount1)
-                            / LogMeter.kBytesPerMegaByte;
+                            / IDefs.kBytesPerMegaByte;
                     break;
                 default:
                     break;
@@ -1576,7 +1576,7 @@ public final class RuleMatcher {
                 }
                 return 0f;
             }
-            final float l = ((float) limit) / LogMeter.kHundredth;
+            final float l = ((float) limit) / IDefs.kHundredth;
             if (l <= billedCost) {
                 return 0f;
             }

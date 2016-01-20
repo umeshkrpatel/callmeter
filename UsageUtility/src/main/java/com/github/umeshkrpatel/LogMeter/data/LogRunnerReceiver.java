@@ -29,13 +29,14 @@ import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.provider.Telephony;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
-import com.github.umeshkrpatel.LogMeter.LogMeter;
+import com.github.umeshkrpatel.LogMeter.IDefs;
 import com.github.umeshkrpatel.LogMeter.ui.prefs.Preferences;
 
 import de.ub0r.android.lib.Utils;
@@ -58,7 +59,7 @@ public final class LogRunnerReceiver extends BroadcastReceiver {
     /**
      * Factor for time between update checks.
      */
-    static final long DELAY_FACTOR = LogMeter.kSecondsPerMinute * LogMeter.kMilliSecondsPerSecond;
+    static final long DELAY_FACTOR = IDefs.kSecondsPerMinute * IDefs.kMilliSecondsPerSecond;
     /**
      * Tag for output.
      */
@@ -243,17 +244,28 @@ public final class LogRunnerReceiver extends BroadcastReceiver {
                     break;
                 }
                 case ConnectivityManager.CONNECTIVITY_ACTION: {
-                    CONNECT_STATUS = intent.getIntExtra(ConnectivityManager.EXTRA_NETWORK_TYPE, -1);
-                    if (CONNECT_STATUS == ConnectivityManager.TYPE_MOBILE
-                            || CONNECT_STATUS == ConnectivityManager.TYPE_WIFI) {
-                        ConnectivityManager connMgr =
-                                (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-                        NetworkInfo net = connMgr.getNetworkInfo(CONNECT_STATUS);
-                        if (net.getState() == NetworkInfo.State.CONNECTED) {
-                            LogRunnerService.update(context, LogRunnerService.ACTION_UPDATE_WIFI_DATA);
+                    NetworkInfo net = null;
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                        CONNECT_STATUS = intent.getIntExtra(ConnectivityManager.EXTRA_NETWORK_TYPE, -1);
+                        if (CONNECT_STATUS == ConnectivityManager.TYPE_MOBILE
+                                || CONNECT_STATUS == ConnectivityManager.TYPE_WIFI) {
+                            ConnectivityManager connMgr =
+                                    (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+                            net = connMgr.getNetworkInfo(CONNECT_STATUS);
                         } else {
                             CONNECT_STATUS = NO_DATA_NET;
+                            return;
                         }
+                    } else {
+                        net = intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
+                        if (net.getType() != ConnectivityManager.TYPE_WIFI && net.getType() != ConnectivityManager.TYPE_MOBILE) {
+                            CONNECT_STATUS = NO_DATA_NET;
+                            return;
+                        }
+                    }
+
+                    if (net.getState() == NetworkInfo.State.CONNECTED) {
+                        LogRunnerService.update(context, LogRunnerService.ACTION_UPDATE_DATA);
                     } else {
                         CONNECT_STATUS = NO_DATA_NET;
                     }
@@ -268,11 +280,5 @@ public final class LogRunnerReceiver extends BroadcastReceiver {
         }
         // run LogRunnerService
         LogRunnerService.update(context, a);
-        // schedule next update
-        if (a == null || !a.equals(LogRunnerService.ACTION_SHORT_RUN)) {
-            LogRunnerReceiver.schedNext(context, null);
-        } else {
-            LogRunnerReceiver.schedNext(context, a);
-        }
     }
 }

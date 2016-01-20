@@ -36,7 +36,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
-import com.github.umeshkrpatel.LogMeter.LogMeter;
+import com.github.umeshkrpatel.LogMeter.IDefs;
 import com.github.umeshkrpatel.LogMeter.R;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
 import com.github.umeshkrpatel.LogMeter.data.RuleMatcher;
@@ -196,7 +196,7 @@ public final class AskForPlan extends Activity implements OnClickListener, OnDis
                 protected Void doInBackground(final Void... params) {
                     while (count > 0) {
                         try {
-                            Thread.sleep(LogMeter.kMilliSecondsPerSecond);
+                            Thread.sleep(IDefs.kMilliSecondsPerSecond);
                         } catch (InterruptedException e) {
                             Log.e(TAG, "intr. count=" + count + " e:" + e.getMessage());
                         }

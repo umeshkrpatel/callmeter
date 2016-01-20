@@ -20,7 +20,7 @@ package com.github.umeshkrpatel.LogMeter.ui;
 
 import android.content.Context;
 
-import com.github.umeshkrpatel.LogMeter.LogMeter;
+import com.github.umeshkrpatel.LogMeter.IDefs;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
 import com.github.umeshkrpatel.LogMeter.ui.prefs.Preferences;
 
@@ -214,20 +214,20 @@ public final class Common {
      */
     public static String prettyBytes(final float value) {
         StringBuilder sb = new StringBuilder();
-        if (value < LogMeter.kBytesPerKiloByte) {
+        if (value < IDefs.kBytesPerKiloByte) {
             sb.append(String.format("%.1f", value));
             sb.append(BYTE_UNITS_B);
-        } else if (value < LogMeter.kBytesPerMegaByte) {
-            sb.append(String.format("%.1f", value / LogMeter.kBytesPerKiloByte));
+        } else if (value < IDefs.kBytesPerMegaByte) {
+            sb.append(String.format("%.1f", value / IDefs.kBytesPerKiloByte));
             sb.append(BYTE_UNITS_KB);
-        } else if (value < LogMeter.kBytesPerGigaByte) {
-            sb.append(String.format("%.2f", value / LogMeter.kBytesPerMegaByte));
+        } else if (value < IDefs.kBytesPerGigaByte) {
+            sb.append(String.format("%.2f", value / IDefs.kBytesPerMegaByte));
             sb.append(BYTE_UNITS_MB);
-        } else if (value < LogMeter.kBytesPerTeraByte) {
-            sb.append(String.format("%.3f", value / LogMeter.kBytesPerGigaByte));
+        } else if (value < IDefs.kBytesPerTeraByte) {
+            sb.append(String.format("%.3f", value / IDefs.kBytesPerGigaByte));
             sb.append(BYTE_UNITS_GB);
         } else {
-            sb.append(String.format("%.4f", value / LogMeter.kBytesPerTeraByte));
+            sb.append(String.format("%.4f", value / IDefs.kBytesPerTeraByte));
             sb.append(BYTE_UNITS_TB);
         }
         return sb.toString();
@@ -245,33 +245,33 @@ public final class Common {
         final long ls = (long) seconds;
         long d, h, m;
         if (showHours) {
-            d = ls / LogMeter.kSecondsPerDay;
-            h = (ls % LogMeter.kSecondsPerDay) / LogMeter.kSecondsPerHour;
-            m = (ls % LogMeter.kSecondsPerHour) / LogMeter.kSecondsPerMinute;
+            d = ls / IDefs.kSecondsPerDay;
+            h = (ls % IDefs.kSecondsPerDay) / IDefs.kSecondsPerHour;
+            m = (ls % IDefs.kSecondsPerHour) / IDefs.kSecondsPerMinute;
         } else {
             d = 0L;
             h = 0L;
-            m = ls / LogMeter.kSecondsPerMinute;
+            m = ls / IDefs.kSecondsPerMinute;
         }
-        final long s = ls % LogMeter.kSecondsPerMinute;
+        final long s = ls % IDefs.kSecondsPerMinute;
         if (d > 0L) {
             ret = d + "d ";
         } else {
             ret = "";
         }
         if (h > 0 || d > 0) {
-            if (h < LogMeter.kTenth) {
+            if (h < IDefs.kTenth) {
                 ret += "0";
             }
             ret += h + "h:";
         }
         if (m > 0 || h > 0 || d > 0) {
-            if (m < LogMeter.kTenth && h > 0) {
+            if (m < IDefs.kTenth && h > 0) {
                 ret += "0";
             }
             ret += m + "m:";
         }
-        if (s < LogMeter.kTenth && (m > 0 || h > 0 || d > 0)) {
+        if (s < IDefs.kTenth && (m > 0 || h > 0 || d > 0)) {
             ret += "0";
         }
         ret += s + "s";

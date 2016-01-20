@@ -320,7 +320,7 @@ public final class UtilityActivity
 
     private void runLogRunner() {
         // schedule next update
-        LogRunnerReceiver.schedNext(this, DELAY_LOGRUNNER, LogRunnerService.ACTION_RUN_MATCHER);
+        // LogRunnerReceiver.schedNext(this, DELAY_LOGRUNNER, LogRunnerService.ACTION_RUN_MATCHER);
         LogRunnerReceiver.schedNext(this, LogRunnerService.ACTION_SHORT_RUN);
     }
 

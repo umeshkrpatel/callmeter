@@ -274,7 +274,7 @@ public final class LogsAppWidgetProvider extends AppWidgetProvider {
         Common.setDateFormat(context);
 
         // Update logs and run rule matcher
-        LogRunnerService.update(context, LogRunnerService.ACTION_RUN_MATCHER);
+        // LogRunnerService.update(context, LogRunnerService.ACTION_RUN_MATCHER);
 
         updateWidgets(context, appWidgetManager, appWidgetIds);
     }

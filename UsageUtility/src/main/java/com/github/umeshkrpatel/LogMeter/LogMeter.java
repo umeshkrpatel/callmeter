@@ -21,18 +21,6 @@ import android.util.Log;
  */
 public final class LogMeter extends Application {
 
-    public static final long kMinimumDate = 10000000000L;
-    public static final long kMilliSecondsPerSecond = 1000L;
-    public static final int kEightyth = 80;
-    public static final int kHundredth = 100;
-    public static final int kSecondsPerMinute = 60;
-    public static final int kSecondsPerHour = 60 * kSecondsPerMinute;
-    public static final int kSecondsPerDay = 24 * kSecondsPerHour;
-    public static final int kTenth = 10;
-    public static final long kBytesPerKiloByte = 1024L;
-    public static final long kBytesPerMegaByte = kBytesPerKiloByte * kBytesPerKiloByte;
-    public static final long kBytesPerGigaByte = kBytesPerMegaByte * kBytesPerKiloByte;
-    public static final long kBytesPerTeraByte = kBytesPerGigaByte * kBytesPerKiloByte;
     private static final String TAG = "LogMeter";
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)

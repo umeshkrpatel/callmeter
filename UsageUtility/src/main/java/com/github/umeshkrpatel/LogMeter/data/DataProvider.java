@@ -44,7 +44,7 @@ import android.util.Log;
 import android.util.Xml;
 import android.widget.Toast;
 
-import com.github.umeshkrpatel.LogMeter.LogMeter;
+import com.github.umeshkrpatel.LogMeter.IDefs;
 import com.github.umeshkrpatel.LogMeter.R;
 import com.github.umeshkrpatel.LogMeter.ui.prefs.Preferences;
 
@@ -1649,8 +1649,8 @@ public final class DataProvider extends ContentProvider {
                 long date = Utils.parseLong(uri.getQueryParameter(Plans.PARAM_DATE), -1L);
                 if (date < 0L) {
                     // round up minutes for SQL caching
-                    date = ((System.currentTimeMillis() / LogMeter.kHundredth) + 1)
-                            * LogMeter.kHundredth;
+                    date = ((System.currentTimeMillis() / IDefs.kHundredth) + 1)
+                            * IDefs.kHundredth;
                 }
                 final Calendar now = Calendar.getInstance();
                 now.setTimeInMillis(date);
@@ -2779,7 +2779,7 @@ public final class DataProvider extends ContentProvider {
                         + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_MMS
                         + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + TYPE_DATA_MOBILE + " THEN "
                         + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "."
-                        + MIXED_UNITS_DATA + "/" + LogMeter.kBytesPerMegaByte + " ELSE " + Logs.TABLE + "."
+                        + MIXED_UNITS_DATA + "/" + IDefs.kBytesPerMegaByte + " ELSE " + Logs.TABLE + "."
                         + Logs.BILL_AMOUNT + " END) AS " + SUM_TD_BILLED_AMOUNT,
                 "sum(CASE WHEN " + Logs.TABLE + "." + Logs.DATE + " is null or " + Logs.TABLE + "."
                         + Logs.DATE + "<={" + SUM_BILLDAY + "} or " + Logs.TABLE + "." + Logs.DATE
@@ -2796,7 +2796,7 @@ public final class DataProvider extends ContentProvider {
                         + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_MMS
                         + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + TYPE_DATA_MOBILE + " THEN "
                         + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "."
-                        + MIXED_UNITS_DATA + "/" + LogMeter.kBytesPerMegaByte + " ELSE " + Logs.TABLE + "."
+                        + MIXED_UNITS_DATA + "/" + IDefs.kBytesPerMegaByte + " ELSE " + Logs.TABLE + "."
                         + Logs.BILL_AMOUNT + " END) AS " + SUM_BP_BILLED_AMOUNT,
                 "sum(CASE WHEN " + Logs.TABLE + "." + Logs.DATE + " is null or " + Logs.TABLE + "."
                         + Logs.DATE + ">{" + SUM_NOW + "} THEN 0 ELSE 1 END) as " + SUM_AT_COUNT,
@@ -2811,7 +2811,7 @@ public final class DataProvider extends ContentProvider {
                         + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_MMS
                         + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + TYPE_DATA_MOBILE + " THEN "
                         + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "."
-                        + MIXED_UNITS_DATA + "/" + LogMeter.kBytesPerMegaByte + " ELSE " + Logs.TABLE + "."
+                        + MIXED_UNITS_DATA + "/" + IDefs.kBytesPerMegaByte + " ELSE " + Logs.TABLE + "."
                         + Logs.BILL_AMOUNT + " END) AS " + SUM_AT_BILLED_AMOUNT,
                 "(CASE WHEN " + TABLE + "." + TYPE + "=" + TYPE_BILLPERIOD + " THEN (CASE WHEN "
                         + TABLE + "." + COST_PER_PLAN + " is null  THEN 0 ELSE " + TABLE + "."
@@ -2849,7 +2849,7 @@ public final class DataProvider extends ContentProvider {
                         + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_MMS
                         + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + TYPE_DATA_MOBILE + " THEN "
                         + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "."
-                        + MIXED_UNITS_DATA + "/" + LogMeter.kBytesPerMegaByte + " ELSE " + Logs.TABLE + "."
+                        + MIXED_UNITS_DATA + "/" + IDefs.kBytesPerMegaByte + " ELSE " + Logs.TABLE + "."
                         + Logs.BILL_AMOUNT + " END) AS " + SUM_AT_BILLED_AMOUNT,
         };
         /**
@@ -3008,10 +3008,10 @@ public final class DataProvider extends ContentProvider {
                                   final float cost) {
             switch (lType) {
                 case DataProvider.LIMIT_TYPE_COST:
-                    return (int) (cost * LogMeter.kHundredth);
+                    return (int) (cost * IDefs.kHundredth);
                 case DataProvider.LIMIT_TYPE_UNITS:
                     if (pType == DataProvider.TYPE_DATA_MOBILE) {
-                        return (int) (amount / LogMeter.kBytesPerKiloByte);
+                        return (int) (amount / IDefs.kBytesPerKiloByte);
                     } else {
                         return (int) amount;
                     }
@@ -3040,14 +3040,14 @@ public final class DataProvider extends ContentProvider {
                 case DataProvider.LIMIT_TYPE_UNITS:
                     switch (pType) {
                         case DataProvider.TYPE_DATA_MOBILE:
-                            return (long) (limit * LogMeter.kBytesPerKiloByte);
+                            return (long) (limit * IDefs.kBytesPerKiloByte);
                         case DataProvider.TYPE_CALL:
-                            return (long) (limit * LogMeter.kSecondsPerMinute);
+                            return (long) (limit * IDefs.kSecondsPerMinute);
                         default:
                             return (long) limit;
                     }
                 case DataProvider.LIMIT_TYPE_COST:
-                    return (long) (limit * LogMeter.kHundredth);
+                    return (long) (limit * IDefs.kHundredth);
                 default:
                     return 0L;
             }

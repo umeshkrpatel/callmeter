@@ -44,7 +44,7 @@ import android.widget.Toast;
 import java.util.Calendar;
 import java.util.Date;
 
-import com.github.umeshkrpatel.LogMeter.LogMeter;
+import com.github.umeshkrpatel.LogMeter.IDefs;
 import com.github.umeshkrpatel.LogMeter.R;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
 import com.github.umeshkrpatel.LogMeter.data.LogRunnerService;
@@ -180,7 +180,7 @@ public final class AddLogActivity extends AppCompatActivity implements OnClickLi
                         break;
                     case DataProvider.Rules.WHAT_DATA:
                         cv.put(DataProvider.Logs.TYPE, DataProvider.TYPE_DATA_MOBILE);
-                        l *= LogMeter.kBytesPerKiloByte;
+                        l *= IDefs.kBytesPerKiloByte;
                         break;
                     case DataProvider.Rules.WHAT_MMS:
                         cv.put(DataProvider.Logs.TYPE, DataProvider.TYPE_MMS);
@@ -205,7 +205,7 @@ public final class AddLogActivity extends AppCompatActivity implements OnClickLi
                     cv.put(DataProvider.Logs.ROAMED, 1);
                 }
                 getContentResolver().insert(DataProvider.Logs.CONTENT_URI, cv);
-                LogRunnerService.update(this, null);
+                LogRunnerService.update(this, LogRunnerService.ACTION_SHORT_RUN);
                 if (!this.isFinishing()) {
                     finish();
                 }
