@@ -53,6 +53,7 @@ import com.github.umeshkrpatel.LogMeter.R;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider.XmlMetaData;
 import com.github.umeshkrpatel.LogMeter.data.ExportProvider;
+import com.github.umeshkrpatel.LogMeter.IDataDefs;
 import com.github.umeshkrpatel.LogMeter.data.LogRunnerService;
 import com.github.umeshkrpatel.LogMeter.data.RuleMatcher;
 import com.github.umeshkrpatel.LogMeter.ui.Common;
@@ -586,7 +587,7 @@ public final class Preferences extends PreferenceActivity implements
 
                         try {
                             final File d = new File(Environment.getExternalStorageDirectory(),
-                                    DataProvider.kPackageName);
+                                    IDataDefs.kPackageName);
                             final File f = new File(d, fn);
                             //noinspection ResultOfMethodCallIgnored
                             f.mkdirs();
@@ -636,7 +637,7 @@ public final class Preferences extends PreferenceActivity implements
         final AsyncTask<Void, Void, String> task = new AsyncTask<Void, Void, String>() {
             @Override
             protected String doInBackground(final Void... params) {
-                File d = new File(Environment.getExternalStorageDirectory(), DataProvider.kPackageName);
+                File d = new File(Environment.getExternalStorageDirectory(), IDataDefs.kPackageName);
                 File f = new File(d, "logs-"
                         + DateFormat.format("yyyyMMddkkmmss", System.currentTimeMillis()) + ".csv");
                 //noinspection ResultOfMethodCallIgnored
@@ -672,8 +673,8 @@ public final class Preferences extends PreferenceActivity implements
                             long a = c.getLong(DataProvider.Logs.INDEX_AMOUNT);
                             float ba = c.getFloat(DataProvider.Logs.INDEX_BILL_AMOUNT);
                             float cost = c.getFloat(DataProvider.Logs.INDEX_COST);
-                            w.append(Common.formatAmount(t, a, true)).append(";");
-                            w.append(Common.formatAmount(t, ba, true)).append(";");
+                            w.append(Common.formatAmount(IDataDefs.Type.fromInt(t), a, true)).append(";");
+                            w.append(Common.formatAmount(IDataDefs.Type.fromInt(t), ba, true)).append(";");
                             w.append(String.format(cFormat, cost)).append(";");
                             w.append(c.getString(DataProvider.Logs.INDEX_PLAN_NAME)).append(";");
                             w.append(c.getString(DataProvider.Logs.INDEX_RULE_NAME)).append("\n");
@@ -715,13 +716,13 @@ public final class Preferences extends PreferenceActivity implements
      *
      * @param type type to delete; -1 for all
      */
-    private void resetData(final int type) {
-        if (type < 0 || type == DataProvider.TYPE_CALL) {
+    private void resetData(final IDataDefs.Type type) {
+        if (type == IDataDefs.Type.TYPE_NONE || type == IDataDefs.Type.TYPE_CALL) {
             Editor e = PreferenceManager.getDefaultSharedPreferences(this).edit();
-            LogRunnerService.setLastData(e, DataProvider.TYPE_CALL, 0, -1L);
+            LogRunnerService.setLastData(e, IDataDefs.Type.TYPE_CALL, 0, -1L);
             e.apply();
         }
-        if (type < 0) {
+        if (type == IDataDefs.Type.TYPE_NONE) {
             getContentResolver().delete(DataProvider.Logs.CONTENT_URI, null, null);
         } else {
             getContentResolver().delete(DataProvider.Logs.CONTENT_URI,
@@ -741,15 +742,15 @@ public final class Preferences extends PreferenceActivity implements
         builder.setPositiveButton(android.R.string.yes, new OnClickListener() {
             @Override
             public void onClick(final DialogInterface dialog, final int which) {
-                Preferences.this.resetData(DataProvider.TYPE_CALL);
-                Preferences.this.resetData(DataProvider.TYPE_SMS);
-                Preferences.this.resetData(DataProvider.TYPE_MMS);
+                Preferences.this.resetData(IDataDefs.Type.TYPE_CALL);
+                Preferences.this.resetData(IDataDefs.Type.TYPE_SMS);
+                Preferences.this.resetData(IDataDefs.Type.TYPE_MMS);
             }
         });
         builder.setNeutralButton(R.string.reset_data_data_, new OnClickListener() {
             @Override
             public void onClick(final DialogInterface dialog, final int which) {
-                Preferences.this.resetData(-1);
+                Preferences.this.resetData(IDataDefs.Type.TYPE_NONE);
             }
         });
         builder.setNegativeButton(android.R.string.no, null);

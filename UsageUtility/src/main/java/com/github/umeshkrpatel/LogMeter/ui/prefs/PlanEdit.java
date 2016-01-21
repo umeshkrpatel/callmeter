@@ -35,6 +35,7 @@ import android.util.Log;
 import com.github.umeshkrpatel.LogMeter.LogMeter;
 import com.github.umeshkrpatel.LogMeter.R;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
+import com.github.umeshkrpatel.LogMeter.IDataDefs;
 import com.github.umeshkrpatel.LogMeter.data.RuleMatcher;
 
 import java.util.Calendar;
@@ -101,16 +102,16 @@ public final class PlanEdit extends PreferenceActivity implements UpdateListener
             return;
 
         if (c.moveToFirst()) {
-            int t;
+            IDataDefs.Type t;
             if (c.isNull(DataProvider.Plans.INDEX_TYPE)) {
-                t = DataProvider.TYPE_CALL;
-                values.put(DataProvider.Plans.TYPE, t);
+                t = IDataDefs.Type.TYPE_CALL;
+                values.put(DataProvider.Plans.TYPE, t.toInt());
             } else {
-                t = c.getInt(DataProvider.Plans.INDEX_TYPE);
+                t = IDataDefs.Type.values()[c.getInt(DataProvider.Plans.INDEX_TYPE)];
             }
             int lt;
             if (c.isNull(DataProvider.Plans.INDEX_LIMIT_TYPE)) {
-                lt = DataProvider.LIMIT_TYPE_NONE;
+                lt = IDataDefs.LIMIT_TYPE_NONE;
                 values.put(DataProvider.Plans.LIMIT_TYPE, lt);
             } else {
                 lt = c.getInt(DataProvider.Plans.INDEX_LIMIT_TYPE);
@@ -133,7 +134,7 @@ public final class PlanEdit extends PreferenceActivity implements UpdateListener
             ep.setInputType(InputType.TYPE_CLASS_TEXT);
             ps.addPreference(ep);
             LogMeter.setActivitySubtitle(this, ep.getText());
-            if (t != DataProvider.TYPE_SPACING && t != DataProvider.TYPE_TITLE) {
+            if (t != IDataDefs.Type.TYPE_SPACING && t != IDataDefs.Type.TYPE_TITLE) {
                 // short name
                 ep = new CVEditTextPreference(this, values, DataProvider.Plans.SHORTNAME, this
                         .getString(R.string.plans_new).replaceAll(" ", ""));
@@ -153,14 +154,14 @@ public final class PlanEdit extends PreferenceActivity implements UpdateListener
                 lp.setValue(String.valueOf(t));
                 ps.addPreference(lp);
             }
-            if (t == DataProvider.TYPE_BILLPERIOD) {
+            if (t == IDataDefs.Type.TYPE_BILLPERIOD) {
                 // bill period
-                int bpl;
+                IDataDefs.BillPeriod bpl;
                 if (c.isNull(DataProvider.Plans.INDEX_BILLPERIOD)) {
-                    bpl = DataProvider.BILLPERIOD_1MONTH;
-                    values.put(DataProvider.Plans.BILLPERIOD, bpl);
+                    bpl = IDataDefs.BillPeriod.MONTH01;
+                    values.put(DataProvider.Plans.BILLPERIOD, bpl.toInt());
                 } else {
-                    bpl = c.getInt(DataProvider.Plans.INDEX_BILLPERIOD);
+                    bpl = IDataDefs.BillPeriod.fromInt(c.getInt(DataProvider.Plans.INDEX_BILLPERIOD));
                 }
                 if (!prepaid) {
                     CVListPreference lp = new CVListPreference(this, values,
@@ -172,10 +173,9 @@ public final class PlanEdit extends PreferenceActivity implements UpdateListener
                     ps.addPreference(lp);
                 } else {
                     // set bill period to infinite
-                    values
-                            .put(DataProvider.Plans.BILLPERIOD, DataProvider.BILLPERIOD_INFINITE);
+                    values.put(DataProvider.Plans.BILLPERIOD, IDataDefs.BillPeriod.BPINF.toInt());
                 }
-                if (bpl != DataProvider.BILLPERIOD_DAY) {
+                if (bpl != IDataDefs.BillPeriod.DAY01) {
                     // bill day
                     CVDatePreference dp = new CVDatePreference(this, values,
                             DataProvider.Plans.BILLDAY, true);
@@ -187,14 +187,14 @@ public final class PlanEdit extends PreferenceActivity implements UpdateListener
                         values.put(DataProvider.Plans.BILLDAY, cal.getTimeInMillis());
                     } else {
                         cal.setTimeInMillis(c.getLong(DataProvider.Plans.INDEX_BILLDAY));
-                        if (bpl != DataProvider.BILLPERIOD_INFINITE) {
+                        if (bpl != IDataDefs.BillPeriod.BPINF) {
                             cal = DataProvider.Plans.getBillDay(bpl, cal, null, false);
                         }
                     }
                     dp.setValue(cal);
                     ps.addPreference(dp);
                 }
-            } else if (t != DataProvider.TYPE_SPACING && t != DataProvider.TYPE_TITLE) {
+            } else if (t != IDataDefs.Type.TYPE_SPACING && t != IDataDefs.Type.TYPE_TITLE) {
                 // bill period id
                 CVListPreference lp = new CVListPreference(this, values,
                         DataProvider.Plans.BILLPERIOD_ID);
@@ -216,7 +216,7 @@ public final class PlanEdit extends PreferenceActivity implements UpdateListener
                     // get first bill period
                     Cursor cursor = getContentResolver().query(DataProvider.Plans.CONTENT_URI,
                             new String[]{DataProvider.Plans.ID},
-                            DataProvider.Plans.TYPE + "=" + DataProvider.TYPE_BILLPERIOD, null,
+                            DataProvider.Plans.TYPE + "=" + IDataDefs.Type.TYPE_BILLPERIOD, null,
                             null);
                     if (cursor != null) {
                         if (cursor.moveToFirst()) {
@@ -249,7 +249,7 @@ public final class PlanEdit extends PreferenceActivity implements UpdateListener
                 lp.setStatic(R.array.limit_type_id, R.array.limit_type);
                 lp.setValue(String.valueOf(lt));
                 ps.addPreference(lp);
-                if (lt != DataProvider.LIMIT_TYPE_NONE) {
+                if (lt != IDataDefs.LIMIT_TYPE_NONE) {
                     // limit
                     ep = new CVEditTextPreference(this, values, DataProvider.Plans.LIMIT, "");
                     ep.setTitle(R.string.limit_);
@@ -260,8 +260,8 @@ public final class PlanEdit extends PreferenceActivity implements UpdateListener
                             | InputType.TYPE_NUMBER_FLAG_DECIMAL);
                     ps.addPreference(ep);
                 }
-                if (merged == null && (t == DataProvider.TYPE_CALL
-                        || t == DataProvider.TYPE_MIXED)) {
+                if (merged == null && (t == IDataDefs.Type.TYPE_CALL
+                        || t == IDataDefs.Type.TYPE_MIXED)) {
                     // bill mode
                     CVBillModePreference bp = new CVBillModePreference(this, values,
                             DataProvider.Plans.BILLMODE);
@@ -289,7 +289,7 @@ public final class PlanEdit extends PreferenceActivity implements UpdateListener
                     }
                 }
             }
-            if (t == DataProvider.TYPE_BILLPERIOD && prepaid) {
+            if (t == IDataDefs.Type.TYPE_BILLPERIOD && prepaid) {
                 // balance
                 ep = new CVEditTextPreference(this, values, DataProvider.Plans.COST_PER_PLAN,
                         "");
@@ -298,7 +298,7 @@ public final class PlanEdit extends PreferenceActivity implements UpdateListener
                 ep.setText(c.getString(DataProvider.Plans.INDEX_COST_PER_PLAN));
                 ep.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
                 ps.addPreference(ep);
-            } else if (t != DataProvider.TYPE_SPACING && t != DataProvider.TYPE_TITLE) {
+            } else if (t != IDataDefs.Type.TYPE_SPACING && t != IDataDefs.Type.TYPE_TITLE) {
                 // cost per plan
                 ep = new CVEditTextPreference(this, values, DataProvider.Plans.COST_PER_PLAN,
                         "");
@@ -309,9 +309,9 @@ public final class PlanEdit extends PreferenceActivity implements UpdateListener
                 ps.addPreference(ep);
             }
             if (merged == null
-                    && (t == DataProvider.TYPE_SMS || t == DataProvider.TYPE_MMS
-                    || t == DataProvider.TYPE_CALL || t == DataProvider.TYPE_MIXED)) {
-                if (lt != DataProvider.LIMIT_TYPE_NONE || ppid > 0L) {
+                    && (t == IDataDefs.Type.TYPE_SMS || t == IDataDefs.Type.TYPE_MMS
+                    || t == IDataDefs.Type.TYPE_CALL || t == IDataDefs.Type.TYPE_MIXED)) {
+                if (lt != IDataDefs.LIMIT_TYPE_NONE || ppid > 0L) {
                     // cost per item in limit
                     ep = new CVEditTextPreference(this, values,
                             DataProvider.Plans.COST_PER_ITEM_IN_LIMIT, "");
@@ -327,7 +327,7 @@ public final class PlanEdit extends PreferenceActivity implements UpdateListener
                 ep = new CVEditTextPreference(this, values, DataProvider.Plans.COST_PER_ITEM,
                         "");
                 ep.setTitle(R.string.cost_per_item_);
-                if (lt == DataProvider.LIMIT_TYPE_NONE) {
+                if (lt == IDataDefs.LIMIT_TYPE_NONE) {
                     ep.setSummary(R.string.cost_per_item_no_limit_help);
                 } else {
                     ep.setSummary(R.string.cost_per_item_help);
@@ -337,7 +337,7 @@ public final class PlanEdit extends PreferenceActivity implements UpdateListener
                 ep.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
                 ps.addPreference(ep);
             }
-            if (t == DataProvider.TYPE_MIXED) {
+            if (t == IDataDefs.Type.TYPE_MIXED) {
                 // mixed: units/minute
                 ep = new CVEditTextPreference(this, values,
                         DataProvider.Plans.MIXED_UNITS_CALL, "");
@@ -371,15 +371,15 @@ public final class PlanEdit extends PreferenceActivity implements UpdateListener
                 ep.setInputType(InputType.TYPE_CLASS_NUMBER);
                 ps.addPreference(ep);
             }
-            if (merged == null && (t == DataProvider.TYPE_CALL || t == DataProvider.TYPE_DATA_MOBILE)) {
-                if (lt != DataProvider.LIMIT_TYPE_NONE || ppid > 0L) {
+            if (merged == null && (t == IDataDefs.Type.TYPE_CALL || t == IDataDefs.Type.TYPE_DATA_MOBILE)) {
+                if (lt != IDataDefs.LIMIT_TYPE_NONE || ppid > 0L) {
                     // cost per amount in limit
                     CV2EditTextPreference ep2 = new CV2EditTextPreference(this, values,
                             DataProvider.Plans.COST_PER_AMOUNT_IN_LIMIT1,
                             DataProvider.Plans.COST_PER_AMOUNT_IN_LIMIT2,
-                            t != DataProvider.TYPE_CALL || !advanced, "", "");
+                            t != IDataDefs.Type.TYPE_CALL || !advanced, "", "");
                     ep2.setTitle(R.string.cost_per_amount_in_limit_);
-                    if (t == DataProvider.TYPE_CALL && advanced) {
+                    if (t == IDataDefs.Type.TYPE_CALL && advanced) {
                         ep2.setSummary(R.string.cost_per_amount_in_limit_help2);
                     } else {
                         ep2.setSummary(R.string.cost_per_amount_in_limit_help1);
@@ -394,16 +394,16 @@ public final class PlanEdit extends PreferenceActivity implements UpdateListener
                 // cost per amount
                 CV2EditTextPreference ep2 = new CV2EditTextPreference(this, values,
                         DataProvider.Plans.COST_PER_AMOUNT1, DataProvider.Plans.COST_PER_AMOUNT2,
-                        t != DataProvider.TYPE_CALL || !advanced, "", "");
+                        t != IDataDefs.Type.TYPE_CALL || !advanced, "", "");
                 ep2.setTitle(R.string.cost_per_amount_);
-                if (lt == DataProvider.LIMIT_TYPE_NONE) {
-                    if (t == DataProvider.TYPE_CALL && advanced) {
+                if (lt == IDataDefs.LIMIT_TYPE_NONE) {
+                    if (t == IDataDefs.Type.TYPE_CALL && advanced) {
                         ep2.setSummary(R.string.cost_per_amount_no_limit_help2);
                     } else {
                         ep2.setSummary(R.string.cost_per_amount_no_limit_help1);
                     }
                 } else {
-                    if (t == DataProvider.TYPE_CALL && advanced) {
+                    if (t == IDataDefs.Type.TYPE_CALL && advanced) {
                         ep2.setSummary(R.string.cost_per_amount_help2);
                     } else {
                         ep2.setSummary(R.string.cost_per_amount_help1);
@@ -426,17 +426,17 @@ public final class PlanEdit extends PreferenceActivity implements UpdateListener
     /**
      * Get selection for merged plans field.
      *
-     * @param t plan type
+     * @param type plan type
      * @return where clause
      */
-    private String getMergePlansWhere(final int t) {
+    private String getMergePlansWhere(final IDataDefs.Type type) {
         String where;
-        if (t == DataProvider.TYPE_MIXED) {
-            where = "(" + DataProvider.Plans.TYPE + " in (" + DataProvider.TYPE_CALL + ","
-                    + DataProvider.TYPE_SMS + "," + DataProvider.TYPE_MMS + ","
-                    + DataProvider.TYPE_DATA_MOBILE + "))";
+        if (type == IDataDefs.Type.TYPE_MIXED) {
+            where = "(" + DataProvider.Plans.TYPE + " in (" + IDataDefs.Type.TYPE_CALL + ","
+                    + IDataDefs.Type.TYPE_SMS + "," + IDataDefs.Type.TYPE_MMS + ","
+                    + IDataDefs.Type.TYPE_DATA_MOBILE + "))";
         } else {
-            where = DataProvider.Plans.TYPE + " = " + t;
+            where = DataProvider.Plans.TYPE + " = " + type;
         }
         where += " AND " + DataProvider.Plans.ID + " != " + pid + " AND "
                 + DataProvider.Plans.MERGED_PLANS + " IS NULL";
@@ -447,24 +447,24 @@ public final class PlanEdit extends PreferenceActivity implements UpdateListener
     /**
      * Get hint for LIMIT preference.
      *
-     * @param t  type
+     * @param type  type
      * @param lt limit type
      * @return res id
      */
-    private int getLimitHint(final int t, final int lt) {
+    private int getLimitHint(final IDataDefs.Type type, final int lt) {
         switch (lt) {
-            case DataProvider.LIMIT_TYPE_COST:
+            case IDataDefs.LIMIT_TYPE_COST:
                 return R.string.units_cost;
-            case DataProvider.LIMIT_TYPE_UNITS:
-                switch (t) {
-                    case DataProvider.TYPE_CALL:
+            case IDataDefs.LIMIT_TYPE_UNITS:
+                switch (type) {
+                    case TYPE_CALL:
                         return R.string.units_minutes;
-                    case DataProvider.TYPE_DATA_MOBILE:
+                    case TYPE_DATA_MOBILE:
                         return R.string.units_mbyte;
-                    case DataProvider.TYPE_MIXED:
+                    case TYPE_MIXED:
                         return R.string.units_units;
-                    case DataProvider.TYPE_MMS:
-                    case DataProvider.TYPE_SMS:
+                    case TYPE_MMS:
+                    case TYPE_SMS:
                         return R.string.units_num_msg;
                     default:
                         return -1;
@@ -480,14 +480,14 @@ public final class PlanEdit extends PreferenceActivity implements UpdateListener
      * @param t type
      * @return res id
      */
-    private int getCostPerItemHint(final int t) {
+    private int getCostPerItemHint(final IDataDefs.Type t) {
         switch (t) {
-            case DataProvider.TYPE_CALL:
+            case TYPE_CALL:
                 return R.string.units_cost_per_call;
-            case DataProvider.TYPE_MIXED:
+            case TYPE_MIXED:
                 return R.string.units_cost_per_unit;
-            case DataProvider.TYPE_MMS:
-            case DataProvider.TYPE_SMS:
+            case TYPE_MMS:
+            case TYPE_SMS:
                 return R.string.units_cost_per_message;
             default:
                 return -1;
@@ -500,11 +500,11 @@ public final class PlanEdit extends PreferenceActivity implements UpdateListener
      * @param t type
      * @return res id
      */
-    private int getCostPerAmountHint(final int t) {
+    private int getCostPerAmountHint(final IDataDefs.Type t) {
         switch (t) {
-            case DataProvider.TYPE_CALL:
+            case TYPE_CALL:
                 return R.string.units_cost_per_minute;
-            case DataProvider.TYPE_DATA_MOBILE:
+            case TYPE_DATA_MOBILE:
                 return R.string.units_cost_per_mbyte;
             default:
                 return -1;

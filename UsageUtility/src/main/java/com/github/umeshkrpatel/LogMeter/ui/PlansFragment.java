@@ -59,6 +59,7 @@ import com.github.mikephil.charting.charts.PieChart;
 import com.github.umeshkrpatel.LogMeter.IDefs;
 import com.github.umeshkrpatel.LogMeter.R;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
+import com.github.umeshkrpatel.LogMeter.IDataDefs;
 import com.github.umeshkrpatel.LogMeter.ui.prefs.PlanEdit;
 import com.github.umeshkrpatel.LogMeter.ui.prefs.Preferences;
 
@@ -409,15 +410,15 @@ public final class PlansFragment extends ListFragment implements OnClickListener
                 free = plan.getFree();
             }
 
-            if (plan.type != DataProvider.TYPE_SPACING && plan.type != DataProvider.TYPE_TITLE) {
+            if (plan.type != IDataDefs.Type.TYPE_SPACING && plan.type != IDataDefs.Type.TYPE_TITLE) {
                 if (plan.hasBa) {
-                    long bd = plan.getBillDay(plan.type == DataProvider.TYPE_BILLPERIOD
+                    long bd = plan.getBillDay(plan.type == IDataDefs.Type.TYPE_BILLPERIOD
                             && pShowTargetBillDay);
                     spb.append(Common.formatValues(context, plan.now, plan.type, plan.bpCount,
                             plan.bpBa, plan.billperiod, bd, pShowHours));
                     spb.setSpan(new StyleSpan(Typeface.BOLD), 0, spb.length(),
                             Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    if (plan.type != DataProvider.TYPE_BILLPERIOD) {
+                    if (plan.type != IDataDefs.Type.TYPE_BILLPERIOD) {
                         if (showTotal) {
                             spb.append(delimiter).append(Common.formatValues(context, plan.now, plan.type,
                                     plan.atCount, plan.atBa, plan.billperiod, plan.billday,
@@ -474,7 +475,7 @@ public final class PlansFragment extends ListFragment implements OnClickListener
 
             TextView tvCache = null;
             ProgressBar pbCache = null;
-            if (plan.type == DataProvider.TYPE_SPACING) {
+            if (plan.type == IDataDefs.Type.TYPE_SPACING) {
                 if (textSizeSpacer > 0) {
                     final ViewGroup.LayoutParams lp = holder.vSpacer.getLayoutParams();
                     lp.height = textSizeSpacer;
@@ -485,7 +486,7 @@ public final class PlansFragment extends ListFragment implements OnClickListener
                 holder.vContent.setVisibility(View.GONE);
                 holder.vPeriodLayout.setVisibility(View.GONE);
                 holder.pcDataChart.setVisibility(View.GONE);
-            } else if (plan.type == DataProvider.TYPE_TITLE) {
+            } else if (plan.type == IDataDefs.Type.TYPE_TITLE) {
                 holder.tvBigtitle.setText(cursor.getString(DataProvider.Plans.INDEX_NAME));
                 if (textSizeBigTitle > 0) {
                     holder.tvBigtitle.setTextSize(textSizeBigTitle);
@@ -495,7 +496,7 @@ public final class PlansFragment extends ListFragment implements OnClickListener
                 holder.vContent.setVisibility(View.GONE);
                 holder.vPeriodLayout.setVisibility(View.GONE);
                 holder.pcDataChart.setVisibility(View.GONE);
-            } else if (plan.type == DataProvider.TYPE_BILLPERIOD) {
+            } else if (plan.type == IDataDefs.Type.TYPE_BILLPERIOD) {
                 holder.tvBigtitle.setVisibility(View.GONE);
                 holder.vSpacer.setVisibility(View.GONE);
                 holder.vContent.setVisibility(View.GONE);
@@ -553,7 +554,7 @@ public final class PlansFragment extends ListFragment implements OnClickListener
                     pbCache.setProgress((int) plan.limitPos);
                     pbCache.setVisibility(progressBarVisability);
                     int pbs;
-                    if (plan.type == DataProvider.TYPE_BILLPERIOD) {
+                    if (plan.type == IDataDefs.Type.TYPE_BILLPERIOD) {
                         pbs = textSizePBarBP;
                     } else {
                         pbs = textSizePBar;
@@ -568,8 +569,8 @@ public final class PlansFragment extends ListFragment implements OnClickListener
                     pbCache.setVisibility(progressBarVisability);
                 }
             }
-            if (savePlan && now < 0L && plan.type != DataProvider.TYPE_SPACING
-                    && plan.type != DataProvider.TYPE_TITLE) {
+            if (savePlan && now < 0L && plan.type != IDataDefs.Type.TYPE_SPACING
+                    && plan.type != IDataDefs.Type.TYPE_TITLE) {
                 plan.save(e);
                 isDirty = true;
             }

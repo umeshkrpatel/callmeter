@@ -39,6 +39,7 @@ import android.widget.TextView;
 import com.github.umeshkrpatel.LogMeter.IDefs;
 import com.github.umeshkrpatel.LogMeter.R;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
+import com.github.umeshkrpatel.LogMeter.IDataDefs;
 import com.github.umeshkrpatel.LogMeter.data.RuleMatcher;
 import com.github.umeshkrpatel.LogMeter.ui.prefs.Preferences;
 
@@ -142,7 +143,7 @@ public final class AskForPlan extends Activity implements OnClickListener, OnDis
 
         final Cursor c = getContentResolver().query(DataProvider.Plans.CONTENT_URI,
                 DataProvider.Plans.PROJECTION,
-                DataProvider.Plans.TYPE + " = " + DataProvider.TYPE_CALL, null, null);
+                DataProvider.Plans.TYPE + " = " + IDataDefs.Type.TYPE_CALL, null, null);
         if (c == null || !c.moveToFirst()) {
             Log.e(TAG, "no plans: " + c);
             if (c != null && !c.isClosed()) {

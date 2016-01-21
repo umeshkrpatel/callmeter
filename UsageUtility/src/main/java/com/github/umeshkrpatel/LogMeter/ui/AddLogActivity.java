@@ -27,6 +27,7 @@ import android.content.ContentValues;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -41,16 +42,17 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import java.util.Calendar;
-import java.util.Date;
-
+import com.github.umeshkrpatel.LogMeter.IDataDefs;
 import com.github.umeshkrpatel.LogMeter.IDefs;
 import com.github.umeshkrpatel.LogMeter.R;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
 import com.github.umeshkrpatel.LogMeter.data.LogRunnerService;
 import com.github.umeshkrpatel.LogMeter.ui.prefs.Preferences;
+
+import java.util.Calendar;
+import java.util.Date;
+
 import de.ub0r.android.lib.Utils;
-import android.util.Log;
 
 /**
  * Add a log entry.
@@ -176,18 +178,18 @@ public final class AddLogActivity extends AppCompatActivity implements OnClickLi
                 final ContentValues cv = new ContentValues();
                 switch (t) {
                     case DataProvider.Rules.WHAT_CALL:
-                        cv.put(DataProvider.Logs.TYPE, DataProvider.TYPE_CALL);
+                        cv.put(DataProvider.Logs.TYPE, IDataDefs.Type.TYPE_CALL.toInt());
                         break;
                     case DataProvider.Rules.WHAT_DATA:
-                        cv.put(DataProvider.Logs.TYPE, DataProvider.TYPE_DATA_MOBILE);
+                        cv.put(DataProvider.Logs.TYPE, IDataDefs.Type.TYPE_DATA_MOBILE.toInt());
                         l *= IDefs.kBytesPerKiloByte;
                         break;
                     case DataProvider.Rules.WHAT_MMS:
-                        cv.put(DataProvider.Logs.TYPE, DataProvider.TYPE_MMS);
+                        cv.put(DataProvider.Logs.TYPE, IDataDefs.Type.TYPE_MMS.toInt());
                         l = 1;
                         break;
                     case DataProvider.Rules.WHAT_SMS:
-                        cv.put(DataProvider.Logs.TYPE, DataProvider.TYPE_SMS);
+                        cv.put(DataProvider.Logs.TYPE, IDataDefs.Type.TYPE_SMS.toInt());
                         l = 1;
                         break;
                     default:
@@ -197,8 +199,8 @@ public final class AddLogActivity extends AppCompatActivity implements OnClickLi
                 }
                 cv.put(DataProvider.Logs.DIRECTION, d);
                 cv.put(DataProvider.Logs.AMOUNT, l);
-                cv.put(DataProvider.Logs.PLAN_ID, DataProvider.NO_ID);
-                cv.put(DataProvider.Logs.RULE_ID, DataProvider.NO_ID);
+                cv.put(DataProvider.Logs.PLAN_ID, IDataDefs.NO_ID);
+                cv.put(DataProvider.Logs.RULE_ID, IDataDefs.NO_ID);
                 cv.put(DataProvider.Logs.REMOTE, r);
                 cv.put(DataProvider.Logs.DATE, cal.getTimeInMillis());
                 if (roamed) {

@@ -1,8 +1,5 @@
 package com.github.umeshkrpatel.LogMeter;
 
-/**
- * Created by umpatel on 1/20/2016.
- */
 public interface IDefs {
     long kDateTimeFactor = 86400000L;
     long kMilliSecondsPerSecond = 1000L;

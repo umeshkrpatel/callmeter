@@ -19,10 +19,7 @@
 package com.github.umeshkrpatel.LogMeter.ui;
 
 
-import android.app.AlertDialog.Builder;
-import android.content.ContentUris;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -54,7 +51,7 @@ import android.widget.ToggleButton;
 
 import com.github.umeshkrpatel.LogMeter.R;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
-import com.github.umeshkrpatel.LogMeter.data.LogRunnerService;
+import com.github.umeshkrpatel.LogMeter.IDataDefs;
 import com.github.umeshkrpatel.LogMeter.data.NameCache;
 import com.github.umeshkrpatel.LogMeter.ui.prefs.Preferences;
 
@@ -183,12 +180,12 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
         tbOut.setChecked(p.getBoolean(PREF_OUT, true));
 
         String[] directions = getResources().getStringArray(R.array.direction_calls);
-        tbIn.setText(directions[DataProvider.DIRECTION_IN]);
-        tbIn.setTextOn(directions[DataProvider.DIRECTION_IN]);
-        tbIn.setTextOff(directions[DataProvider.DIRECTION_IN]);
-        tbOut.setText(directions[DataProvider.DIRECTION_OUT]);
-        tbOut.setTextOn(directions[DataProvider.DIRECTION_OUT]);
-        tbOut.setTextOff(directions[DataProvider.DIRECTION_OUT]);
+        tbIn.setText(directions[IDataDefs.DIRECTION_IN]);
+        tbIn.setTextOn(directions[IDataDefs.DIRECTION_IN]);
+        tbIn.setTextOff(directions[IDataDefs.DIRECTION_IN]);
+        tbOut.setText(directions[IDataDefs.DIRECTION_OUT]);
+        tbOut.setTextOn(directions[IDataDefs.DIRECTION_OUT]);
+        tbOut.setTextOff(directions[IDataDefs.DIRECTION_OUT]);
 
         if (planId >= 0L) {
             setPlanId(planId);
@@ -248,23 +245,23 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
 
         String where = DataProvider.Logs.TABLE + "." + DataProvider.Logs.TYPE + " in (-1";
         if (tbCall != null && tbCall.isChecked()) {
-            where += "," + DataProvider.TYPE_CALL;
+            where += "," + IDataDefs.Type.TYPE_CALL;
         }
         if (tbSMS != null && tbSMS.isChecked()) {
-            where += "," + DataProvider.TYPE_SMS;
+            where += "," + IDataDefs.Type.TYPE_SMS;
         }
         if (tbMMS != null && tbMMS.isChecked()) {
-            where += "," + DataProvider.TYPE_MMS;
+            where += "," + IDataDefs.Type.TYPE_MMS;
         }
         if (tbData != null && tbData.isChecked()) {
-            where += "," + DataProvider.TYPE_DATA_MOBILE;
+            where += "," + IDataDefs.Type.TYPE_DATA_MOBILE;
         }
         where += ") and " + DataProvider.Logs.TABLE + "." + DataProvider.Logs.DIRECTION + " in (-1";
         if (tbIn != null && tbIn.isChecked()) {
-            where += "," + DataProvider.DIRECTION_IN;
+            where += "," + IDataDefs.DIRECTION_IN;
         }
         if (tbOut != null && tbOut.isChecked()) {
-            where += "," + DataProvider.DIRECTION_OUT;
+            where += "," + IDataDefs.DIRECTION_OUT;
         }
         where += ")";
 
@@ -463,7 +460,7 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
 
             GridLayout gridLayout = (GridLayout) view.findViewById(R.id.log_items);
             StringBuilder buf = new StringBuilder();
-            final int type = cursor.getInt(0);
+            final IDataDefs.Type type = IDataDefs.Type.values()[cursor.getInt(0)];
             final int dir = cursor.getInt(1);
             final long date = cursor.getLong(2);
             buf.append(Common.formatDate(context, date));
@@ -471,16 +468,16 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
             buf.append(DateFormat.getTimeFormat(context).format(new Date(date)));
             holder.tvTime.setText(buf.toString());
 
-            if (dir == DataProvider.DIRECTION_IN) {
+            if (dir == IDataDefs.DIRECTION_IN) {
                 holder.ivType.setImageResource(R.drawable.ic_incoming);
             } else {
                 holder.ivType.setImageResource(R.drawable.ic_outgoing);
             }
 
-            if (type == DataProvider.TYPE_SMS || type == DataProvider.TYPE_MMS) {
+            if (type == IDataDefs.Type.TYPE_SMS || type == IDataDefs.Type.TYPE_MMS) {
                 holder.ivItem.setImageResource(R.drawable.ic_message);
                 view.setBackgroundColor(Color.argb(1, 0xFD, 0xC2, 0x0E));
-            } else if (type == DataProvider.TYPE_CALL) {
+            } else if (type == IDataDefs.Type.TYPE_CALL) {
                 holder.ivItem.setImageResource(R.drawable.ic_call);
                 view.setBackgroundColor(Color.argb(1, 0x56, 0x00, 0x64));
             } else {

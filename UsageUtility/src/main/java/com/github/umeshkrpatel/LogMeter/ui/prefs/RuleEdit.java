@@ -36,6 +36,7 @@ import android.util.Log;
 import com.github.umeshkrpatel.LogMeter.LogMeter;
 import com.github.umeshkrpatel.LogMeter.R;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
+import com.github.umeshkrpatel.LogMeter.IDataDefs;
 import com.github.umeshkrpatel.LogMeter.data.LogRunnerService;
 import com.github.umeshkrpatel.LogMeter.data.RuleMatcher;
 
@@ -95,13 +96,13 @@ public final class RuleEdit extends PreferenceActivity implements UpdateListener
      * @param type type of array
      * @return string array
      */
-    private int getStringArray(final int type) {
+    private int getStringArray(final IDataDefs.Type type) {
         switch (type) {
-            case DataProvider.TYPE_SMS:
+            case TYPE_SMS:
                 return R.array.direction_sms;
-            case DataProvider.TYPE_MMS:
+            case TYPE_MMS:
                 return R.array.direction_mms;
-            case DataProvider.TYPE_DATA_MOBILE:
+            case TYPE_DATA_MOBILE:
                 return R.array.direction_data;
             default:
                 return R.array.direction_calls;
@@ -235,7 +236,7 @@ public final class RuleEdit extends PreferenceActivity implements UpdateListener
             Log.d(TAG, "what: " + w);
             lp.setValue(String.valueOf(w));
             ps.addPreference(lp);
-            int t = DataProvider.what2type(w);
+            IDataDefs.Type t = DataProvider.what2type(w);
             // plan
             lp = new CVListPreference(this, values, DataProvider.Rules.PLAN_ID);
             lp.setTitle(R.string.plan_);
@@ -258,8 +259,8 @@ public final class RuleEdit extends PreferenceActivity implements UpdateListener
             lp.setTitle(R.string.direction_);
             lp.setSummary(R.string.direction_help);
             lp.setStatic(
-                    new String[]{String.valueOf(DataProvider.DIRECTION_IN),
-                            String.valueOf(DataProvider.DIRECTION_OUT), "-1"},
+                    new String[]{String.valueOf(IDataDefs.DIRECTION_IN),
+                            String.valueOf(IDataDefs.DIRECTION_OUT), "-1"},
                     getStrings(getStringArray(t)));
             int i;
             if (c.isNull(DataProvider.Rules.INDEX_DIRECTION)) {
@@ -429,18 +430,18 @@ public final class RuleEdit extends PreferenceActivity implements UpdateListener
         String where;
         switch (w) {
             case DataProvider.Rules.WHAT_CALL:
-                where = DataProvider.Plans.TYPE + " = " + DataProvider.TYPE_CALL + " OR "
-                        + DataProvider.Plans.TYPE + " = " + DataProvider.TYPE_MIXED;
+                where = DataProvider.Plans.TYPE + " = " + IDataDefs.Type.TYPE_CALL + " OR "
+                        + DataProvider.Plans.TYPE + " = " + IDataDefs.Type.TYPE_MIXED;
                 break;
             case DataProvider.Rules.WHAT_DATA:
-                where = DataProvider.Plans.TYPE + " = " + DataProvider.TYPE_DATA_MOBILE + " OR "
-                        + DataProvider.Plans.TYPE + " = " + DataProvider.TYPE_MIXED;
+                where = DataProvider.Plans.TYPE + " = " + IDataDefs.Type.TYPE_DATA_MOBILE + " OR "
+                        + DataProvider.Plans.TYPE + " = " + IDataDefs.Type.TYPE_MIXED;
                 break;
             case DataProvider.Rules.WHAT_SMS:
             case DataProvider.Rules.WHAT_MMS:
-                where = DataProvider.Plans.TYPE + " = " + DataProvider.TYPE_SMS + " OR "
-                        + DataProvider.Plans.TYPE + " = " + DataProvider.TYPE_MMS + " OR "
-                        + DataProvider.Plans.TYPE + " = " + DataProvider.TYPE_MIXED;
+                where = DataProvider.Plans.TYPE + " = " + IDataDefs.Type.TYPE_SMS + " OR "
+                        + DataProvider.Plans.TYPE + " = " + IDataDefs.Type.TYPE_MMS + " OR "
+                        + DataProvider.Plans.TYPE + " = " + IDataDefs.Type.TYPE_MIXED;
                 break;
             default:
                 where = DataProvider.Plans.WHERE_REALPLANS;

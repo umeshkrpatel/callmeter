@@ -13,6 +13,7 @@ import android.provider.ContactsContract;
 import android.support.v4.util.LruCache;
 import android.util.Log;
 
+import com.github.umeshkrpatel.LogMeter.IDataDefs;
 import com.github.umeshkrpatel.LogMeter.LogMeter;
 
 import java.io.InputStream;
@@ -65,9 +66,10 @@ public final class NameCache extends LruCache<String, NameCache.NameCacheItem> {
      * Return get(key) formatted with format.
      *
      * @param key    key
+     * @param type
      * @return Cached Name {@link String}
      */
-    public String getName(final Context context, final String key, final int type) {
+    public String getName(final Context context, final String key, final IDataDefs.Type type) {
         NameCacheItem nameCacheItem = get(key);
         if (nameCacheItem == null) {
             nameCacheItem = NameFinder.findName(context, key, type);
@@ -79,9 +81,10 @@ public final class NameCache extends LruCache<String, NameCache.NameCacheItem> {
      * Return get(key) formatted with format.
      *
      * @param key    key
+     * @param type
      * @return Cached Photo_ID {@link String}
      */
-    public Drawable getDrawableIcon(final Context context, final String key, final int type) {
+    public Drawable getDrawableIcon(final Context context, final String key, final IDataDefs.Type type) {
         NameCacheItem nameCacheItem = get(key);
         if (nameCacheItem == null) {
             nameCacheItem = NameFinder.findName(context, key, type);
@@ -89,7 +92,7 @@ public final class NameCache extends LruCache<String, NameCache.NameCacheItem> {
         return nameCacheItem.mDrawable;
     }
 
-    public NameCacheItem getNameCacheItem(final Context context, final String key, final int type) {
+    public NameCacheItem getNameCacheItem(final Context context, final String key, final IDataDefs.Type type) {
         NameCacheItem nameCacheItem = get(key);
         if (nameCacheItem == null) {
             nameCacheItem = NameFinder.findName(context, key, type);
@@ -105,7 +108,7 @@ public final class NameCache extends LruCache<String, NameCache.NameCacheItem> {
     private static class NameFinder extends AsyncTask<Void, Void, String> {
         private final Context mContext;
         private final String mNumber;
-        private final int mType;
+        private final IDataDefs.Type mType;
         private Drawable mDrawable;
         private static String[] PROJECTION_CONTACT = new String[] {
             ContactsContract.PhoneLookup.DISPLAY_NAME,
@@ -117,7 +120,7 @@ public final class NameCache extends LruCache<String, NameCache.NameCacheItem> {
          * @param context {@link Context}
          * @param number  phone number
          */
-        public NameFinder(final Context context, final String number, final int type) {
+        public NameFinder(final Context context, final String number, final IDataDefs.Type type) {
             mContext = context; mNumber = number; mType = type;
         }
 
@@ -126,10 +129,11 @@ public final class NameCache extends LruCache<String, NameCache.NameCacheItem> {
          *
          * @param context {@link Context}
          * @param number  phone number
+         * @param type
          * @return name or formatted {@link String}
          */
         public static NameCacheItem findName(final Context context, final String number,
-                                             final int type) {
+                                             final IDataDefs.Type type) {
             NameFinder loader = new NameFinder(context, number, type);
             String name = loader.doInBackground((Void) null);
             Drawable drawable = loader.getDrawableIcon();
@@ -140,7 +144,7 @@ public final class NameCache extends LruCache<String, NameCache.NameCacheItem> {
         @Override
         protected String doInBackground(final Void... params) {
             String ret = mNumber;
-            if (mType == DataProvider.TYPE_DATA_MOBILE) {
+            if (mType == IDataDefs.Type.TYPE_DATA_MOBILE) {
                 try {
                     PackageManager pm = mContext.getPackageManager();
                     ApplicationInfo applicationInfo = pm.getApplicationInfo(mNumber, 0);

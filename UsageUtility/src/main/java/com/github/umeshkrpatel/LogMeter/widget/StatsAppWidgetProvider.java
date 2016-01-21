@@ -39,9 +39,8 @@ import android.widget.RemoteViews;
 
 import com.github.umeshkrpatel.LogMeter.IDefs;
 import com.github.umeshkrpatel.LogMeter.R;
-import com.github.umeshkrpatel.LogMeter.data.DataProvider;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider.Plans.Plan;
-import com.github.umeshkrpatel.LogMeter.data.LogRunnerService;
+import com.github.umeshkrpatel.LogMeter.IDataDefs;
 import com.github.umeshkrpatel.LogMeter.ui.Common;
 import com.github.umeshkrpatel.LogMeter.ui.UtilityActivity;
 import com.github.umeshkrpatel.LogMeter.ui.prefs.Preferences;
@@ -239,7 +238,7 @@ public final class StatsAppWidgetProvider extends AppWidgetProvider {
 
         String stats = "";
         if (plan.hasBa) {
-            long bd = plan.getBillDay(plan.type == DataProvider.TYPE_BILLPERIOD
+            long bd = plan.getBillDay(plan.type == IDataDefs.Type.TYPE_BILLPERIOD
                     && showTargetBillDay);
             stats = Common.formatValues(context, -1, plan.type, plan.bpCount, plan.bpBa,
                     plan.billperiod, bd, false);
@@ -288,15 +287,15 @@ public final class StatsAppWidgetProvider extends AppWidgetProvider {
         if (showIcon) {
             views.setViewVisibility(R.id.widget_icon, View.VISIBLE);
             switch (plan.type) {
-                case DataProvider.TYPE_DATA_MOBILE:
+                case TYPE_DATA_MOBILE:
                     views.setImageViewResource(R.id.widget_icon, R.drawable.ic_widget_data);
                     break;
-                case DataProvider.TYPE_CALL:
-                case DataProvider.TYPE_MIXED:
+                case TYPE_CALL:
+                case TYPE_MIXED:
                     views.setImageViewResource(R.id.widget_icon, R.drawable.ic_widget_phone);
                     break;
-                case DataProvider.TYPE_SMS:
-                case DataProvider.TYPE_MMS:
+                case TYPE_SMS:
+                case TYPE_MMS:
                     views.setImageViewResource(R.id.widget_icon, R.drawable.ic_widget_message);
                     break;
                 default:

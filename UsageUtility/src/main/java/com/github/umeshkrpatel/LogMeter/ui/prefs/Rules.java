@@ -37,6 +37,7 @@ import android.view.MenuItem;
 
 import com.github.umeshkrpatel.LogMeter.R;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
+import com.github.umeshkrpatel.LogMeter.IDataDefs;
 import com.github.umeshkrpatel.LogMeter.data.RuleMatcher;
 import com.github.umeshkrpatel.LogMeter.ui.prefs.UpDownPreference.OnUpDownClickListener;
 import de.ub0r.android.lib.Utils;
@@ -110,11 +111,11 @@ public final class Rules extends PreferenceActivity
                 if (i >= 0 && i < DataProvider.Rules.NO_MATTER) {
                     String[] strs;
                     final Resources r = getResources();
-                    if (t == DataProvider.TYPE_SMS) {
+                    if (t == IDataDefs.Type.TYPE_SMS.toInt()) {
                         strs = r.getStringArray(R.array.direction_sms);
-                    } else if (t == DataProvider.TYPE_MMS) {
+                    } else if (t == IDataDefs.Type.TYPE_MMS.toInt()) {
                         strs = r.getStringArray(R.array.direction_mms);
-                    } else if (t == DataProvider.TYPE_DATA_MOBILE) {
+                    } else if (t == IDataDefs.Type.TYPE_DATA_MOBILE.toInt()) {
                         strs = r.getStringArray(R.array.direction_data);
                     } else {
                         strs = r.getStringArray(R.array.direction_calls);

@@ -40,9 +40,9 @@ import android.view.View;
 import android.widget.RemoteViews;
 
 import com.github.umeshkrpatel.LogMeter.R;
+import com.github.umeshkrpatel.LogMeter.IDataDefs;
 import com.github.umeshkrpatel.LogMeter.data.NameCache;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
-import com.github.umeshkrpatel.LogMeter.data.LogRunnerService;
 import com.github.umeshkrpatel.LogMeter.ui.Common;
 import com.github.umeshkrpatel.LogMeter.ui.UtilityActivity;
 import com.github.umeshkrpatel.LogMeter.ui.prefs.Preferences;
@@ -175,18 +175,18 @@ public final class LogsAppWidgetProvider extends AppWidgetProvider {
                 DataProvider.Logs.DATE + " DESC");
         assert c != null;
         if (c.moveToFirst()) {
-            final int t = c.getInt(DataProvider.Logs.INDEX_TYPE);
+            final IDataDefs.Type t = IDataDefs.Type.fromInt(c.getInt(DataProvider.Logs.INDEX_TYPE));
             final long date = c.getLong(DataProvider.Logs.INDEX_DATE);
             final float cost = c.getFloat(DataProvider.Logs.INDEX_COST);
             final float free = c.getFloat(DataProvider.Logs.INDEX_FREE);
             StringBuilder buf1 = new StringBuilder();
-            if (t == DataProvider.TYPE_MMS || t == DataProvider.TYPE_SMS
-                    || t == DataProvider.TYPE_CALL) {
+            if (t == IDataDefs.Type.TYPE_MMS || t == IDataDefs.Type.TYPE_SMS
+                    || t == IDataDefs.Type.TYPE_CALL) {
                 String number = c.getString(DataProvider.Logs.INDEX_REMOTE);
                 if (TextUtils.isEmpty(number)) {
                     buf1.append("???");
                 } else {
-                    String name = NameCache.getInstance().getName(context, number, 0);
+                    String name = NameCache.getInstance().getName(context, number, IDataDefs.Type.TYPE_CALL);
                     if (name == null) {
                         buf1.append(number);
                     } else {
@@ -214,15 +214,15 @@ public final class LogsAppWidgetProvider extends AppWidgetProvider {
             if (showIcon) {
                 views.setViewVisibility(R.id.widget_icon, View.VISIBLE);
                 switch (t) {
-                    case DataProvider.TYPE_DATA_MOBILE:
+                    case TYPE_DATA_MOBILE:
                         views.setImageViewResource(R.id.widget_icon, R.drawable.ic_widget_data);
                         break;
-                    case DataProvider.TYPE_CALL:
-                    case DataProvider.TYPE_MIXED:
+                    case TYPE_CALL:
+                    case TYPE_MIXED:
                         views.setImageViewResource(R.id.widget_icon, R.drawable.ic_widget_phone);
                         break;
-                    case DataProvider.TYPE_SMS:
-                    case DataProvider.TYPE_MMS:
+                    case TYPE_SMS:
+                    case TYPE_MMS:
                         views.setImageViewResource(R.id.widget_icon, R.drawable.ic_widget_message);
                         break;
                     default:

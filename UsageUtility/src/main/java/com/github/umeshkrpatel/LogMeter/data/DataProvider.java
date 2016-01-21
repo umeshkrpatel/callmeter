@@ -67,145 +67,14 @@ import java.util.regex.Pattern;
 import de.ub0r.android.lib.DbUtils;
 import de.ub0r.android.lib.Utils;
 
+import static com.github.umeshkrpatel.LogMeter.IDataDefs.*;
+import static com.github.umeshkrpatel.LogMeter.IDataDefs.BillPeriod.*;
+import static com.github.umeshkrpatel.LogMeter.IDataDefs.Type.*;
+
 /**
  * @author flx
  */
 public final class DataProvider extends ContentProvider {
-    public static final String kPackageName = "com.github.umeshkrpatel.LogMeter";
-    public static final String kAuthority = kPackageName + ".data";
-    /**
-     * Type of log: title.
-     */
-    public static final int TYPE_TITLE = 0;
-    /**
-     * Type of log: spacing.
-     */
-    public static final int TYPE_SPACING = 1;
-    /**
-     * Type of log: billmode.
-     */
-    public static final int TYPE_BILLPERIOD = 2;
-    /**
-     * Type of log: mixed.
-     */
-    public static final int TYPE_MIXED = 3;
-    /**
-     * Type of log: call.
-     */
-    public static final int TYPE_CALL = 4;
-    /**
-     * Type of log: sms.
-     */
-    public static final int TYPE_SMS = 5;
-    /**
-     * Type of log: mms.
-     */
-    public static final int TYPE_MMS = 6;
-    /**
-     * Type of log: data.
-     */
-    public static final int TYPE_DATA_MOBILE = 7;
-    public static final int TYPE_DATA_WIFI = 8;
-    /**
-     * Direction of log: in.
-     */
-    public static final int DIRECTION_IN = 0;
-    /**
-     * Direction of log: out.
-     */
-    public static final int DIRECTION_OUT = 1;
-    /**
-     * Type of limit: none.
-     */
-    public static final int LIMIT_TYPE_NONE = 0;
-    /**
-     * Type of limit: units.
-     */
-    public static final int LIMIT_TYPE_UNITS = 1;
-    /**
-     * Type of limit: cost.
-     */
-    public static final int LIMIT_TYPE_COST = 2;
-    /**
-     * Bill period: one day.
-     */
-    public static final int BILLPERIOD_DAY = 0;
-    /**
-     * Bill period: one week.
-     */
-    public static final int BILLPERIOD_WEEK = 1;
-    /**
-     * Bill period: two weeks.
-     */
-    public static final int BILLPERIOD_14D = 2;
-    /**
-     * Bill period: 15 days.
-     */
-    public static final int BILLPERIOD_15D = 3;
-    /**
-     * Bill period: 28 days.
-     */
-    public static final int BILLPERIOD_28D = 17;
-    /**
-     * Bill period: 30 days.
-     */
-    public static final int BILLPERIOD_30D = 4;
-    /**
-     * Bill period: 31 days.
-     */
-    public static final int BILLPERIOD_31D = 5;
-    /**
-     * Bill period: 60 days.
-     */
-    public static final int BILLPERIOD_60D = 6;
-    /**
-     * Bill period: 90 days.
-     */
-    public static final int BILLPERIOD_90D = 7;
-    /**
-     * Bill period: 1 month.
-     */
-    public static final int BILLPERIOD_1MONTH = 8;
-    /**
-     * Bill period: 1 month + 1 Day.
-     */
-    public static final int BILLPERIOD_1MONTH_1DAY = 9;
-    /**
-     * Bill period: 2 month.
-     */
-    public static final int BILLPERIOD_2MONTH = 10;
-    /**
-     * Bill period: 3 month.
-     */
-    public static final int BILLPERIOD_3MONTH = 11;
-    /**
-     * Bill period: 4 month.
-     */
-    public static final int BILLPERIOD_4MONTH = 12;
-    /**
-     * Bill period: 5 month.
-     */
-    public static final int BILLPERIOD_5MONTH = 13;
-    /**
-     * Bill period: 6 month.
-     */
-    public static final int BILLPERIOD_6MONTH = 14;
-    /**
-     * Bill period: 12 month.
-     */
-    public static final int BILLPERIOD_12MONTH = 15;
-    /**
-     * Bill period: infinite.
-     */
-    public static final int BILLPERIOD_INFINITE = 16;
-    /**
-     * Plan/rule id: not yet calculated.
-     */
-    public static final int NO_ID = -1;
-    /**
-     * Plan/rule id: no plan/rule found.
-     */
-    public static final int NOT_FOUND = -2;
     /**
      * Tag for output.
      */
@@ -217,23 +86,23 @@ public final class DataProvider extends ContentProvider {
     /**
      * Name of the {@link SQLiteDatabase}.
      */
-    private static final String DATABASE_NAME = "callmeter.db";
+    private static final String kDatabaseName = "UsageMeter.db";
     /**
      * Version of the {@link SQLiteDatabase}.
      */
-    private static final int DATABASE_VERSION = 35;
+    private static final int kDatabaseVersion = 35;
     /**
      * Versions of {@link SQLiteDatabase}, which need no unmatch().
      */
-    private static final int[] DATABASE_KNOWNGOOD = new int[]{30, 31, 32, 33, 34};
+    private static final int[] kDatabaseKnowGood = new int[]{30, 31, 32, 33, 34};
     /**
      * Version of the export file.
      */
-    private static final int EXPORT_VERSION = 2;
+    private static final int kExportVersion = 2;
     /**
      * Separator of values.
      */
-    private static final String EXPORT_VALUESEPARATOR = ":#:";
+    private static final String kExportValueSeperator = ":#:";
     /**
      * Internal id: logs.
      */
@@ -371,12 +240,12 @@ public final class DataProvider extends ContentProvider {
             return;
         }
         ContentValues cv = new ContentValues();
-        cv.put(DataProvider.Logs.PLAN_ID, DataProvider.NO_ID);
-        cv.put(DataProvider.Logs.RULE_ID, DataProvider.NO_ID);
+        cv.put(DataProvider.Logs.PLAN_ID, NO_ID);
+        cv.put(DataProvider.Logs.RULE_ID, NO_ID);
         // reset all but manually set plans
         db.update(DataProvider.Logs.TABLE, cv, DataProvider.Logs.RULE_ID + " is null or NOT ("
-                + DataProvider.Logs.RULE_ID + " = " + DataProvider.NOT_FOUND + " AND "
-                + DataProvider.Logs.PLAN_ID + " != " + DataProvider.NOT_FOUND + ")", null);
+                + DataProvider.Logs.RULE_ID + " = " + NOT_FOUND + " AND "
+                + DataProvider.Logs.PLAN_ID + " != " + NOT_FOUND + ")", null);
         cv.clear();
         cv.put(DataProvider.Plans.NEXT_ALERT, 0);
         db.update(DataProvider.Plans.TABLE, cv, null, null);
@@ -481,7 +350,7 @@ public final class DataProvider extends ContentProvider {
                                        final String provider, final String title) {
         StringBuilder sb = new StringBuilder();
         sb.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
-        sb.append("<ruleset version=\"" + EXPORT_VERSION + "\">\n");
+        sb.append("<ruleset version=\"" + kExportVersion + "\">\n");
         sb.append("  <country>").append(encodeString(country)).append("</country>\n");
         sb.append("  <provider>").append(encodeString(provider)).append("</provider>\n");
         sb.append("  <title>").append(encodeString(title)).append("</title>\n");
@@ -514,7 +383,7 @@ public final class DataProvider extends ContentProvider {
     public static String backupLogs(final Context context, final String title) {
         StringBuilder sb = new StringBuilder();
         sb.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
-        sb.append("<logs version=\"" + EXPORT_VERSION + "\">\n");
+        sb.append("<logs version=\"" + kExportVersion + "\">\n");
         sb.append("  <title>").append(encodeString(title)).append("</title>\n");
         final SQLiteDatabase db = new DatabaseHelper(context).getReadableDatabase();
         assert db != null;
@@ -542,7 +411,7 @@ public final class DataProvider extends ContentProvider {
     public static String backupNumGroups(final Context context, final String title) {
         StringBuilder sb = new StringBuilder();
         sb.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
-        sb.append("<numbersgroups version=\"" + EXPORT_VERSION + "\">\n");
+        sb.append("<numbersgroups version=\"" + kExportVersion + "\">\n");
         sb.append("  <title>").append(encodeString(title)).append("</title>\n");
         final SQLiteDatabase db = new DatabaseHelper(context).getReadableDatabase();
         assert db != null;
@@ -564,7 +433,7 @@ public final class DataProvider extends ContentProvider {
     public static String backupHourGroups(final Context context, final String title) {
         StringBuilder sb = new StringBuilder();
         sb.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
-        sb.append("<hoursgroups version=\"" + EXPORT_VERSION + "\">\n");
+        sb.append("<hoursgroups version=\"" + kExportVersion + "\">\n");
         sb.append("  <title>").append(encodeString(title)).append("</title>\n");
         final SQLiteDatabase db = new DatabaseHelper(context).getReadableDatabase();
         assert db != null;
@@ -843,7 +712,7 @@ public final class DataProvider extends ContentProvider {
                 continue;
             }
             final String imp = ti[1];
-            final String[] nvs = imp.split(EXPORT_VALUESEPARATOR);
+            final String[] nvs = imp.split(kExportValueSeperator);
             final ContentValues cv = new ContentValues();
             for (String nv : nvs) {
                 final String[] nvv = nv.split(":", 2);
@@ -944,31 +813,6 @@ public final class DataProvider extends ContentProvider {
 
         // translate default rule set:
         ContentValues cv = new ContentValues();
-        // bill period: 12
-        //cv.put(Plans.NAME,
-        //        context.getResources().getStringArray(R.array.plans_type)[TYPE_BILLPERIOD]);
-        //cv.put(Plans.SHORTNAME, context.getString(R.string.billperiod_sn));
-        // set 1st day of billing (including TZ)
-        //Calendar cal = Calendar.getInstance();
-        //cal.set(Calendar.DAY_OF_MONTH, 1);
-        //cal.set(Calendar.HOUR_OF_DAY, 0);
-        //cal.set(Calendar.MINUTE, 1);
-        //cal.set(Calendar.SECOND, 1);
-        //cal.set(Calendar.MILLISECOND, 0);
-        //cv.put(Plans.BILLDAY, cal.getTimeInMillis());
-        //updatePlans(db, cv, 12);
-        //cv.clear();
-        // spacer: 13, 17, 21
-        //cv.put(Plans.NAME, context.getResources().getStringArray(R.array.plans_type)[TYPE_SPACING]);
-        //updatePlans(db, cv, 13);
-        //updatePlans(db, cv, 17);
-        //updatePlans(db, cv, 21);
-        //cv.clear();
-        // calls: 14
-        //cv.put(Plans.NAME, context.getString(R.string.calls));
-        //cv.put(Plans.SHORTNAME, context.getString(R.string.calls));
-        //updatePlans(db, cv, 14);
-        //cv.clear();
         // calls in: 15
         cv.put(Plans.NAME, context.getString(R.string.calls_in));
         cv.put(Plans.SHORTNAME, context.getString(R.string.calls_in_));
@@ -979,11 +823,6 @@ public final class DataProvider extends ContentProvider {
         cv.put(Plans.SHORTNAME, context.getString(R.string.calls_out_));
         updatePlans(db, cv, 13);
         cv.clear();
-        // messages: 18
-        //cv.put(Plans.NAME, context.getString(R.string.messages));
-        //cv.put(Plans.SHORTNAME, context.getString(R.string.messages_));
-        //updatePlans(db, cv, 18);
-        //cv.clear();
         // sms in: 19
         cv.put(Plans.NAME, context.getString(R.string.sms_in));
         cv.put(Plans.SHORTNAME, context.getString(R.string.sms_in_));
@@ -1004,11 +843,6 @@ public final class DataProvider extends ContentProvider {
         cv.put(Plans.SHORTNAME, context.getString(R.string.mms_out_));
         updatePlans(db, cv, 17);
         cv.clear();
-        // data: 22
-        //cv.put(Plans.NAME, context.getString(R.string.data_));
-        //cv.put(Plans.SHORTNAME, context.getString(R.string.data));
-        //updatePlans(db, cv, 22);
-        //cv.clear();
         // data in/out: 23
         cv.put(Plans.NAME, context.getString(R.string.data_inout));
         cv.put(Plans.SHORTNAME, context.getString(R.string.data_inout_));
@@ -1174,11 +1008,11 @@ public final class DataProvider extends ContentProvider {
         Log.d(TAG, "backup(db," + table + ",cols,sel,args," + strip + ")");
         ArrayList<ContentValues> ret = null;
         if (os == null) {
-            ret = new ArrayList<ContentValues>();
+            ret = new ArrayList<>();
         }
         String[] proj = cols;
         if (strip != null) {
-            ArrayList<String> a = new ArrayList<String>(cols.length);
+            ArrayList<String> a = new ArrayList<>(cols.length);
             for (String c : cols) {
                 if (strip.equals(c)) {
                     Log.d(TAG, "ignore column: " + c);
@@ -1321,16 +1155,16 @@ public final class DataProvider extends ContentProvider {
      * @param what rule's type
      * @return plan's type
      */
-    public static int what2type(final int what) {
+    public static Type what2type(final int what) {
         switch (what) {
             case Rules.WHAT_DATA:
                 return TYPE_DATA_MOBILE;
             case Rules.WHAT_MMS:
-                return TYPE_MMS;
+                return Type.TYPE_MMS;
             case Rules.WHAT_SMS:
-                return TYPE_SMS;
+                return Type.TYPE_SMS;
             default:
-                return TYPE_CALL;
+                return Type.TYPE_CALL;
         }
     }
 
@@ -1463,7 +1297,7 @@ public final class DataProvider extends ContentProvider {
     }
 
     @Override
-    public ContentProviderResult[] applyBatch(
+    public @NonNull ContentProviderResult[] applyBatch(
             @NonNull final ArrayList<ContentProviderOperation> operations)
             throws OperationApplicationException {
         Log.d(TAG, "applyBatch(#" + operations.size() + ")");
@@ -1484,7 +1318,7 @@ public final class DataProvider extends ContentProvider {
     }
 
     @Override
-    public int bulkInsert(final Uri uri, @NonNull final ContentValues[] values) {
+    public int bulkInsert(@NonNull final Uri uri, @NonNull final ContentValues[] values) {
         Log.d(TAG, "bulkInsert(" + uri + ", #" + values.length + ")");
         if (values.length == 0) {
             return 0;
@@ -1669,26 +1503,26 @@ public final class DataProvider extends ContentProvider {
                     billps = "(CASE ";
                     nbillps = "(CASE ";
                     do {
-                        int period = cursor.getInt(1);
+                        BillPeriod period = BillPeriod.fromInt(cursor.getInt(1));
                         long bday = cursor.getLong(2);
                         Calendar bd = Plans.getBillDay(period, bday, now, false);
                         Calendar nbd = Plans.getBillDay(period, bd, now, true);
                         final long pid = cursor.getLong(0);
                         final long lbtime = bd.getTimeInMillis();
                         final long hbtime = nbd.getTimeInMillis();
-                        if (hideAllTime && period != BILLPERIOD_INFINITE
+                        if (hideAllTime && period != BPINF
                                 && (lowBp < 0L || lowBp > lbtime)) {
                             lowBp = lbtime;
                         }
-                        if (period != BILLPERIOD_INFINITE && (highBp < 0L || highBp < hbtime)) {
+                        if (period != BPINF && (highBp < 0L || highBp < hbtime)) {
                             highBp = hbtime;
                         }
                         billps += " WHEN " + Plans.TABLE + "." + Plans.ID + "=" + pid + " or ("
-                                + Plans.TABLE + "." + Plans.TYPE + "!=" + TYPE_BILLPERIOD + " and "
+                                + Plans.TABLE + "." + Plans.TYPE + "!=" + Type.TYPE_BILLPERIOD + " and "
                                 + Plans.TABLE + "." + Plans.BILLPERIOD_ID + "=" + pid + ") THEN "
                                 + lbtime;
                         nbillps += " WHEN " + Plans.TABLE + "." + Plans.ID + "=" + pid + " or ("
-                                + Plans.TABLE + "." + Plans.TYPE + "!=" + TYPE_BILLPERIOD + " and "
+                                + Plans.TABLE + "." + Plans.TYPE + "!=" + Type.TYPE_BILLPERIOD + " and "
                                 + Plans.TABLE + "." + Plans.BILLPERIOD_ID + "=" + pid + ") THEN "
                                 + hbtime;
                     } while (cursor.moveToNext());
@@ -1715,7 +1549,7 @@ public final class DataProvider extends ContentProvider {
                                 + Logs.TABLE + "."
                                 + Logs.PLAN_ID + "||',%' or (" + Plans.TABLE + "." + Plans.TYPE
                                 + "="
-                                + TYPE_BILLPERIOD + " and (" + Logs.TABLE + "." + Logs.PLAN_ID
+                                + Type.TYPE_BILLPERIOD + " and (" + Logs.TABLE + "." + Logs.PLAN_ID
                                 + " in (select "
                                 + Plans.ID + " from " + Plans.TABLE + " as p where p."
                                 + Plans.BILLPERIOD_ID
@@ -1727,8 +1561,8 @@ public final class DataProvider extends ContentProvider {
                                 + "=" + Plans.TABLE + "." + Plans.ID + ")))))");
                 groupBy = Plans.TABLE + "." + Plans.ID;
                 if (hideZero || hideNoCost) {
-                    having = Plans.TYPE + " in(" + TYPE_BILLPERIOD + "," + TYPE_SPACING + ","
-                            + TYPE_TITLE + ")";
+                    having = Plans.TYPE + " in(" + Type.TYPE_BILLPERIOD + "," + Type.TYPE_SPACING + ","
+                            + Type.TYPE_TITLE + ")";
 
                     if (hideZero) {
                         having += " or " + Plans.SUM_BP_BILLED_AMOUNT + ">0";
@@ -1830,7 +1664,11 @@ public final class DataProvider extends ContentProvider {
 
         // Tell the cursor what uri to watch, so it knows when its source data
         // changes
-        c.setNotificationUri(getContext().getContentResolver(), uri);
+        try {
+            c.setNotificationUri(getContext().getContentResolver(), uri);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed e: " + e.getMessage());
+        }
         Log.d(TAG, "query(" + uri + ", sel): " + c.getCount());
         return c;
     }
@@ -2770,12 +2608,12 @@ public final class DataProvider extends ContentProvider {
                 "sum(CASE WHEN " + Logs.TABLE + "." + Logs.DATE + "<{" + SUM_TODAY + "} or "
                         + Logs.TABLE + "." + Logs.DATE + ">{" + SUM_NOW + "} THEN 0 WHEN " + TABLE
                         + "." + MERGED_PLANS + " is null or " + TABLE + "." + TYPE + "!="
-                        + TYPE_MIXED + " THEN " + Logs.TABLE + "." + Logs.BILL_AMOUNT + " WHEN  "
-                        + Logs.TABLE + "." + Logs.TYPE + "=" + TYPE_CALL + " THEN " + Logs.TABLE
+                        + Type.TYPE_MIXED + " THEN " + Logs.TABLE + "." + Logs.BILL_AMOUNT + " WHEN  "
+                        + Logs.TABLE + "." + Logs.TYPE + "=" + Type.TYPE_CALL + " THEN " + Logs.TABLE
                         + "." + Logs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_CALL + "/60"
-                        + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + TYPE_SMS + " THEN "
+                        + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + Type.TYPE_SMS + " THEN "
                         + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_SMS
-                        + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + TYPE_MMS + " THEN "
+                        + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + Type.TYPE_MMS + " THEN "
                         + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_MMS
                         + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + TYPE_DATA_MOBILE + " THEN "
                         + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "."
@@ -2787,12 +2625,12 @@ public final class DataProvider extends ContentProvider {
                 "sum(CASE WHEN " + Logs.TABLE + "." + Logs.DATE + "<={" + SUM_BILLDAY + "} or "
                         + Logs.TABLE + "." + Logs.DATE + ">{" + SUM_NOW + "} THEN 0 WHEN " + TABLE
                         + "." + MERGED_PLANS + " is null or " + TABLE + "." + TYPE + "!="
-                        + TYPE_MIXED + " THEN " + Logs.TABLE + "." + Logs.BILL_AMOUNT + " WHEN  "
-                        + Logs.TABLE + "." + Logs.TYPE + "=" + TYPE_CALL + " THEN " + Logs.TABLE
+                        + Type.TYPE_MIXED + " THEN " + Logs.TABLE + "." + Logs.BILL_AMOUNT + " WHEN  "
+                        + Logs.TABLE + "." + Logs.TYPE + "=" + Type.TYPE_CALL + " THEN " + Logs.TABLE
                         + "." + Logs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_CALL + "/60"
-                        + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + TYPE_SMS + " THEN "
+                        + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + Type.TYPE_SMS + " THEN "
                         + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_SMS
-                        + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + TYPE_MMS + " THEN "
+                        + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + Type.TYPE_MMS + " THEN "
                         + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_MMS
                         + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + TYPE_DATA_MOBILE + " THEN "
                         + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "."
@@ -2802,18 +2640,18 @@ public final class DataProvider extends ContentProvider {
                         + Logs.DATE + ">{" + SUM_NOW + "} THEN 0 ELSE 1 END) as " + SUM_AT_COUNT,
                 "sum(CASE WHEN " + Logs.TABLE + "." + Logs.DATE + ">{" + SUM_NOW + "} THEN 0 WHEN "
                         + TABLE + "." + MERGED_PLANS + " is null or " + TABLE + "." + TYPE + "!="
-                        + TYPE_MIXED + " THEN " + Logs.TABLE + "." + Logs.BILL_AMOUNT + " WHEN  "
-                        + Logs.TABLE + "." + Logs.TYPE + "=" + TYPE_CALL + " THEN " + Logs.TABLE
+                        + Type.TYPE_MIXED + " THEN " + Logs.TABLE + "." + Logs.BILL_AMOUNT + " WHEN  "
+                        + Logs.TABLE + "." + Logs.TYPE + "=" + Type.TYPE_CALL + " THEN " + Logs.TABLE
                         + "." + Logs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_CALL + "/60"
-                        + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + TYPE_SMS + " THEN "
+                        + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + Type.TYPE_SMS + " THEN "
                         + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_SMS
-                        + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + TYPE_MMS + " THEN "
+                        + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + Type.TYPE_MMS + " THEN "
                         + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_MMS
                         + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + TYPE_DATA_MOBILE + " THEN "
                         + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "."
                         + MIXED_UNITS_DATA + "/" + IDefs.kBytesPerMegaByte + " ELSE " + Logs.TABLE + "."
                         + Logs.BILL_AMOUNT + " END) AS " + SUM_AT_BILLED_AMOUNT,
-                "(CASE WHEN " + TABLE + "." + TYPE + "=" + TYPE_BILLPERIOD + " THEN (CASE WHEN "
+                "(CASE WHEN " + TABLE + "." + TYPE + "=" + Type.TYPE_BILLPERIOD + " THEN (CASE WHEN "
                         + TABLE + "." + COST_PER_PLAN + " is null  THEN 0 ELSE " + TABLE + "."
                         + COST_PER_PLAN + " END) + (select sum(CASE WHEN p." + COST_PER_PLAN
                         + " is null THEN 0 ELSE p." + COST_PER_PLAN + " END) from " + TABLE
@@ -2840,12 +2678,12 @@ public final class DataProvider extends ContentProvider {
                         + Logs.DATE + ">{" + SUM_NOW + "} THEN 0 ELSE 1 END) as " + SUM_AT_COUNT,
                 "sum(CASE WHEN " + Logs.TABLE + "." + Logs.DATE + ">{" + SUM_NOW + "} THEN 0 WHEN "
                         + TABLE + "." + MERGED_PLANS + " is null or " + TABLE + "." + TYPE + "!="
-                        + TYPE_MIXED + " THEN " + Logs.TABLE + "." + Logs.BILL_AMOUNT + " WHEN  "
-                        + Logs.TABLE + "." + Logs.TYPE + "=" + TYPE_CALL + " THEN " + Logs.TABLE
+                        + Type.TYPE_MIXED + " THEN " + Logs.TABLE + "." + Logs.BILL_AMOUNT + " WHEN  "
+                        + Logs.TABLE + "." + Logs.TYPE + "=" + Type.TYPE_CALL + " THEN " + Logs.TABLE
                         + "." + Logs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_CALL + "/60"
-                        + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + TYPE_SMS + " THEN "
+                        + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + Type.TYPE_SMS + " THEN "
                         + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_SMS
-                        + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + TYPE_MMS + " THEN "
+                        + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + Type.TYPE_MMS + " THEN "
                         + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_MMS
                         + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + TYPE_DATA_MOBILE + " THEN "
                         + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "."
@@ -2859,17 +2697,17 @@ public final class DataProvider extends ContentProvider {
         /**
          * Select only real plans.
          */
-        public static final String WHERE_REALPLANS = TYPE + "!=" + TYPE_BILLPERIOD + " and " + TYPE
-                + "!=" + TYPE_SPACING + " and " + TYPE + "!=" + TYPE_TITLE;
+        public static final String WHERE_REALPLANS = TYPE + "!=" + Type.TYPE_BILLPERIOD + " and " + TYPE
+                + "!=" + Type.TYPE_SPACING + " and " + TYPE + "!=" + Type.TYPE_TITLE;
         /**
          * Select only bill periods.
          */
-        public static final String WHERE_BILLPERIODS = TYPE + " = " + TYPE_BILLPERIOD;
+        public static final String WHERE_BILLPERIODS = TYPE + " = " + Type.TYPE_BILLPERIOD;
         /**
          * Select only real plans and bill periods.
          */
-        public static final String WHERE_PLANS = TYPE + "!=" + TYPE_SPACING + " and " + TYPE + "!="
-                + TYPE_TITLE;
+        public static final String WHERE_PLANS = TYPE + "!=" + Type.TYPE_SPACING + " and " + TYPE + "!="
+                + Type.TYPE_TITLE;
         /**
          * Default order.
          */
@@ -3004,13 +2842,13 @@ public final class DataProvider extends ContentProvider {
          * @param cost   billed cost
          * @return get used
          */
-        public static int getUsed(final int pType, final int lType, final float amount,
+        public static int getUsed(final Type pType, final int lType, final float amount,
                                   final float cost) {
             switch (lType) {
-                case DataProvider.LIMIT_TYPE_COST:
+                case LIMIT_TYPE_COST:
                     return (int) (cost * IDefs.kHundredth);
-                case DataProvider.LIMIT_TYPE_UNITS:
-                    if (pType == DataProvider.TYPE_DATA_MOBILE) {
+                case LIMIT_TYPE_UNITS:
+                    if (pType == TYPE_DATA_MOBILE) {
                         return (int) (amount / IDefs.kBytesPerKiloByte);
                     } else {
                         return (int) amount;
@@ -3032,21 +2870,21 @@ public final class DataProvider extends ContentProvider {
          * @param limit limit
          * @return get limit
          */
-        public static long getLimit(final int pType, final int lType, final float limit) {
+        public static long getLimit(final Type pType, final int lType, final float limit) {
             if (limit == 0L) {
                 return 0L;
             }
             switch (lType) {
-                case DataProvider.LIMIT_TYPE_UNITS:
+                case LIMIT_TYPE_UNITS:
                     switch (pType) {
-                        case DataProvider.TYPE_DATA_MOBILE:
+                        case TYPE_DATA_MOBILE:
                             return (long) (limit * IDefs.kBytesPerKiloByte);
-                        case DataProvider.TYPE_CALL:
+                        case TYPE_CALL:
                             return (long) (limit * IDefs.kSecondsPerMinute);
                         default:
                             return (long) limit;
                     }
-                case DataProvider.LIMIT_TYPE_COST:
+                case LIMIT_TYPE_COST:
                     return (long) (limit * IDefs.kHundredth);
                 default:
                     return 0L;
@@ -3063,7 +2901,7 @@ public final class DataProvider extends ContentProvider {
          * @param next   get the next, not the current one
          * @return {@link Calendar} with current first bill day
          */
-        public static Calendar getBillDay(final int period, final long start, final Calendar now,
+        public static Calendar getBillDay(final BillPeriod period, final long start, final Calendar now,
                                           final boolean next) {
             Calendar s = Calendar.getInstance();
             s.setTimeInMillis(start);
@@ -3079,7 +2917,7 @@ public final class DataProvider extends ContentProvider {
          * @param next   get the next, not the current one
          * @return {@link Calendar} with current first bill day
          */
-        public static Calendar getBillDay(final int period, final long start, final long now,
+        public static Calendar getBillDay(final BillPeriod period, final long start, final long now,
                                           final boolean next) {
             Calendar s = Calendar.getInstance();
             s.setTimeInMillis(start);
@@ -3094,7 +2932,7 @@ public final class DataProvider extends ContentProvider {
          * @param period period type
          * @return array of [Calendar.FIELD, amount]
          */
-        private static int[] getPeriodSettings(final int period) {
+        private static int[] getPeriodSettings(final BillPeriod period) {
             int f; // Calendar.FIELD
             int v; // amount
             /*
@@ -3107,73 +2945,73 @@ public final class DataProvider extends ContentProvider {
             int j = Calendar.MILLISECOND; // Additional Calendar.FIELD
             int k = 0; // Additional amount
             switch (period) {
-                case BILLPERIOD_DAY:
+                case DAY01:
                     f = Calendar.DAY_OF_MONTH;
                     v = 1;
                     break;
-                case BILLPERIOD_28D:
+                case DAY28:
                     f = Calendar.DAY_OF_MONTH;
                     v = 28;
                     break;
-                case BILLPERIOD_30D:
+                case DAY30:
                     f = Calendar.DAY_OF_MONTH;
                     v = 30;
                     break;
-                case BILLPERIOD_31D:
+                case DAY31:
                     f = Calendar.DAY_OF_MONTH;
                     v = 31;
                     break;
-                case BILLPERIOD_60D:
+                case DAY60:
                     f = Calendar.DAY_OF_MONTH;
                     v = 60;
                     break;
-                case BILLPERIOD_90D:
+                case DAY90:
                     f = Calendar.DAY_OF_MONTH;
                     v = 90;
                     break;
-                case BILLPERIOD_1MONTH:
+                case MONTH01:
                     f = Calendar.MONTH;
                     v = 1;
                     break;
-                case BILLPERIOD_2MONTH:
+                case MONTH02:
                     f = Calendar.MONTH;
                     v = 2;
                     break;
-                case BILLPERIOD_3MONTH:
+                case MONTH03:
                     f = Calendar.MONTH;
                     v = 3;
                     break;
-                case BILLPERIOD_4MONTH:
+                case MONTH04:
                     f = Calendar.MONTH;
                     v = 4;
                     break;
-                case BILLPERIOD_5MONTH:
+                case MONTH05:
                     f = Calendar.MONTH;
                     v = 5;
                     break;
-                case BILLPERIOD_6MONTH:
+                case MONTH06:
                     f = Calendar.MONTH;
                     v = 6;
                     break;
-                case BILLPERIOD_12MONTH:
+                case MONTH12:
                     f = Calendar.YEAR;
                     v = 1;
                     break;
-                case BILLPERIOD_1MONTH_1DAY:
+                case MONTH1DAY1:
                     f = Calendar.MONTH;
                     v = 1;
                     j = Calendar.DAY_OF_MONTH;
                     k = 1;
                     break;
-                case BILLPERIOD_WEEK:
+                case WEEK01:
                     f = Calendar.DAY_OF_MONTH;
                     v = 7;
                     break;
-                case BILLPERIOD_14D:
+                case DAY14:
                     f = Calendar.DAY_OF_MONTH;
                     v = 14;
                     break;
-                case BILLPERIOD_15D:
+                case DAY15:
                     f = Calendar.DAY_OF_MONTH;
                     v = 15;
                     break;
@@ -3195,16 +3033,16 @@ public final class DataProvider extends ContentProvider {
          * @param next   get the next, not the current one
          * @return {@link Calendar} with current first bill day
          */
-        public static Calendar getBillDay(final int period, final Calendar start,
+        public static Calendar getBillDay(final BillPeriod period, final Calendar start,
                                           final Calendar now, final boolean next) {
             int f;
             int v;
             int j;
             int k;
             switch (period) {
-                case BILLPERIOD_INFINITE:
+                case BPINF:
                     return start;
-                case BILLPERIOD_DAY:
+                case DAY01:
                     Calendar ret;
                     if (now == null) {
                         ret = Calendar.getInstance();
@@ -3271,7 +3109,7 @@ public final class DataProvider extends ContentProvider {
          * @param offset  offset for each bill day
          * @return {@link ArrayList} of bill days
          */
-        public static ArrayList<Long> getBillDays(final int period, final long start,
+        public static ArrayList<Long> getBillDays(final BillPeriod period, final long start,
                                                   final long newerAs, final long offset) {
             Log.d(TAG, "getBillDays()");
             ArrayList<Long> ret = new ArrayList<>();
@@ -3283,10 +3121,10 @@ public final class DataProvider extends ContentProvider {
             Calendar c = Calendar.getInstance();
             final long now = System.currentTimeMillis();
             switch (period) {
-                case BILLPERIOD_INFINITE:
+                case BPINF:
                     Log.d(TAG, "inifinite: return null");
                     return null;
-                case BILLPERIOD_DAY:
+                case DAY01:
                     c.set(Calendar.HOUR_OF_DAY, 0);
                     c.set(Calendar.MINUTE, 0);
                     c.set(Calendar.SECOND, 0);
@@ -3391,7 +3229,7 @@ public final class DataProvider extends ContentProvider {
             /**
              * Type of plan.
              */
-            public final int type;
+            public final Type type;
 
             /**
              * UtilityActivity's name.
@@ -3406,7 +3244,7 @@ public final class DataProvider extends ContentProvider {
             /**
              * Bill period.
              */
-            public final int billperiod;
+            public final BillPeriod billperiod;
 
             /**
              * Bill day.
@@ -3492,11 +3330,11 @@ public final class DataProvider extends ContentProvider {
             public Plan(final Cursor cursor) {
                 Log.d(TAG, "new Plan(" + cursor + ")");
                 id = cursor.getLong(INDEX_ID);
-                type = cursor.getInt(INDEX_TYPE);
+                type = Type.values()[cursor.getInt(INDEX_TYPE)];
                 name = cursor.getString(INDEX_NAME);
                 sname = cursor.getString(INDEX_SHORTNAME);
-                billperiod = cursor.getInt(INDEX_BILLPERIOD);
-                if (type == TYPE_SPACING || type == TYPE_TITLE) {
+                billperiod = BillPeriod.fromInt(cursor.getInt(INDEX_BILLPERIOD));
+                if (type == Type.TYPE_SPACING || type == Type.TYPE_TITLE) {
                     billday = -1;
                     nextbillday = -1;
                     limittype = -1;
@@ -3526,10 +3364,10 @@ public final class DataProvider extends ContentProvider {
                     billday = cursor.getLong(INDEX_SUM_BILLDAY);
                     nextbillday = cursor.getLong(INDEX_SUM_NEXTBILLDAY);
                     cpp = cursor.getFloat(INDEX_SUM_CPP);
-                    if (type == TYPE_BILLPERIOD) {
+                    if (type == Type.TYPE_BILLPERIOD) {
                         limittype = -1;
                         hasBa = true;
-                        if (billperiod == DataProvider.BILLPERIOD_INFINITE) {
+                        if (billperiod == BPINF) {
                             limitPos = 0;
                             limit = 0;
                         } else {
@@ -3548,7 +3386,7 @@ public final class DataProvider extends ContentProvider {
                         limit = getLimit(type, limittype,
                                 cursor.getFloat(INDEX_LIMIT));
                         limitPos = getUsed(type, limittype, bpBa, cost);
-                        hasBa = type != TYPE_MIXED
+                        hasBa = type != Type.TYPE_MIXED
                                 || cursor.getInt(INDEX_SUM_MIXED_UNITS_CALL) != 0
                                 || cursor.getInt(INDEX_SUM_MIXED_UNITS_DATA) != 0
                                 || cursor.getInt(INDEX_SUM_MIXED_UNITS_MMS) != 0
@@ -3579,11 +3417,11 @@ public final class DataProvider extends ContentProvider {
             public Plan(final Cursor cursor, final SharedPreferences p) {
                 Log.d(TAG, "new Plan(" + cursor + ", " + p + ")");
                 id = cursor.getLong(INDEX_ID);
-                type = cursor.getInt(INDEX_TYPE);
+                type = Type.values()[cursor.getInt(INDEX_TYPE)];
                 name = cursor.getString(INDEX_NAME);
                 sname = cursor.getString(INDEX_SHORTNAME);
-                billperiod = cursor.getInt(INDEX_BILLPERIOD);
-                if (type == TYPE_SPACING || type == TYPE_TITLE) {
+                billperiod = BillPeriod.fromInt(cursor.getInt(INDEX_BILLPERIOD));
+                if (type == Type.TYPE_SPACING || type == Type.TYPE_TITLE) {
                     billday = -1;
                     nextbillday = -1;
                     limittype = -1;
@@ -3614,10 +3452,10 @@ public final class DataProvider extends ContentProvider {
                     nextbillday = p.getLong(PREF_PREFIX + SUM_NEXTBILLDAY + id, 0L);
                     cpp = p.getFloat(PREF_PREFIX + SUM_CPP + id, 0f);
 
-                    if (type == TYPE_BILLPERIOD) {
+                    if (type == Type.TYPE_BILLPERIOD) {
                         limittype = -1;
                         hasBa = true;
-                        if (billperiod == DataProvider.BILLPERIOD_INFINITE) {
+                        if (billperiod == BPINF) {
                             limitPos = 0;
                             limit = 0;
                         } else {
@@ -3636,7 +3474,7 @@ public final class DataProvider extends ContentProvider {
                         limit = getLimit(type, limittype,
                                 cursor.getFloat(INDEX_LIMIT));
                         limitPos = getUsed(type, limittype, bpBa, cost);
-                        hasBa = type != TYPE_MIXED
+                        hasBa = type != Type.TYPE_MIXED
                                 || cursor.getInt(INDEX_BASIC_MIXED_UNITS_CALL) != 0
                                 || cursor.getInt(INDEX_BASIC_MIXED_UNITS_DATA) != 0
                                 || cursor.getInt(INDEX_BASIC_MIXED_UNITS_MMS) != 0
@@ -3789,7 +3627,7 @@ public final class DataProvider extends ContentProvider {
              * @return balance - cost for bill periods; else cost + cpp
              */
             public float getAccumCostPrepaid() {
-                if (type == TYPE_BILLPERIOD) {
+                if (type == Type.TYPE_BILLPERIOD) {
                     return cpp - cost;
                 } else {
                     return cost + cpp;
@@ -4465,7 +4303,7 @@ public final class DataProvider extends ContentProvider {
          * @param context {@link Context}
          */
         DatabaseHelper(final Context context) {
-            super(context, DATABASE_NAME, null, DATABASE_VERSION);
+            super(context, kDatabaseName, null, kDatabaseVersion);
             ctx = context;
         }
 
@@ -4495,7 +4333,7 @@ public final class DataProvider extends ContentProvider {
          * @return true, if unmatch() is needed
          */
         private boolean needUnmatch(final int oldVersion) {
-            for (int v : DATABASE_KNOWNGOOD) {
+            for (int v : kDatabaseKnowGood) {
                 if (v == oldVersion) {
                     return false;
                 }

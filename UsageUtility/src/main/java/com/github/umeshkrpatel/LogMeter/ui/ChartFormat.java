@@ -17,7 +17,7 @@ import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.github.mikephil.charting.utils.ViewPortHandler;
-import com.github.umeshkrpatel.LogMeter.data.DataProvider;
+import com.github.umeshkrpatel.LogMeter.IDataDefs;
 
 import java.util.ArrayList;
 
@@ -193,7 +193,7 @@ public class ChartFormat {
         public String getFormattedValue(float v, Entry e, int i, ViewPortHandler h) {
             if (v == INVALID)
                 return "";
-            return Common.formatAmount(DataProvider.TYPE_CALL, v, true);
+            return Common.formatAmount(IDataDefs.Type.TYPE_CALL, v, true);
         }
     }
 
@@ -203,7 +203,7 @@ public class ChartFormat {
         public String getFormattedValue(float v, Entry e, int i, ViewPortHandler h) {
             if (v == INVALID)
                 return "";
-            return Common.formatAmount(DataProvider.TYPE_DATA_MOBILE, v, false);
+            return Common.formatAmount(IDataDefs.Type.TYPE_DATA_MOBILE, v, false);
         }
     }
 
@@ -213,7 +213,7 @@ public class ChartFormat {
         public String getFormattedValue(float v, Entry e, int i, ViewPortHandler h) {
             if (v == INVALID)
                 return "";
-            return Common.formatAmount(DataProvider.TYPE_SMS, v, false);
+            return Common.formatAmount(IDataDefs.Type.TYPE_SMS, v, false);
         }
     }
 }

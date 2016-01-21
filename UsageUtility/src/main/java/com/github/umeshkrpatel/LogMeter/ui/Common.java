@@ -21,7 +21,7 @@ package com.github.umeshkrpatel.LogMeter.ui;
 import android.content.Context;
 
 import com.github.umeshkrpatel.LogMeter.IDefs;
-import com.github.umeshkrpatel.LogMeter.data.DataProvider;
+import com.github.umeshkrpatel.LogMeter.IDataDefs;
 import com.github.umeshkrpatel.LogMeter.ui.prefs.Preferences;
 
 import java.text.DateFormat;
@@ -140,15 +140,15 @@ public final class Common {
      * @param showHours show hours and days
      * @return {@link String} representing amount
      */
-    public static String formatAmount(final int pType, final float amount,
+    public static String formatAmount(final IDataDefs.Type pType, final float amount,
                                       final boolean showHours) {
         switch (pType) {
-            case DataProvider.TYPE_DATA_MOBILE:
+            case TYPE_DATA_MOBILE:
                 return prettyBytes(amount);
-            case DataProvider.TYPE_CALL:
+            case TYPE_CALL:
                 return prettySeconds(amount, showHours);
-            case DataProvider.TYPE_MMS:
-            case DataProvider.TYPE_SMS:
+            case TYPE_MMS:
+            case TYPE_SMS:
                 return String.valueOf((long) amount);
             default:
                 return String.format("%.2f", amount).replaceAll("[\\.,]?0*$", "");
@@ -163,9 +163,9 @@ public final class Common {
      * @param billDay    {@link Calendar} for bill periods bill day
      * @return formated date
      */
-    public static String formatDate(final Context context, final int billperiod,
+    public static String formatDate(final Context context, final IDataDefs.BillPeriod billperiod,
                                     final Calendar billDay) {
-        if (billperiod == DataProvider.BILLPERIOD_INFINITE && billDay == null) {
+        if (billperiod == IDataDefs.BillPeriod.BPINF && billDay == null) {
             return "\u221E";
         } else {
             return formatDate(context, billDay);
@@ -185,20 +185,22 @@ public final class Common {
      * @param showHours  show hours
      * @return string
      */
-    public static String formatValues(final Context context, final long now, final int pType,
-                                      final long count, final float amount, final int billperiod, final long billday,
+    public static String formatValues(
+            final Context context, final long now, final IDataDefs.Type pType, final long count,
+            final float amount, final IDataDefs.BillPeriod billperiod, final long billday,
+
                                       final boolean showHours) {
         switch (pType) {
-            case DataProvider.TYPE_BILLPERIOD:
+            case TYPE_BILLPERIOD:
                 Calendar billDay = Calendar.getInstance();
                 billDay.setTimeInMillis(billday);
                 return formatDate(context, billperiod, billDay);
-            case DataProvider.TYPE_CALL:
+            case TYPE_CALL:
                 return formatAmount(pType, amount, showHours) + " (" + count + ")";
-            case DataProvider.TYPE_DATA_MOBILE:
-            case DataProvider.TYPE_SMS:
-            case DataProvider.TYPE_MMS:
-            case DataProvider.TYPE_MIXED:
+            case TYPE_DATA_MOBILE:
+            case TYPE_SMS:
+            case TYPE_MMS:
+            case TYPE_MIXED:
                 return formatAmount(pType, amount, showHours);
             default:
                 return "";

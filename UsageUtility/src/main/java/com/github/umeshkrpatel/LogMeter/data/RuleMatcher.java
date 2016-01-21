@@ -39,6 +39,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.github.umeshkrpatel.LogMeter.IDataDefs;
 import com.github.umeshkrpatel.LogMeter.IDefs;
 import com.github.umeshkrpatel.LogMeter.R;
 import com.github.umeshkrpatel.LogMeter.ui.UtilityActivity;
@@ -171,13 +172,13 @@ public final class RuleMatcher {
         Log.d(TAG, "unmatch()");
         ContentValues cv = new ContentValues();
         final ContentResolver cr = context.getContentResolver();
-        cv.put(DataProvider.Logs.PLAN_ID, DataProvider.NO_ID);
-        cv.put(DataProvider.Logs.RULE_ID, DataProvider.NO_ID);
+        cv.put(DataProvider.Logs.PLAN_ID, IDataDefs.NO_ID);
+        cv.put(DataProvider.Logs.RULE_ID, IDataDefs.NO_ID);
         // reset all but manually set plans
         cr.update(DataProvider.Logs.CONTENT_URI, cv, DataProvider.Logs.RULE_ID
                         + " is null or NOT (" + DataProvider.Logs.RULE_ID + " = "
-                        + DataProvider.NOT_FOUND
-                        + " AND " + DataProvider.Logs.PLAN_ID + " != " + DataProvider.NOT_FOUND
+                        + IDataDefs.NOT_FOUND
+                        + " AND " + DataProvider.Logs.PLAN_ID + " != " + IDataDefs.NOT_FOUND
                         + ")",
                 null
         );
@@ -245,7 +246,7 @@ public final class RuleMatcher {
                         .withValue(DataProvider.Logs.FREE, p.getFree(log, bc))
                         .withSelection(WHERE, new String[]{String.valueOf(lid)})
                         .build();
-                p.updatePlan(ba, bc, t);
+                p.updatePlan(ba, bc, IDataDefs.Type.values()[t]);
                 ops.add(op);
                 matched = true;
                 break;
@@ -254,8 +255,8 @@ public final class RuleMatcher {
         if (!matched) {
             ContentProviderOperation op = ContentProviderOperation
                     .newUpdate(DataProvider.Logs.CONTENT_URI)
-                    .withValue(DataProvider.Logs.PLAN_ID, DataProvider.NOT_FOUND)
-                    .withValue(DataProvider.Logs.RULE_ID, DataProvider.NOT_FOUND)
+                    .withValue(DataProvider.Logs.PLAN_ID, IDataDefs.NOT_FOUND)
+                    .withValue(DataProvider.Logs.RULE_ID, IDataDefs.NOT_FOUND)
                     .withSelection(WHERE, new String[]{String.valueOf(lid)})
                     .build();
             ops.add(op);
@@ -309,7 +310,7 @@ public final class RuleMatcher {
         final float bc = p.getCost(log, ba);
         cv.put(DataProvider.Logs.COST, bc);
         cv.put(DataProvider.Logs.FREE, p.getFree(log, bc));
-        p.updatePlan(ba, bc, t);
+        p.updatePlan(ba, bc, IDataDefs.Type.values()[t]);
         cr.update(DataProvider.Logs.CONTENT_URI, cv, DataProvider.Logs.ID + " = ?",
                 new String[]{String.valueOf(lid)});
         log.close();
@@ -329,7 +330,7 @@ public final class RuleMatcher {
         load(context);
         final ContentResolver cr = context.getContentResolver();
         final Cursor cursor = cr.query(DataProvider.Logs.CONTENT_URI, DataProvider.Logs.PROJECTION,
-                DataProvider.Logs.PLAN_ID + " = " + DataProvider.NO_ID, null,
+                DataProvider.Logs.PLAN_ID + " = " + IDataDefs.NO_ID, null,
                 DataProvider.Logs.DATE + " ASC");
         if (cursor != null && cursor.moveToFirst()) {
             final int l = cursor.getCount();
@@ -361,7 +362,7 @@ public final class RuleMatcher {
                             Log.d(TAG, "send progress: " + i + " handler=null");
                         }
                         Log.d(TAG, "save logs..");
-                        cr.applyBatch(DataProvider.kAuthority, ops);
+                        cr.applyBatch(IDataDefs.kAuthority, ops);
                         ops.clear();
                         Log.d(TAG, "sleeping..");
                         try {
@@ -374,7 +375,7 @@ public final class RuleMatcher {
                     ++i;
                 } while (cursor.moveToNext());
                 if (ops.size() > 0) {
-                    cr.applyBatch(DataProvider.kAuthority, ops);
+                    cr.applyBatch(IDataDefs.kAuthority, ops);
                 }
             } catch (IllegalStateException | OperationApplicationException | RemoteException e) {
                 Log.e(TAG, "Exception in RuleMatcher's loop e:" + e.getMessage());
@@ -655,7 +656,8 @@ public final class RuleMatcher {
          */
         boolean match(final ContentResolver cr, final Cursor log) {
             Log.d(TAG, "what: " + what);
-            final int t = log.getInt(DataProvider.Logs.INDEX_TYPE);
+            final IDataDefs.Type t =
+                    IDataDefs.Type.values()[log.getInt(DataProvider.Logs.INDEX_TYPE)];
             Log.d(TAG, "type: " + t);
             boolean ret = false;
 
@@ -681,7 +683,7 @@ public final class RuleMatcher {
 
             switch (what) {
                 case DataProvider.Rules.WHAT_CALL:
-                    ret = (t == DataProvider.TYPE_CALL);
+                    ret = (t == IDataDefs.Type.TYPE_CALL);
                     if (ret && issipcall != DataProvider.Rules.NO_MATTER) {
                         final long d = log.getLong(DataProvider.Logs.INDEX_DATE);
                         Log.d(TAG, "match sipcall: " + issipcall);
@@ -711,13 +713,13 @@ public final class RuleMatcher {
                     }
                     break;
                 case DataProvider.Rules.WHAT_DATA:
-                    ret = (t == DataProvider.TYPE_DATA_MOBILE);
+                    ret = (t == IDataDefs.Type.TYPE_DATA_MOBILE);
                     break;
                 case DataProvider.Rules.WHAT_MMS:
-                    ret = (t == DataProvider.TYPE_MMS);
+                    ret = (t == IDataDefs.Type.TYPE_MMS);
                     break;
                 case DataProvider.Rules.WHAT_SMS:
-                    ret = (t == DataProvider.TYPE_SMS);
+                    ret = (t == IDataDefs.Type.TYPE_SMS);
                     if (ret && iswebsms != DataProvider.Rules.NO_MATTER) {
                         final long d = log.getLong(DataProvider.Logs.INDEX_DATE);
                         Log.d(TAG, "match websms: " + iswebsms);
@@ -1086,7 +1088,7 @@ public final class RuleMatcher {
         /**
          * Type of log.
          */
-        private final int type;
+        private final IDataDefs.Type type;
 
         /**
          * Type of limit.
@@ -1111,7 +1113,7 @@ public final class RuleMatcher {
         /**
          * Billperiod.
          */
-        private final int billperiod;
+        private final IDataDefs.BillPeriod billperiod;
 
         /**
          * Cost per item.
@@ -1191,12 +1193,12 @@ public final class RuleMatcher {
             cResolver = cr;
             id = cursor.getInt(DataProvider.Plans.INDEX_ID);
             name = cursor.getString(DataProvider.Plans.INDEX_NAME);
-            type = cursor.getInt(DataProvider.Plans.INDEX_TYPE);
+            type = IDataDefs.Type.values()[cursor.getInt(DataProvider.Plans.INDEX_TYPE)];
             limitType = cursor.getInt(DataProvider.Plans.INDEX_LIMIT_TYPE);
             final long l = DataProvider.Plans.getLimit(type, limitType,
                     cursor.getFloat(DataProvider.Plans.INDEX_LIMIT));
-            if (limitType == DataProvider.LIMIT_TYPE_UNITS
-                    && type == DataProvider.TYPE_DATA_MOBILE) {
+            if (limitType == IDataDefs.LIMIT_TYPE_UNITS
+                    && type == IDataDefs.Type.TYPE_DATA_MOBILE) {
                 // normally amount is saved as kB, here it is B
                 limit = l * IDefs.kBytesPerKiloByte;
             } else {
@@ -1229,16 +1231,16 @@ public final class RuleMatcher {
                 if (c != null && c.moveToFirst()) {
                     billday = Calendar.getInstance();
                     billday.setTimeInMillis(c.getLong(DataProvider.Plans.INDEX_BILLDAY));
-                    billperiod = c.getInt(DataProvider.Plans.INDEX_BILLPERIOD);
+                    billperiod = IDataDefs.BillPeriod.fromInt(c.getInt(DataProvider.Plans.INDEX_BILLPERIOD));
                 } else {
-                    billperiod = DataProvider.BILLPERIOD_INFINITE;
+                    billperiod = IDataDefs.BillPeriod.BPINF;
                     billday = null;
                 }
                 if (c != null && !c.isClosed()) {
                     c.close();
                 }
             } else {
-                billperiod = DataProvider.BILLPERIOD_INFINITE;
+                billperiod = IDataDefs.BillPeriod.BPINF;
                 billday = null;
             }
             final String billmode = cursor.getString(DataProvider.Plans.INDEX_BILLMODE);
@@ -1268,15 +1270,15 @@ public final class RuleMatcher {
          * @param logType log type
          * @return units per *
          */
-        int getUP(final int logType) {
+        int getUP(final IDataDefs.Type logType) {
             switch (logType) {
-                case DataProvider.TYPE_CALL:
+                case TYPE_CALL:
                     return upc;
-                case DataProvider.TYPE_DATA_MOBILE:
+                case TYPE_DATA_MOBILE:
                     return upd;
-                case DataProvider.TYPE_MMS:
+                case TYPE_MMS:
                     return upm;
-                case DataProvider.TYPE_SMS:
+                case TYPE_SMS:
                     return ups;
                 default:
                     return 0;
@@ -1290,7 +1292,7 @@ public final class RuleMatcher {
          */
         void checkBillday(final Cursor log) {
             // skip for infinite bill periods
-            if (billperiod == DataProvider.BILLPERIOD_INFINITE) {
+            if (billperiod == IDataDefs.BillPeriod.BPINF) {
                 return;
             }
 
@@ -1333,16 +1335,16 @@ public final class RuleMatcher {
          */
         float getRemainingLimit() {
             Log.d(TAG, "getRemainingLimit(): " + id);
-            if (parent != null && limitType == DataProvider.LIMIT_TYPE_NONE) {
+            if (parent != null && limitType == IDataDefs.LIMIT_TYPE_NONE) {
                 Log.d(TAG, "check parent");
                 return parent.getRemainingLimit();
             } else {
                 Log.d(TAG, "ltype: " + limitType);
                 switch (limitType) {
-                    case DataProvider.LIMIT_TYPE_COST:
+                    case IDataDefs.LIMIT_TYPE_COST:
                         Log.d(TAG, "bc<lt " + (billedCost * IDefs.kHundredth) + "<" + limit);
                         return limit - billedCost * IDefs.kHundredth;
-                    case DataProvider.LIMIT_TYPE_UNITS:
+                    case IDataDefs.LIMIT_TYPE_UNITS:
                         Log.d(TAG, "ba<lt " + billedAmount + "<" + limit);
                         return limit - billedAmount;
                     default:
@@ -1384,25 +1386,24 @@ public final class RuleMatcher {
 
         /**
          * Update {@link Plan}.
-         *
          * @param amount billed amount
          * @param cost   billed cost
          * @param t      type of log
          */
-        void updatePlan(final float amount, final float cost, final int t) {
+        void updatePlan(final float amount, final float cost, final IDataDefs.Type t) {
             billedAmount += amount;
             billedCost += cost;
             final Plan pp = parent;
             if (pp != null) {
-                if (type != DataProvider.TYPE_MIXED && pp.type == DataProvider.TYPE_MIXED) {
+                if (type != IDataDefs.Type.TYPE_MIXED && pp.type == IDataDefs.Type.TYPE_MIXED) {
                     switch (t) {
-                        case DataProvider.TYPE_CALL:
+                        case TYPE_CALL:
                             pp.billedAmount += amount * pp.upc / IDefs.kSecondsPerMinute;
                             break;
-                        case DataProvider.TYPE_MMS:
+                        case TYPE_MMS:
                             pp.billedAmount += amount * pp.upm;
                             break;
-                        case DataProvider.TYPE_SMS:
+                        case TYPE_SMS:
                             pp.billedAmount += amount * pp.ups;
                             break;
                         default:
@@ -1423,10 +1424,11 @@ public final class RuleMatcher {
          */
         float getBilledAmount(final Cursor log) {
             long amount = log.getLong(DataProvider.Logs.INDEX_AMOUNT);
-            final int t = log.getInt(DataProvider.Logs.INDEX_TYPE);
+            final IDataDefs.Type t =
+                    IDataDefs.Type.values()[log.getInt(DataProvider.Logs.INDEX_TYPE)];
             float ret;
             switch (t) {
-                case DataProvider.TYPE_CALL:
+                case TYPE_CALL:
                     ret = roundTime(amount);
                     if (stripSeconds > 0) {
                         ret -= stripSeconds;
@@ -1443,18 +1445,18 @@ public final class RuleMatcher {
                     break;
             }
 
-            if (type == DataProvider.TYPE_MIXED) {
+            if (type == IDataDefs.Type.TYPE_MIXED) {
                 switch (t) {
-                    case DataProvider.TYPE_CALL:
+                    case TYPE_CALL:
                         ret = ret * upc / IDefs.kSecondsPerMinute;
                         break;
-                    case DataProvider.TYPE_SMS:
+                    case TYPE_SMS:
                         ret = ret * ups;
                         break;
-                    case DataProvider.TYPE_MMS:
+                    case TYPE_MMS:
                         ret = ret * upm;
                         break;
-                    case DataProvider.TYPE_DATA_MOBILE:
+                    case TYPE_DATA_MOBILE:
                         ret = ret * upd / IDefs.kBytesPerMegaByte;
                     default:
                         break;
@@ -1471,23 +1473,24 @@ public final class RuleMatcher {
          * @return cost
          */
         float getCost(final Cursor log, final float bAmount) {
-            final int t = log.getInt(DataProvider.Logs.INDEX_TYPE);
-            final int pt = type;
+            final IDataDefs.Type t =
+                    IDataDefs.Type.values()[log.getInt(DataProvider.Logs.INDEX_TYPE)];
+            final IDataDefs.Type pt = type;
 
             float ret = 0f;
             float as0; // split amount: before limit
             float as1; // split amount: after limit
             Plan p;
             float f = 1; // factor for mixed plans with limits merging this plan
-            if (parent != null && limitType == DataProvider.LIMIT_TYPE_NONE) {
+            if (parent != null && limitType == IDataDefs.LIMIT_TYPE_NONE) {
                 p = parent;
-                if (pt != DataProvider.TYPE_MIXED && p.type == DataProvider.TYPE_MIXED) {
+                if (pt != IDataDefs.Type.TYPE_MIXED && p.type == IDataDefs.Type.TYPE_MIXED) {
                     f = 1f / p.getUP(t);
                     switch (t) {
-                        case DataProvider.TYPE_CALL:
+                        case TYPE_CALL:
                             f *= IDefs.kSecondsPerMinute;
                             break;
-                        case DataProvider.TYPE_DATA_MOBILE:
+                        case TYPE_DATA_MOBILE:
                             f *= IDefs.kBytesPerMegaByte;
                             break;
                         default:
@@ -1500,10 +1503,10 @@ public final class RuleMatcher {
             }
             // split amount at limit
             float remaining = p.getRemainingLimit() * f;
-            if (p.limitType == DataProvider.LIMIT_TYPE_NONE || remaining <= 0f) {
+            if (p.limitType == IDataDefs.LIMIT_TYPE_NONE || remaining <= 0f) {
                 as0 = 0;
                 as1 = bAmount;
-            } else if (p.limitType == DataProvider.LIMIT_TYPE_UNITS && remaining < bAmount) {
+            } else if (p.limitType == IDataDefs.LIMIT_TYPE_UNITS && remaining < bAmount) {
                 as0 = remaining;
                 as1 = bAmount - remaining;
             } else { // TODO: fix for LIMIT_TYPE_COST
@@ -1511,14 +1514,14 @@ public final class RuleMatcher {
                 as1 = 0;
             }
 
-            if (t == DataProvider.TYPE_SMS || pt == DataProvider.TYPE_MIXED) {
+            if (t == IDataDefs.Type.TYPE_SMS || pt == IDataDefs.Type.TYPE_MIXED) {
                 ret += as0 * costPerItemInLimit + as1 * costPerItem;
             } else {
                 ret += as0 > 0f ? costPerItemInLimit : costPerItem;
             }
 
             switch (t) {
-                case DataProvider.TYPE_CALL:
+                case TYPE_CALL:
                     if (bAmount <= billModeFirstLength) {
                         // bAmount is most likely < remaining
                         ret += (as0 * costPerAmountInLimit1 + as1 * costPerAmount1)
@@ -1552,7 +1555,7 @@ public final class RuleMatcher {
                                 / IDefs.kSecondsPerMinute;
                     }
                     break;
-                case DataProvider.TYPE_DATA_MOBILE:
+                case TYPE_DATA_MOBILE:
                     ret += (as0 * costPerAmountInLimit1 + as1 * costPerAmount1)
                             / IDefs.kBytesPerMegaByte;
                     break;
@@ -1570,7 +1573,7 @@ public final class RuleMatcher {
          * @return free cost
          */
         float getFree(final Cursor log, final float cost) {
-            if (limitType != DataProvider.LIMIT_TYPE_COST) {
+            if (limitType != IDataDefs.LIMIT_TYPE_COST) {
                 if (parent != null) {
                     return parent.getFree(log, cost);
                 }

@@ -12,6 +12,8 @@ import android.provider.OpenableColumns;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.github.umeshkrpatel.LogMeter.IDataDefs;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 
@@ -20,7 +22,7 @@ public class ExportProvider extends ContentProvider {
     /**
      * Authority.
      */
-    public static final String AUTHORITY = DataProvider.kPackageName + ".export";
+    public static final String AUTHORITY = IDataDefs.kPackageName + ".export";
     /**
      * Mime type for export.
      */
@@ -155,7 +157,7 @@ public class ExportProvider extends ContentProvider {
                 retArray[i] = fn;
             } else if (projection[i].equals(OpenableColumns.SIZE)) {
                 final File d = Environment.getExternalStorageDirectory();
-                final File f = new File(d, DataProvider.kPackageName + File.separator + fn);
+                final File f = new File(d, IDataDefs.kPackageName + File.separator + fn);
                 retArray[i] = f.length();
             }
         }
@@ -189,7 +191,7 @@ public class ExportProvider extends ContentProvider {
         if (fn == null) {
             return null;
         }
-        final File f = new File(d, DataProvider.kPackageName + File.separator + fn);
+        final File f = new File(d, IDataDefs.kPackageName + File.separator + fn);
         return ParcelFileDescriptor.open(f, ParcelFileDescriptor.MODE_READ_ONLY);
     }
 }

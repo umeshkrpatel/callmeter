@@ -244,7 +244,7 @@ public final class LogRunnerReceiver extends BroadcastReceiver {
                     break;
                 }
                 case ConnectivityManager.CONNECTIVITY_ACTION: {
-                    NetworkInfo net = null;
+                    NetworkInfo net;
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
                         CONNECT_STATUS = intent.getIntExtra(ConnectivityManager.EXTRA_NETWORK_TYPE, -1);
                         if (CONNECT_STATUS == ConnectivityManager.TYPE_MOBILE

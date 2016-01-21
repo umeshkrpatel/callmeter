@@ -1,9 +1,6 @@
 package com.github.umeshkrpatel.LogMeter.ui;
 
-import android.app.AlertDialog.Builder;
-import android.content.ContentUris;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -28,7 +25,7 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.github.umeshkrpatel.LogMeter.R;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
-import com.github.umeshkrpatel.LogMeter.data.LogRunnerService;
+import com.github.umeshkrpatel.LogMeter.IDataDefs;
 import com.github.umeshkrpatel.LogMeter.ui.prefs.Preferences;
 
 import java.util.ArrayList;
@@ -146,18 +143,18 @@ public final class SummaryFragment extends ListFragment implements OnClickListen
 //                        datai++;
 //                        break;
 //                }
-                if (cursor.getInt(0) == DataProvider.TYPE_CALL) {
+                if (cursor.getInt(0) == IDataDefs.Type.TYPE_CALL.toInt()) {
                     entriesCallDuration.add(new Entry(cursor.getLong(3), calli));
                     entriesCallCount.add(new Entry(cursor.getLong(2), calli));
                     calli++;
-                } else if (cursor.getInt(0) == DataProvider.TYPE_SMS) {
+                } else if (cursor.getInt(0) == IDataDefs.Type.TYPE_SMS.toInt()) {
                     entriesSmsMms.add(new Entry(cursor.getLong(3), smsi));
                     smsi++;
-                } else if (cursor.getInt(0) == DataProvider.TYPE_MMS) {
+                } else if (cursor.getInt(0) == IDataDefs.Type.TYPE_MMS.toInt()) {
                     entriesSmsMms.set(mmsi,
                             new Entry(cursor.getLong(3) + entriesSmsMms.get(mmsi).getVal(), mmsi));
                     mmsi++;
-                } else if (cursor.getInt(0) == DataProvider.TYPE_DATA_MOBILE) {
+                } else if (cursor.getInt(0) == IDataDefs.Type.TYPE_DATA_MOBILE.toInt()) {
                     entriesData.add(new Entry(cursor.getLong(3), datai));
                     datai++;
                 }

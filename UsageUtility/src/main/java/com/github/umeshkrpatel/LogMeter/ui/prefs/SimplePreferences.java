@@ -36,6 +36,7 @@ import android.util.Log;
 
 import com.github.umeshkrpatel.LogMeter.R;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
+import com.github.umeshkrpatel.LogMeter.IDataDefs;
 import com.github.umeshkrpatel.LogMeter.data.RuleMatcher;
 
 import java.util.Calendar;
@@ -119,7 +120,7 @@ public final class SimplePreferences extends PreferenceActivity implements
             e.putString(PREFS_BILLMODE + postfix, billmode);
             e.putString(PREFS_CUSTOM_BILLMODE + postfix, billmode);
             int i = c.getInt(DataProvider.Plans.INDEX_LIMIT_TYPE);
-            if (i == DataProvider.LIMIT_TYPE_UNITS) {
+            if (i == IDataDefs.LIMIT_TYPE_UNITS) {
                 e.putString(PREFS_FREEMIN + postfix, c.getString(DataProvider.Plans.INDEX_LIMIT));
             } else {
                 e.putString(PREFS_FREEMIN + postfix, "");
@@ -141,7 +142,7 @@ public final class SimplePreferences extends PreferenceActivity implements
 
         if (c.moveToFirst()) {
             int i = c.getInt(DataProvider.Plans.INDEX_LIMIT_TYPE);
-            if (i == DataProvider.LIMIT_TYPE_UNITS) {
+            if (i == IDataDefs.LIMIT_TYPE_UNITS) {
                 e.putString(PREFS_FREESMS + postfix, c.getString(DataProvider.Plans.INDEX_LIMIT));
             } else {
                 e.putString(PREFS_FREESMS + postfix, "");
@@ -164,7 +165,7 @@ public final class SimplePreferences extends PreferenceActivity implements
         Cursor c = cr
                 .query(DataProvider.Plans.CONTENT_URI, DataProvider.Plans.PROJECTION,
                         SELECTION_TYPE,
-                        new String[]{String.valueOf(DataProvider.TYPE_BILLPERIOD)}, null);
+                        new String[]{String.valueOf(IDataDefs.Type.TYPE_BILLPERIOD)}, null);
         if (c == null)
             return;
 
@@ -195,7 +196,7 @@ public final class SimplePreferences extends PreferenceActivity implements
 
         if (c.moveToFirst()) {
             int i = c.getInt(DataProvider.Plans.INDEX_LIMIT_TYPE);
-            if (i == DataProvider.LIMIT_TYPE_UNITS) {
+            if (i == IDataDefs.LIMIT_TYPE_UNITS) {
                 e.putString(PREFS_FREEMMS, c.getString(DataProvider.Plans.INDEX_LIMIT));
             } else {
                 e.putString(PREFS_FREEMMS, "");
@@ -206,13 +207,13 @@ public final class SimplePreferences extends PreferenceActivity implements
 
         // data
         c = cr.query(DataProvider.Plans.CONTENT_URI, DataProvider.Plans.PROJECTION, SELECTION_TYPE,
-                new String[]{String.valueOf(DataProvider.TYPE_DATA_MOBILE)}, null);
+                new String[]{String.valueOf(IDataDefs.Type.TYPE_DATA_MOBILE)}, null);
         if (c == null)
             return;
 
         if (c.moveToFirst()) {
             int i = c.getInt(DataProvider.Plans.INDEX_LIMIT_TYPE);
-            if (i == DataProvider.LIMIT_TYPE_UNITS) {
+            if (i == IDataDefs.LIMIT_TYPE_UNITS) {
                 e.putString(PREFS_FREEDATA, c.getString(DataProvider.Plans.INDEX_LIMIT));
             } else {
                 e.putString(PREFS_FREEDATA, "");
@@ -238,9 +239,9 @@ public final class SimplePreferences extends PreferenceActivity implements
         s = p.getString(PREFS_FREEMIN + postfix, "0");
         int i = Utils.parseInt(s, 0);
         if (i > 0) {
-            cv.put(DataProvider.Plans.LIMIT_TYPE, DataProvider.LIMIT_TYPE_UNITS);
+            cv.put(DataProvider.Plans.LIMIT_TYPE, IDataDefs.LIMIT_TYPE_UNITS);
         } else {
-            cv.put(DataProvider.Plans.LIMIT_TYPE, DataProvider.LIMIT_TYPE_NONE);
+            cv.put(DataProvider.Plans.LIMIT_TYPE, IDataDefs.LIMIT_TYPE_NONE);
         }
         cv.put(DataProvider.Plans.LIMIT, i);
         cv.put(DataProvider.Plans.COST_PER_ITEM,
@@ -259,9 +260,9 @@ public final class SimplePreferences extends PreferenceActivity implements
         String s = p.getString(PREFS_FREESMS + postfix, "0");
         int i = Utils.parseInt(s, 0);
         if (i > 0) {
-            cv.put(DataProvider.Plans.LIMIT_TYPE, DataProvider.LIMIT_TYPE_UNITS);
+            cv.put(DataProvider.Plans.LIMIT_TYPE, IDataDefs.LIMIT_TYPE_UNITS);
         } else {
-            cv.put(DataProvider.Plans.LIMIT_TYPE, DataProvider.LIMIT_TYPE_NONE);
+            cv.put(DataProvider.Plans.LIMIT_TYPE, IDataDefs.LIMIT_TYPE_NONE);
         }
         cv.put(DataProvider.Plans.LIMIT, i);
         cv.put(DataProvider.Plans.COST_PER_ITEM,
@@ -292,9 +293,9 @@ public final class SimplePreferences extends PreferenceActivity implements
         Log.d(TAG, "bd: " + DateFormat.getDateFormat(context).format(c.getTime()));
         cv.clear();
         cv.put(DataProvider.Plans.BILLDAY, c.getTimeInMillis());
-        cv.put(DataProvider.Plans.BILLPERIOD, DataProvider.BILLPERIOD_1MONTH);
+        cv.put(DataProvider.Plans.BILLPERIOD, IDataDefs.BillPeriod.MONTH01.toInt());
         cr.update(DataProvider.Plans.CONTENT_URI, cv, SELECTION_TYPE,
-                new String[]{String.valueOf(DataProvider.TYPE_BILLPERIOD)});
+                new String[]{String.valueOf(IDataDefs.Type.TYPE_BILLPERIOD)});
 
         // calls
         savePrefsCall(p, cr, 16, "");
@@ -311,9 +312,9 @@ public final class SimplePreferences extends PreferenceActivity implements
         s = p.getString(PREFS_FREEMMS, "0");
         i = Utils.parseInt(s, 0);
         if (i > 0) {
-            cv.put(DataProvider.Plans.LIMIT_TYPE, DataProvider.LIMIT_TYPE_UNITS);
+            cv.put(DataProvider.Plans.LIMIT_TYPE, IDataDefs.LIMIT_TYPE_UNITS);
         } else {
-            cv.put(DataProvider.Plans.LIMIT_TYPE, DataProvider.LIMIT_TYPE_NONE);
+            cv.put(DataProvider.Plans.LIMIT_TYPE, IDataDefs.LIMIT_TYPE_NONE);
         }
         cv.put(DataProvider.Plans.LIMIT, i);
         cv.put(DataProvider.Plans.COST_PER_ITEM,
@@ -325,16 +326,16 @@ public final class SimplePreferences extends PreferenceActivity implements
         s = p.getString(PREFS_FREEDATA, "0");
         i = Utils.parseInt(s, 0);
         if (i > 0) {
-            cv.put(DataProvider.Plans.LIMIT_TYPE, DataProvider.LIMIT_TYPE_UNITS);
+            cv.put(DataProvider.Plans.LIMIT_TYPE, IDataDefs.LIMIT_TYPE_UNITS);
         } else {
-            cv.put(DataProvider.Plans.LIMIT_TYPE, DataProvider.LIMIT_TYPE_NONE);
+            cv.put(DataProvider.Plans.LIMIT_TYPE, IDataDefs.LIMIT_TYPE_NONE);
         }
         cv.put(DataProvider.Plans.LIMIT, i);
         float f = Utils.parseFloat(p.getString(PREFS_COST_PER_MB, "0"), 0f);
         cv.put(DataProvider.Plans.COST_PER_AMOUNT1, f);
         cv.put(DataProvider.Plans.COST_PER_AMOUNT2, f);
         cr.update(DataProvider.Plans.CONTENT_URI, cv, SELECTION_TYPE,
-                new String[]{String.valueOf(DataProvider.TYPE_DATA_MOBILE)});
+                new String[]{String.valueOf(IDataDefs.Type.TYPE_DATA_MOBILE)});
     }
 
     @SuppressWarnings("deprecation")

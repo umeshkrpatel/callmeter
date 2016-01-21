@@ -20,6 +20,7 @@ import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.data.Entry;
 import com.github.umeshkrpatel.LogMeter.R;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
+import com.github.umeshkrpatel.LogMeter.IDataDefs;
 import com.github.umeshkrpatel.LogMeter.data.NameCache;
 
 import java.util.ArrayList;
@@ -112,8 +113,8 @@ public class DetailFragment extends Fragment {
         mNumber = number;
         try {
             tvNumber.setText(mNumber);
-            tvProfileName.setText(NameCache.getInstance().getName(getContext(), mNumber, 0));
-            Drawable drawable = NameCache.getInstance().getDrawableIcon(getContext(), mNumber, 0);
+            tvProfileName.setText(NameCache.getInstance().getName(getContext(), mNumber, IDataDefs.Type.TYPE_CALL));
+            Drawable drawable = NameCache.getInstance().getDrawableIcon(getContext(), mNumber, IDataDefs.Type.TYPE_CALL);
             if (drawable == null) {
                 ivProfilePic.setImageResource(R.drawable.ic_face_empty_photo_id);
             } else {
@@ -131,12 +132,12 @@ public class DetailFragment extends Fragment {
             ArrayList<Entry> entriesCalls = new ArrayList<>();
             ArrayList<Entry> entriesSms = new ArrayList<>();
             while (cursor.moveToNext()) {
-                if (cursor.getInt(0) == DataProvider.TYPE_CALL) {
+                if (cursor.getInt(0) == IDataDefs.Type.TYPE_CALL.toInt()) {
                     if (cursor.getInt(1) == 15)
                         entriesCalls.add(new Entry(cursor.getInt(3), 1));
                     else
                         entriesCalls.add(new Entry(cursor.getInt(3), 0));
-                } else if (cursor.getInt(0) == DataProvider.TYPE_SMS) {
+                } else if (cursor.getInt(0) == IDataDefs.Type.TYPE_SMS.toInt()) {
                     if (cursor.getInt(1) == 15)
                         entriesSms.add(new Entry(cursor.getInt(3), 1));
                     else
@@ -164,7 +165,7 @@ public class DetailFragment extends Fragment {
                 return;
             int calli = 0, callo = 0, smsi = 0, smso = 0;
             while (cursor.moveToNext()) {
-                if (cursor.getInt(0) == DataProvider.TYPE_CALL) {
+                if (cursor.getInt(0) == IDataDefs.Type.TYPE_CALL.toInt()) {
                     if (cursor.getInt(1) == 15) {
                         barCallsIn.add(new BarEntry(cursor.getInt(4), calli));
                         calli++;
@@ -172,7 +173,7 @@ public class DetailFragment extends Fragment {
                         barCallsOut.add(new BarEntry(cursor.getInt(4), callo));
                         callo++;
                     }
-                } else if (cursor.getInt(0) == DataProvider.TYPE_SMS) {
+                } else if (cursor.getInt(0) == IDataDefs.Type.TYPE_SMS.toInt()) {
                     if (cursor.getInt(1) == 15) {
                         barSmsIn.add(new BarEntry(cursor.getInt(4), smsi));
                         smsi++;

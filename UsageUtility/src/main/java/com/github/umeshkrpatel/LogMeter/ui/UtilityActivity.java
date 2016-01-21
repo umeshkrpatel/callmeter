@@ -6,13 +6,11 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -25,6 +23,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
 
+import com.github.umeshkrpatel.LogMeter.IDataDefs;
 import com.github.umeshkrpatel.LogMeter.LogMeter;
 import com.github.umeshkrpatel.LogMeter.R;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
@@ -250,17 +249,6 @@ public final class UtilityActivity
         setContentView(R.layout.plans);
 		assert getSupportActionBar()!=null;
         getSupportActionBar().setHomeButtonEnabled(true);
-
-        SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(this);
-        //noinspection ConstantConditions
-//        if (p.getAll().isEmpty()) {
-//            // set date of recordings to beginning of last month
-//            Calendar c = Calendar.getInstance();
-//            c.set(Calendar.DAY_OF_MONTH, 0);
-//            c.add(Calendar.MONTH, -1);
-//            Log.i(TAG, "set date of recording: " + c);
-//            p.edit().putLong(Preferences.PREFS_DATE_BEGIN, c.getTimeInMillis()).apply();
-//        }
 
         pager = (ViewPager) findViewById(R.id.pager);
         initAdapter();
@@ -541,8 +529,8 @@ public final class UtilityActivity
                         DataProvider.Plans.CONTENT_URI,
                         DataProvider.Plans.PROJECTION,
                         DataProvider.Plans.TYPE + "=? and " + DataProvider.Plans.BILLPERIOD + "!=?",
-                        new String[]{String.valueOf(DataProvider.TYPE_BILLPERIOD),
-                                String.valueOf(DataProvider.BILLPERIOD_INFINITE)},
+                        new String[]{String.valueOf(IDataDefs.Type.TYPE_BILLPERIOD),
+                                String.valueOf(IDataDefs.BillPeriod.BPINF)},
                         DataProvider.Plans.ORDER + " LIMIT 1");
                 if (minDate < 0L || c == null || !c.moveToFirst()) {
                     positions = new Long[]{-1L, -1L, -1L, -1L};
@@ -552,7 +540,8 @@ public final class UtilityActivity
                     }
                 } else {
                     ArrayList<Long> list = new ArrayList<>();
-                    int bptype = c.getInt(DataProvider.Plans.INDEX_BILLPERIOD);
+                    IDataDefs.BillPeriod bptype =
+                            IDataDefs.BillPeriod.fromInt(c.getInt(DataProvider.Plans.INDEX_BILLPERIOD));
                     ArrayList<Long> bps = DataProvider.Plans.getBillDays(bptype,
                             c.getLong(DataProvider.Plans.INDEX_BILLDAY), minDate, -1);
                     if (bps != null) {
