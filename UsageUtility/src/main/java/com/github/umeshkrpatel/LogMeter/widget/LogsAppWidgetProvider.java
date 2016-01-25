@@ -171,18 +171,18 @@ public final class LogsAppWidgetProvider extends AppWidgetProvider {
 
         ContentResolver cr = context.getContentResolver();
         Cursor c = cr.query(DataProvider.Logs.CONTENT_URI, DataProvider.Logs.PROJECTION,
-                DataProvider.Logs.PLAN_ID + "=?", new String[]{String.valueOf(pid)},
-                DataProvider.Logs.DATE + " DESC");
+                IDataDefs.ILogs.PLAN_ID + "=?", new String[]{String.valueOf(pid)},
+                IDataDefs.ILogs.DATE + " DESC");
         assert c != null;
         if (c.moveToFirst()) {
-            final IDataDefs.Type t = IDataDefs.Type.fromInt(c.getInt(DataProvider.Logs.INDEX_TYPE));
-            final long date = c.getLong(DataProvider.Logs.INDEX_DATE);
-            final float cost = c.getFloat(DataProvider.Logs.INDEX_COST);
-            final float free = c.getFloat(DataProvider.Logs.INDEX_FREE);
+            final IDataDefs.Type t = IDataDefs.Type.fromInt(c.getInt(IDataDefs.ILogs.INDEX_TYPE));
+            final long date = c.getLong(IDataDefs.ILogs.INDEX_DATE);
+            final float cost = c.getFloat(IDataDefs.ILogs.INDEX_COST);
+            final float free = c.getFloat(IDataDefs.ILogs.INDEX_FREE);
             StringBuilder buf1 = new StringBuilder();
             if (t == IDataDefs.Type.TYPE_MMS || t == IDataDefs.Type.TYPE_SMS
                     || t == IDataDefs.Type.TYPE_CALL) {
-                String number = c.getString(DataProvider.Logs.INDEX_REMOTE);
+                String number = c.getString(IDataDefs.ILogs.INDEX_REMOTE);
                 if (TextUtils.isEmpty(number)) {
                     buf1.append("???");
                 } else {
@@ -196,7 +196,7 @@ public final class LogsAppWidgetProvider extends AppWidgetProvider {
                 buf1.append("\n");
             }
             buf1.append(
-                    Common.formatAmount(t, c.getLong(DataProvider.Logs.INDEX_AMOUNT), showHours));
+                    Common.formatAmount(t, c.getLong(IDataDefs.ILogs.INDEX_AMOUNT), showHours));
             if (showCost && cost > 0f) {
                 buf1.append("\n");
                 if (free == 0f) {

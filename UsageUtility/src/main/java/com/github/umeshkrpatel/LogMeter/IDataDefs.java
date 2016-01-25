@@ -4,23 +4,17 @@ public interface IDataDefs {
     String kPackageName = "com.github.umeshkrpatel.LogMeter";
     String kAuthority = kPackageName + ".data";
     enum Type {
-        TYPE_NONE(-1),
-        TYPE_TITLE(0),
-        TYPE_SPACING(1),
-        TYPE_BILLPERIOD(2),
-        TYPE_MIXED(3),
-        TYPE_CALL(4),
-        TYPE_SMS(5),
-        TYPE_MMS(6),
-        TYPE_DATA_MOBILE(7),
-        TYPE_DATA_WIFI(8),
-        TYPE_UNKNOWN(9);
-        private Integer eValue;
-        Type (Integer value) {
-            eValue = value;
-        }
+        TYPE_NONE,
+        TYPE_BILLPERIOD,
+        TYPE_MIXED,
+        TYPE_CALL,
+        TYPE_SMS,
+        TYPE_MMS,
+        TYPE_DATA_MOBILE,
+        TYPE_DATA_WIFI,
+        TYPE_UNKNOWN;
         public int toInt() {
-            return eValue;
+            return this.ordinal();
         }
         public static Type fromInt(int type) {
             return Type.values()[type];
@@ -28,28 +22,24 @@ public interface IDataDefs {
     };
 
     enum BillPeriod {
-        DAY01(0),
-        WEEK01(1),
-        DAY14(2),
-        DAY15(3),
-        DAY28(17),
-        DAY30(4),
-        DAY31(5),
-        DAY60(6),
-        DAY90(7),
-        MONTH01(8),
-        MONTH1DAY1(9),
-        MONTH02(10),
-        MONTH03(11),
-        MONTH04(12),
-        MONTH05(13),
-        MONTH06(14),
-        MONTH12(15),
-        BPINF(16);
-        private int eValue;
-        BillPeriod(int value) {
-            eValue = value;
-        }
+        DAY01,
+        WEEK01,
+        DAY14,
+        DAY15,
+        DAY28,
+        DAY30,
+        DAY31,
+        DAY60,
+        DAY90,
+        MONTH01,
+        MONTH1DAY1,
+        MONTH02,
+        MONTH03,
+        MONTH04,
+        MONTH05,
+        MONTH06,
+        MONTH12,
+        BPINF;
         public int toInt() {
             return this.ordinal();
         }
@@ -86,4 +76,37 @@ public interface IDataDefs {
      * Plan/rule id: no plan/rule found.
      */
     int NOT_FOUND = -2;
+
+    interface ILogs {
+        String TABLE = "logs";
+        int INDEX_ID = 0;
+        int INDEX_PLAN_ID = 1;
+        int INDEX_RULE_ID = 2;
+        int INDEX_TYPE = 3;
+        int INDEX_DIRECTION = 4;
+        int INDEX_DATE = 5;
+        int INDEX_AMOUNT = 6;
+        int INDEX_BILL_AMOUNT = 7;
+        int INDEX_REMOTE = 8;
+        int INDEX_ROAMED = 9;
+        int INDEX_COST = 10;
+        int INDEX_FREE = 11;
+        int INDEX_MYNUMBER = 12;
+        int INDEX_PLAN_NAME = 13;
+        int INDEX_RULE_NAME = 14;
+        int INDEX_PLAN_TYPE = 15;
+        String ID = "_id";
+        String PLAN_ID = "_plan_id";
+        String RULE_ID = "_rule_id";
+        String TYPE = "_type";
+        String DIRECTION = "_direction";
+        String DATE = "_date";
+        String AMOUNT = "_amount";
+        String BILL_AMOUNT = "_bill_amount";
+        String REMOTE = "_remote";
+        String ROAMED = "_roamed";
+        String COST = "_logs_cost";
+        String FREE = "_logs_cost_free";
+        String MYNUMBER = "_mynumber";
+    }
 }

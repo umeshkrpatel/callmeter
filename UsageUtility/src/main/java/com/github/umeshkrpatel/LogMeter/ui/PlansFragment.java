@@ -322,8 +322,7 @@ public final class PlansFragment extends ListFragment implements OnClickListener
     }
 
     private static class PlansAdapter extends ResourceCursorAdapter {
-        private static int textSize, textSizeBigTitle, textSizeTitle, textSizeSpacer, textSizePBar,
-                textSizePBarBP;
+        private static int textSize, textSizeTitle, textSizePBar, textSizePBarBP;
         private static String delimiter = " | ";
         private static String currencyFormat = "$%.2f";
         private static boolean pShowHours = true;
@@ -362,9 +361,7 @@ public final class PlansFragment extends ListFragment implements OnClickListener
             prepaid = p.getBoolean(Preferences.PREFS_PREPAID, false);
 
             textSize = Preferences.getTextsize(context);
-            textSizeBigTitle = Preferences.getTextsizeBigTitle(context);
             textSizeTitle = Preferences.getTextsizeTitle(context);
-            textSizeSpacer = Preferences.getTextsizeSpacer(context);
             textSizePBar = Preferences.getTextsizeProgressBar(context);
             textSizePBarBP = Preferences.getTextsizeProgressBarBP(context);
         }
@@ -410,27 +407,25 @@ public final class PlansFragment extends ListFragment implements OnClickListener
                 free = plan.getFree();
             }
 
-            if (plan.type != IDataDefs.Type.TYPE_SPACING && plan.type != IDataDefs.Type.TYPE_TITLE) {
-                if (plan.hasBa) {
-                    long bd = plan.getBillDay(plan.type == IDataDefs.Type.TYPE_BILLPERIOD
-                            && pShowTargetBillDay);
-                    spb.append(Common.formatValues(context, plan.now, plan.type, plan.bpCount,
-                            plan.bpBa, plan.billperiod, bd, pShowHours));
-                    spb.setSpan(new StyleSpan(Typeface.BOLD), 0, spb.length(),
-                            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    if (plan.type != IDataDefs.Type.TYPE_BILLPERIOD) {
-                        if (showTotal) {
-                            spb.append(delimiter).append(Common.formatValues(context, plan.now, plan.type,
-                                    plan.atCount, plan.atBa, plan.billperiod, plan.billday,
-                                    pShowHours));
-                        }
-                        if (showToday) {
-                            spb.insert(
-                                    0,
-                                    Common.formatValues(context, plan.now, plan.type, plan.tdCount,
-                                            plan.tdBa, plan.billperiod, plan.billday, pShowHours)
-                                            + delimiter);
-                        }
+            if (plan.hasBa) {
+                long bd = plan.getBillDay(plan.type == IDataDefs.Type.TYPE_BILLPERIOD
+                        && pShowTargetBillDay);
+                spb.append(Common.formatValues(context, plan.now, plan.type, plan.bpCount,
+                        plan.bpBa, plan.billperiod, bd, pShowHours));
+                spb.setSpan(new StyleSpan(Typeface.BOLD), 0, spb.length(),
+                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                if (plan.type != IDataDefs.Type.TYPE_BILLPERIOD) {
+                    if (showTotal) {
+                        spb.append(delimiter).append(Common.formatValues(context, plan.now, plan.type,
+                                plan.atCount, plan.atBa, plan.billperiod, plan.billday,
+                                pShowHours));
+                    }
+                    if (showToday) {
+                        spb.insert(
+                                0,
+                                Common.formatValues(context, plan.now, plan.type, plan.tdCount,
+                                        plan.tdBa, plan.billperiod, plan.billday, pShowHours)
+                                        + delimiter);
                     }
                 }
                 if (free > 0f || cost > 0f) {
@@ -473,30 +468,9 @@ public final class PlansFragment extends ListFragment implements OnClickListener
             Log.v(TAG, "limitPos: " + plan.limitPos);
             Log.v(TAG, "text: " + spb);
 
-            TextView tvCache = null;
-            ProgressBar pbCache = null;
-            if (plan.type == IDataDefs.Type.TYPE_SPACING) {
-                if (textSizeSpacer > 0) {
-                    final ViewGroup.LayoutParams lp = holder.vSpacer.getLayoutParams();
-                    lp.height = textSizeSpacer;
-                    holder.vSpacer.setLayoutParams(lp);
-                }
-                holder.vSpacer.setVisibility(View.INVISIBLE);
-                holder.tvBigtitle.setVisibility(View.GONE);
-                holder.vContent.setVisibility(View.GONE);
-                holder.vPeriodLayout.setVisibility(View.GONE);
-                holder.pcDataChart.setVisibility(View.GONE);
-            } else if (plan.type == IDataDefs.Type.TYPE_TITLE) {
-                holder.tvBigtitle.setText(cursor.getString(DataProvider.Plans.INDEX_NAME));
-                if (textSizeBigTitle > 0) {
-                    holder.tvBigtitle.setTextSize(textSizeBigTitle);
-                }
-                holder.tvBigtitle.setVisibility(View.VISIBLE);
-                holder.vSpacer.setVisibility(View.GONE);
-                holder.vContent.setVisibility(View.GONE);
-                holder.vPeriodLayout.setVisibility(View.GONE);
-                holder.pcDataChart.setVisibility(View.GONE);
-            } else if (plan.type == IDataDefs.Type.TYPE_BILLPERIOD) {
+            TextView tvCache;
+            ProgressBar pbCache;
+            if (plan.type == IDataDefs.Type.TYPE_BILLPERIOD) {
                 holder.tvBigtitle.setVisibility(View.GONE);
                 holder.vSpacer.setVisibility(View.GONE);
                 holder.vContent.setVisibility(View.GONE);
@@ -569,8 +543,7 @@ public final class PlansFragment extends ListFragment implements OnClickListener
                     pbCache.setVisibility(progressBarVisability);
                 }
             }
-            if (savePlan && now < 0L && plan.type != IDataDefs.Type.TYPE_SPACING
-                    && plan.type != IDataDefs.Type.TYPE_TITLE) {
+            if (savePlan && now < 0L) {
                 plan.save(e);
                 isDirty = true;
             }

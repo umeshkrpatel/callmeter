@@ -178,18 +178,18 @@ public final class AddLogActivity extends AppCompatActivity implements OnClickLi
                 final ContentValues cv = new ContentValues();
                 switch (t) {
                     case DataProvider.Rules.WHAT_CALL:
-                        cv.put(DataProvider.Logs.TYPE, IDataDefs.Type.TYPE_CALL.toInt());
+                        cv.put(IDataDefs.ILogs.TYPE, IDataDefs.Type.TYPE_CALL.toInt());
                         break;
                     case DataProvider.Rules.WHAT_DATA:
-                        cv.put(DataProvider.Logs.TYPE, IDataDefs.Type.TYPE_DATA_MOBILE.toInt());
+                        cv.put(IDataDefs.ILogs.TYPE, IDataDefs.Type.TYPE_DATA_MOBILE.toInt());
                         l *= IDefs.kBytesPerKiloByte;
                         break;
                     case DataProvider.Rules.WHAT_MMS:
-                        cv.put(DataProvider.Logs.TYPE, IDataDefs.Type.TYPE_MMS.toInt());
+                        cv.put(IDataDefs.ILogs.TYPE, IDataDefs.Type.TYPE_MMS.toInt());
                         l = 1;
                         break;
                     case DataProvider.Rules.WHAT_SMS:
-                        cv.put(DataProvider.Logs.TYPE, IDataDefs.Type.TYPE_SMS.toInt());
+                        cv.put(IDataDefs.ILogs.TYPE, IDataDefs.Type.TYPE_SMS.toInt());
                         l = 1;
                         break;
                     default:
@@ -197,14 +197,14 @@ public final class AddLogActivity extends AppCompatActivity implements OnClickLi
                         Toast.makeText(this, "unknown type", Toast.LENGTH_LONG).show();
                         return true;
                 }
-                cv.put(DataProvider.Logs.DIRECTION, d);
-                cv.put(DataProvider.Logs.AMOUNT, l);
-                cv.put(DataProvider.Logs.PLAN_ID, IDataDefs.NO_ID);
-                cv.put(DataProvider.Logs.RULE_ID, IDataDefs.NO_ID);
-                cv.put(DataProvider.Logs.REMOTE, r);
-                cv.put(DataProvider.Logs.DATE, cal.getTimeInMillis());
+                cv.put(IDataDefs.ILogs.DIRECTION, d);
+                cv.put(IDataDefs.ILogs.AMOUNT, l);
+                cv.put(IDataDefs.ILogs.PLAN_ID, IDataDefs.NO_ID);
+                cv.put(IDataDefs.ILogs.RULE_ID, IDataDefs.NO_ID);
+                cv.put(IDataDefs.ILogs.REMOTE, r);
+                cv.put(IDataDefs.ILogs.DATE, cal.getTimeInMillis());
                 if (roamed) {
-                    cv.put(DataProvider.Logs.ROAMED, 1);
+                    cv.put(IDataDefs.ILogs.ROAMED, 1);
                 }
                 getContentResolver().insert(DataProvider.Logs.CONTENT_URI, cv);
                 LogRunnerService.update(this, LogRunnerService.ACTION_SHORT_RUN);

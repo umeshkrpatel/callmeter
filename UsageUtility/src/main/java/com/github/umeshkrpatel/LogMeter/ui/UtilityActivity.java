@@ -514,7 +514,7 @@ public final class UtilityActivity
             ctx = context;
             ContentResolver cr = context.getContentResolver();
             Cursor c = cr.query(DataProvider.Logs.CONTENT_URI,
-                    new String[]{DataProvider.Logs.DATE}, null, null, DataProvider.Logs.DATE
+                    new String[]{IDataDefs.ILogs.DATE}, null, null, IDataDefs.ILogs.DATE
                             + " ASC LIMIT 1");
             if (c == null || !c.moveToFirst()) {
                 positions = new Long[]{-1L, -1L, -1L, -1L};
@@ -529,8 +529,8 @@ public final class UtilityActivity
                         DataProvider.Plans.CONTENT_URI,
                         DataProvider.Plans.PROJECTION,
                         DataProvider.Plans.TYPE + "=? and " + DataProvider.Plans.BILLPERIOD + "!=?",
-                        new String[]{String.valueOf(IDataDefs.Type.TYPE_BILLPERIOD),
-                                String.valueOf(IDataDefs.BillPeriod.BPINF)},
+                        new String[]{String.valueOf(IDataDefs.Type.TYPE_BILLPERIOD.toInt()),
+                                String.valueOf(IDataDefs.BillPeriod.BPINF.toInt())},
                         DataProvider.Plans.ORDER + " LIMIT 1");
                 if (minDate < 0L || c == null || !c.moveToFirst()) {
                     positions = new Long[]{-1L, -1L, -1L, -1L};

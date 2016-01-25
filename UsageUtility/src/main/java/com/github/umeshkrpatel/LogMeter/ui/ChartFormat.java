@@ -9,6 +9,7 @@ import android.text.style.StyleSpan;
 import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.PieChart;
+import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.Entry;
@@ -23,7 +24,10 @@ import java.util.ArrayList;
 
 public class ChartFormat {
     public static final int[] CHART_COLORS = {
-            Color.rgb(255, 102, 0), Color.rgb(192, 255, 140), Color.rgb(255, 247, 140)
+            Color.rgb(255, 102, 0),
+            Color.rgb(192, 255, 140),
+            Color.rgb(255, 247, 140),
+            Color.rgb(255, 247, 100)
     };
     /*
      * Handle to empty DataSet
@@ -53,7 +57,7 @@ public class ChartFormat {
 
     public static ArrayList<String> generateChartDateList(int startDate, int currentMonth) {
         ArrayList<String> dateStrings = new ArrayList<>();
-        int endLimit = 30;
+        int endLimit;
         switch (currentMonth) {
             case 1:
             case 3:
@@ -84,7 +88,14 @@ public class ChartFormat {
         return dateStrings;
     }
 
-    public static void SetupPieChart(PieChart pieChart, ArrayList<Entry> entries, String centerText, ValueFormatter format) {
+    public static void SetupPieChart(PieChart pieChart, ArrayList<Entry> entries, String centerText,
+                                     ValueFormatter valueFormat) {
+        SetupPieChart(pieChart, entries, centerText, valueFormat, false, null);
+    }
+
+    public static void SetupPieChart(PieChart pieChart, ArrayList<Entry> entries, String centerText,
+                                     ValueFormatter valueFormat, boolean enableLegent,
+                                     ArrayList<String> legentStr) {
         pieChart.setDescription("");
 
         // enable hole and configure
@@ -96,7 +107,7 @@ public class ChartFormat {
         pieChart.setTransparentCircleAlpha(110);
 
         pieChart.setHoleRadius(58f);
-        pieChart.setTransparentCircleRadius(61f);
+        pieChart.setTransparentCircleRadius(68f);
 
         pieChart.setDrawCenterText(true);
         pieChart.setCenterTextTypeface(Typeface.SANS_SERIF);
@@ -117,24 +128,33 @@ public class ChartFormat {
         dataSet.setSelectionShift(10);
         dataSet.setColors(GetColorSet(isGray));
 
-        PieData pieData = new PieData(GetStringArray(), dataSet);
+        legentStr = GetStringArray(legentStr);
+
+        PieData pieData = new PieData(legentStr, dataSet);
         pieData.setValueTypeface(Typeface.SANS_SERIF);
         pieData.setValueTextColor(Color.BLUE);
+        pieData.setValueTextSize(10.0f);
 
-        if (format != null) {
-            pieData.setValueFormatter(format);
+        if (valueFormat != null) {
+            pieData.setValueFormatter(valueFormat);
+        } else {
+            pieData.setValueFormatter(EmptyFormatter.getInstance());
         }
 
         pieChart.animateY(1400, Easing.EasingOption.EaseInOutQuad);
         pieChart.setData(pieData);
+        pieChart.setUsePercentValues(true);
+        pieChart.setDrawSliceText(false);
 
-        pieChart.getLegend().setEnabled(false);
+        pieChart.getLegend().setEnabled(enableLegent);
+        Legend l = pieChart.getLegend();
+        l.setPosition(Legend.LegendPosition.RIGHT_OF_CHART_CENTER);
     }
 
     public static ArrayList<Integer> GetColorSet(boolean isGray) {
         if (isGray) {
             if (GRAY_COLOR == null) {
-                GRAY_COLOR = new ArrayList<Integer>();
+                GRAY_COLOR = new ArrayList<>();
                 GRAY_COLOR.add(Color.rgb(205, 201, 201));
             }
             return GRAY_COLOR;
@@ -143,7 +163,7 @@ public class ChartFormat {
         if (COLORS != null)
             return COLORS;
 
-        COLORS = new ArrayList<Integer>();
+        COLORS = new ArrayList<>();
 
         for (int c : CHART_COLORS)
             COLORS.add(c);
@@ -179,8 +199,9 @@ public class ChartFormat {
         return s;
     }
 
-    public static ArrayList<String> GetStringArray() {
-        ArrayList<String> strings = new ArrayList<String>();
+    public static ArrayList<String> GetStringArray(ArrayList<String> strings) {
+        if (strings == null)
+            strings = new ArrayList<>();
         for (int i = 0; i < 4; i++) {
             strings.add(" ");
         }
@@ -188,6 +209,10 @@ public class ChartFormat {
     }
 
     public static class TimeFormatter implements ValueFormatter {
+
+        public String getFormattedValue(Long v) {
+            return Common.formatAmount(IDataDefs.Type.TYPE_CALL, v, true);
+        }
 
         @Override
         public String getFormattedValue(float v, Entry e, int i, ViewPortHandler h) {
@@ -214,6 +239,20 @@ public class ChartFormat {
             if (v == INVALID)
                 return "";
             return Common.formatAmount(IDataDefs.Type.TYPE_SMS, v, false);
+        }
+    }
+
+    private static class EmptyFormatter implements ValueFormatter {
+        private static EmptyFormatter instance = null;
+        public static EmptyFormatter getInstance() {
+            if (instance == null) {
+                instance = new EmptyFormatter();
+            }
+            return instance;
+        }
+        @Override
+        public String getFormattedValue(float v, Entry entry, int i, ViewPortHandler viewPortHandler) {
+            return "";
         }
     }
 }

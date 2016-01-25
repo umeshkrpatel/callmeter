@@ -24,7 +24,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ListFragment;
@@ -49,9 +48,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import com.github.umeshkrpatel.LogMeter.IDataDefs;
 import com.github.umeshkrpatel.LogMeter.R;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
-import com.github.umeshkrpatel.LogMeter.IDataDefs;
 import com.github.umeshkrpatel.LogMeter.data.NameCache;
 import com.github.umeshkrpatel.LogMeter.ui.prefs.Preferences;
 
@@ -118,6 +117,10 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
      */
     private long planId = -1;
     private OnFragmentInteractionListener mListener;
+    private static final int kCallColor = 0xFFCCC0F5;
+    private static final int kSmsMmsColor = 0xFFF0EEBD;
+    private static final int kDataMobileColor = 0xFFC6E3B8;
+    private static final int kDataWifiColor = 0xFFDAF6CE;
 
     /**
      * {@inheritDoc}
@@ -205,7 +208,7 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
                 .getContentResolver()
                 .query(/*DataProvider.Rules.CONTENT_URI, new String[]{DataProvider.Rules.ID},
                         DataProvider.Rules.MYNUMBER + " like '___%'", null, null*/
-                DataProvider.Logs.CONTENT_URI, DataProvider.Logs.PROJECTION_LOG, null, null, DataProvider.Logs.DATE + " DESC");
+                DataProvider.Logs.CONTENT_URI, DataProvider.Logs.PROJECTION_LOG, null, null, IDataDefs.ILogs.DATE + " DESC");
         /*
       Show my number.
      */
@@ -243,20 +246,21 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
             return;
         }
 
-        String where = DataProvider.Logs.TABLE + "." + DataProvider.Logs.TYPE + " in (-1";
+        String where = IDataDefs.ILogs.TABLE + "." + IDataDefs.ILogs.TYPE + " in (-1";
         if (tbCall != null && tbCall.isChecked()) {
-            where += "," + IDataDefs.Type.TYPE_CALL;
+            where += "," + IDataDefs.Type.TYPE_CALL.toInt();
         }
         if (tbSMS != null && tbSMS.isChecked()) {
-            where += "," + IDataDefs.Type.TYPE_SMS;
+            where += "," + IDataDefs.Type.TYPE_SMS.toInt();
         }
         if (tbMMS != null && tbMMS.isChecked()) {
-            where += "," + IDataDefs.Type.TYPE_MMS;
+            where += "," + IDataDefs.Type.TYPE_MMS.toInt();
         }
         if (tbData != null && tbData.isChecked()) {
-            where += "," + IDataDefs.Type.TYPE_DATA_MOBILE;
+            where += "," + IDataDefs.Type.TYPE_DATA_MOBILE.toInt()
+                    + "," + IDataDefs.Type.TYPE_DATA_WIFI.toInt();
         }
-        where += ") and " + DataProvider.Logs.TABLE + "." + DataProvider.Logs.DIRECTION + " in (-1";
+        where += ") and " + IDataDefs.ILogs.TABLE + "." + IDataDefs.ILogs.DIRECTION + " in (-1";
         if (tbIn != null && tbIn.isChecked()) {
             where += "," + IDataDefs.DIRECTION_IN;
         }
@@ -385,7 +389,7 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
             where = args.getString("where");
         }
         return new CursorLoader(getActivity(), DataProvider.Logs.CONTENT_URI,
-                DataProvider.Logs.PROJECTION_LOG, where, null, DataProvider.Logs.DATE + " DESC");
+                DataProvider.Logs.PROJECTION_LOG, where, null, IDataDefs.ILogs.DATE + " DESC");
     }
 
     @Override
@@ -455,12 +459,12 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
                 holder.ivItem = (ImageView) view.findViewById(R.id.ivItem);
                 holder.ivType = (ImageView) view.findViewById(R.id.ivType);
                 holder.ivProfile = (ImageView) view.findViewById(R.id.ivProfile);
+                holder.gridLayout = (GridLayout) view.findViewById(R.id.glItems);
                 view.setTag(holder);
             }
 
-            GridLayout gridLayout = (GridLayout) view.findViewById(R.id.log_items);
             StringBuilder buf = new StringBuilder();
-            final IDataDefs.Type type = IDataDefs.Type.values()[cursor.getInt(0)];
+            final IDataDefs.Type type = IDataDefs.Type.fromInt(cursor.getInt(0));
             final int dir = cursor.getInt(1);
             final long date = cursor.getLong(2);
             buf.append(Common.formatDate(context, date));
@@ -474,15 +478,15 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
                 holder.ivType.setImageResource(R.drawable.ic_outgoing);
             }
 
+            holder.gridLayout.setBackground(getResources().getDrawable(R.drawable.ic_list_bg));
             if (type == IDataDefs.Type.TYPE_SMS || type == IDataDefs.Type.TYPE_MMS) {
                 holder.ivItem.setImageResource(R.drawable.ic_message);
-                view.setBackgroundColor(Color.argb(1, 0xFD, 0xC2, 0x0E));
             } else if (type == IDataDefs.Type.TYPE_CALL) {
                 holder.ivItem.setImageResource(R.drawable.ic_call);
-                view.setBackgroundColor(Color.argb(1, 0x56, 0x00, 0x64));
+            } else if (type == IDataDefs.Type.TYPE_DATA_MOBILE) {
+                holder.ivItem.setImageResource(R.drawable.ic_data_mobile);
             } else {
-                holder.ivItem.setImageResource(R.drawable.ic_data);
-                view.setBackgroundColor(Color.argb(1, 0x56, 0x00, 0x64));
+                holder.ivItem.setImageResource(R.drawable.ic_data_wifi);
             }
 
             String s = cursor.getString(3);
@@ -527,6 +531,7 @@ public final class LogsFragment extends ListFragment implements OnClickListener,
         private class ViewHolder {
             TextView tvName, tvNumber, tvTime, tvDuration;
             ImageView ivProfile, ivItem, ivType;
+            GridLayout gridLayout;
         }
     }
 

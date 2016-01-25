@@ -107,7 +107,7 @@ public final class PlanEdit extends PreferenceActivity implements UpdateListener
                 t = IDataDefs.Type.TYPE_CALL;
                 values.put(DataProvider.Plans.TYPE, t.toInt());
             } else {
-                t = IDataDefs.Type.values()[c.getInt(DataProvider.Plans.INDEX_TYPE)];
+                t = IDataDefs.Type.fromInt(c.getInt(DataProvider.Plans.INDEX_TYPE));
             }
             int lt;
             if (c.isNull(DataProvider.Plans.INDEX_LIMIT_TYPE)) {
@@ -134,16 +134,16 @@ public final class PlanEdit extends PreferenceActivity implements UpdateListener
             ep.setInputType(InputType.TYPE_CLASS_TEXT);
             ps.addPreference(ep);
             LogMeter.setActivitySubtitle(this, ep.getText());
-            if (t != IDataDefs.Type.TYPE_SPACING && t != IDataDefs.Type.TYPE_TITLE) {
-                // short name
-                ep = new CVEditTextPreference(this, values, DataProvider.Plans.SHORTNAME, this
-                        .getString(R.string.plans_new).replaceAll(" ", ""));
-                ep.setTitle(R.string.shortname_);
-                ep.setSummary(R.string.shortname_help);
-                ep.setText(c.getString(DataProvider.Plans.INDEX_SHORTNAME));
-                ep.setInputType(InputType.TYPE_CLASS_TEXT);
-                ps.addPreference(ep);
-            }
+
+            // short name
+            ep = new CVEditTextPreference(this, values, DataProvider.Plans.SHORTNAME, this
+                    .getString(R.string.plans_new).replaceAll(" ", ""));
+            ep.setTitle(R.string.shortname_);
+            ep.setSummary(R.string.shortname_help);
+            ep.setText(c.getString(DataProvider.Plans.INDEX_SHORTNAME));
+            ep.setInputType(InputType.TYPE_CLASS_TEXT);
+            ps.addPreference(ep);
+
             // type
             if (advanced) {
                 CVListPreference lp = new CVListPreference(this, values,
@@ -194,7 +194,7 @@ public final class PlanEdit extends PreferenceActivity implements UpdateListener
                     dp.setValue(cal);
                     ps.addPreference(dp);
                 }
-            } else if (t != IDataDefs.Type.TYPE_SPACING && t != IDataDefs.Type.TYPE_TITLE) {
+            } else {
                 // bill period id
                 CVListPreference lp = new CVListPreference(this, values,
                         DataProvider.Plans.BILLPERIOD_ID);
@@ -216,8 +216,8 @@ public final class PlanEdit extends PreferenceActivity implements UpdateListener
                     // get first bill period
                     Cursor cursor = getContentResolver().query(DataProvider.Plans.CONTENT_URI,
                             new String[]{DataProvider.Plans.ID},
-                            DataProvider.Plans.TYPE + "=" + IDataDefs.Type.TYPE_BILLPERIOD, null,
-                            null);
+                            DataProvider.Plans.TYPE + "=" + IDataDefs.Type.TYPE_BILLPERIOD.toInt(),
+                            null, null);
                     if (cursor != null) {
                         if (cursor.moveToFirst()) {
                             i = cursor.getInt(0);
@@ -298,7 +298,7 @@ public final class PlanEdit extends PreferenceActivity implements UpdateListener
                 ep.setText(c.getString(DataProvider.Plans.INDEX_COST_PER_PLAN));
                 ep.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
                 ps.addPreference(ep);
-            } else if (t != IDataDefs.Type.TYPE_SPACING && t != IDataDefs.Type.TYPE_TITLE) {
+            } else {
                 // cost per plan
                 ep = new CVEditTextPreference(this, values, DataProvider.Plans.COST_PER_PLAN,
                         "");
@@ -432,8 +432,10 @@ public final class PlanEdit extends PreferenceActivity implements UpdateListener
     private String getMergePlansWhere(final IDataDefs.Type type) {
         String where;
         if (type == IDataDefs.Type.TYPE_MIXED) {
-            where = "(" + DataProvider.Plans.TYPE + " in (" + IDataDefs.Type.TYPE_CALL + ","
-                    + IDataDefs.Type.TYPE_SMS + "," + IDataDefs.Type.TYPE_MMS + ","
+            where = "(" + DataProvider.Plans.TYPE + " in ("
+                    + IDataDefs.Type.TYPE_CALL.toInt() + ","
+                    + IDataDefs.Type.TYPE_SMS.toInt() + ","
+                    + IDataDefs.Type.TYPE_MMS.toInt() + ","
                     + IDataDefs.Type.TYPE_DATA_MOBILE + "))";
         } else {
             where = DataProvider.Plans.TYPE + " = " + type;

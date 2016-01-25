@@ -164,7 +164,7 @@ public final class StatsAppWidgetConfigure extends AppCompatActivity implements 
      */
     private void setAdapter() {
         final Cursor c = getContentResolver().query(DataProvider.Plans.CONTENT_URI,
-                PROJ_ADAPTER, DataProvider.Plans.WHERE_PLANS, null, DataProvider.Plans.NAME);
+                PROJ_ADAPTER, null, null, DataProvider.Plans.NAME);
         if (c == null) {
             Log.e(TAG, "Error cursor for Uri:" + DataProvider.Plans.CONTENT_URI);
             return;

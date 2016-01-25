@@ -192,6 +192,10 @@ public final class DataProvider extends ContentProvider {
      */
     private static final int PLANS_SUM_ID = 22;
     /**
+     * Group by support
+     */
+    private static String mGroupBy = null;
+    /**
      * {@link UriMatcher}.
      */
     private static final UriMatcher URI_MATCHER;
@@ -240,12 +244,12 @@ public final class DataProvider extends ContentProvider {
             return;
         }
         ContentValues cv = new ContentValues();
-        cv.put(DataProvider.Logs.PLAN_ID, NO_ID);
-        cv.put(DataProvider.Logs.RULE_ID, NO_ID);
+        cv.put(ILogs.PLAN_ID, NO_ID);
+        cv.put(ILogs.RULE_ID, NO_ID);
         // reset all but manually set plans
-        db.update(DataProvider.Logs.TABLE, cv, DataProvider.Logs.RULE_ID + " is null or NOT ("
-                + DataProvider.Logs.RULE_ID + " = " + NOT_FOUND + " AND "
-                + DataProvider.Logs.PLAN_ID + " != " + NOT_FOUND + ")", null);
+        db.update(ILogs.TABLE, cv, ILogs.RULE_ID + " is null or NOT ("
+                + ILogs.RULE_ID + " = " + NOT_FOUND + " AND "
+                + ILogs.PLAN_ID + " != " + NOT_FOUND + ")", null);
         cv.clear();
         cv.put(DataProvider.Plans.NEXT_ALERT, 0);
         db.update(DataProvider.Plans.TABLE, cv, null, null);
@@ -388,7 +392,7 @@ public final class DataProvider extends ContentProvider {
         final SQLiteDatabase db = new DatabaseHelper(context).getReadableDatabase();
         assert db != null;
         sb.append("  <logs>\n");
-        backupRuleSetSub(sb, db, Logs.TABLE, Logs.PROJECTION, null, null, null);
+        backupRuleSetSub(sb, db, ILogs.TABLE, Logs.PROJECTION, null, null, null);
         sb.append("  </logs>\n");
         sb.append("  <websmss>\n");
         backupRuleSetSub(sb, db, WebSMS.TABLE, WebSMS.PROJECTION, null, null, null);
@@ -633,7 +637,7 @@ public final class DataProvider extends ContentProvider {
                         break;
                     case "logs":
                         list = new ArrayList<>();
-                        lists.put(Logs.TABLE, list);
+                        lists.put(ILogs.TABLE, list);
                         break;
                     case "websmss":
                         list = new ArrayList<>();
@@ -669,7 +673,7 @@ public final class DataProvider extends ContentProvider {
     private static void importTable(final SQLiteDatabase db, final String table,
                                     final List<ContentValues> values) {
         // Add new tables here!
-        if (Hours.TABLE.equals(table) || HoursGroup.TABLE.equals(table) || Logs.TABLE.equals(table)
+        if (Hours.TABLE.equals(table) || HoursGroup.TABLE.equals(table) || ILogs.TABLE.equals(table)
                 || Numbers.TABLE.equals(table) || NumbersGroup.TABLE.equals(table)
                 || Plans.TABLE.equals(table) || Rules.TABLE.equals(table)
                 || SipCall.TABLE.equals(table) || WebSMS.TABLE.equals(table)) {
@@ -1182,11 +1186,11 @@ public final class DataProvider extends ContentProvider {
         String w;
         switch (URI_MATCHER.match(uri)) {
             case LOGS:
-                ret = db.delete(Logs.TABLE, selection, selectionArgs);
+                ret = db.delete(ILogs.TABLE, selection, selectionArgs);
                 break;
             case LOGS_ID:
-                ret = db.delete(Logs.TABLE,
-                        DbUtils.sqlAnd(Logs.ID + "=" + ContentUris.parseId(uri), selection),
+                ret = db.delete(ILogs.TABLE,
+                        DbUtils.sqlAnd(ILogs.ID + "=" + ContentUris.parseId(uri), selection),
                         selectionArgs);
                 break;
             case PLANS_ID:
@@ -1350,7 +1354,7 @@ public final class DataProvider extends ContentProvider {
         long ret;
         switch (URI_MATCHER.match(uri)) {
             case LOGS:
-                ret = db.insert(Logs.TABLE, null, values);
+                ret = db.insert(ILogs.TABLE, null, values);
                 break;
             case WEBSMS:
                 ret = db.insert(WebSMS.TABLE, null, values);
@@ -1440,20 +1444,21 @@ public final class DataProvider extends ContentProvider {
 
         switch (uid) {
             case LOGS_ID:
-                qb.appendWhere(Logs.ID + "=" + ContentUris.parseId(uri));
+                qb.appendWhere(ILogs.ID + "=" + ContentUris.parseId(uri));
             case LOGS:
-                qb.setTables(Logs.TABLE);
+                qb.setTables(ILogs.TABLE);
                 break;
             case LOGS_JOIN:
-                qb.setTables(Logs.TABLE + " LEFT OUTER JOIN " + Plans.TABLE + " ON (" + Logs.TABLE
-                        + "." + Logs.PLAN_ID + "=" + Plans.TABLE + "." + Plans.ID
-                        + ") LEFT OUTER JOIN " + Rules.TABLE + " ON (" + Logs.TABLE + "."
-                        + Logs.RULE_ID + "=" + Rules.TABLE + "." + Rules.ID + ")");
+                qb.setTables(ILogs.TABLE + " LEFT OUTER JOIN " + Plans.TABLE + " ON (" + ILogs.TABLE
+                        + "." + ILogs.PLAN_ID + "=" + Plans.TABLE + "." + Plans.ID
+                        + ") LEFT OUTER JOIN " + Rules.TABLE + " ON (" + ILogs.TABLE + "."
+                        + ILogs.RULE_ID + "=" + Rules.TABLE + "." + Rules.ID + ")");
                 break;
             case LOGS_SUM:
-                qb.setTables(Logs.TABLE + " INNER JOIN " + Plans.TABLE + " ON (" + Logs.TABLE + "."
-                        + Logs.PLAN_ID + "=" + Plans.TABLE + "." + Plans.ID + ")");
-                groupBy = DataProvider.Logs.PLAN_ID;
+                //qb.setTables(ILogs.TABLE + " INNER JOIN " + Plans.TABLE + " ON (" + ILogs.TABLE + "."
+                //        + ILogs.PLAN_ID + "=" + Plans.TABLE + "." + Plans.ID + ")");
+                qb.setTables(ILogs.TABLE);
+                groupBy = getGroupBy();
                 break;
             case WEBSMS:
                 qb.setTables(WebSMS.TABLE);
@@ -1518,11 +1523,11 @@ public final class DataProvider extends ContentProvider {
                             highBp = hbtime;
                         }
                         billps += " WHEN " + Plans.TABLE + "." + Plans.ID + "=" + pid + " or ("
-                                + Plans.TABLE + "." + Plans.TYPE + "!=" + Type.TYPE_BILLPERIOD + " and "
+                                + Plans.TABLE + "." + Plans.TYPE + "!=" + Type.TYPE_BILLPERIOD.toInt() + " and "
                                 + Plans.TABLE + "." + Plans.BILLPERIOD_ID + "=" + pid + ") THEN "
                                 + lbtime;
                         nbillps += " WHEN " + Plans.TABLE + "." + Plans.ID + "=" + pid + " or ("
-                                + Plans.TABLE + "." + Plans.TYPE + "!=" + Type.TYPE_BILLPERIOD + " and "
+                                + Plans.TABLE + "." + Plans.TYPE + "!=" + Type.TYPE_BILLPERIOD.toInt() + " and "
                                 + Plans.TABLE + "." + Plans.BILLPERIOD_ID + "=" + pid + ") THEN "
                                 + hbtime;
                     } while (cursor.moveToNext());
@@ -1535,34 +1540,33 @@ public final class DataProvider extends ContentProvider {
                 cursor.close();
                 String logDate = "";
                 if (lowBp > 0L) {
-                    logDate = Logs.TABLE + "." + Logs.DATE + ">" + lowBp + " and ";
+                    logDate = ILogs.TABLE + "." + ILogs.DATE + ">" + lowBp + " and ";
                 }
                 if (highBp > 0L) {
-                    logDate += Logs.TABLE + "." + Logs.DATE + "<" + highBp + " and ";
+                    logDate += ILogs.TABLE + "." + ILogs.DATE + "<" + highBp + " and ";
                 }
 
                 qb.setTables(
-                        Plans.TABLE + " left outer join " + Logs.TABLE + " on (" + logDate + "("
-                                + Logs.TABLE + "." + Logs.PLAN_ID + "=" + Plans.TABLE + "."
+                        Plans.TABLE + " left outer join " + ILogs.TABLE + " on (" + logDate + "("
+                                + ILogs.TABLE + "." + ILogs.PLAN_ID + "=" + Plans.TABLE + "."
                                 + Plans.ID + " or "
                                 + Plans.TABLE + "." + Plans.MERGED_PLANS + " like '%,'||"
-                                + Logs.TABLE + "."
-                                + Logs.PLAN_ID + "||',%' or (" + Plans.TABLE + "." + Plans.TYPE
+                                + ILogs.TABLE + "."
+                                + ILogs.PLAN_ID + "||',%' or (" + Plans.TABLE + "." + Plans.TYPE
                                 + "="
-                                + Type.TYPE_BILLPERIOD + " and (" + Logs.TABLE + "." + Logs.PLAN_ID
+                                + Type.TYPE_BILLPERIOD.toInt() + " and (" + ILogs.TABLE + "." + ILogs.PLAN_ID
                                 + " in (select "
                                 + Plans.ID + " from " + Plans.TABLE + " as p where p."
                                 + Plans.BILLPERIOD_ID
                                 + "=" + Plans.TABLE + "." + Plans.ID + ") or 1 in (select 1 from "
                                 + Plans.TABLE + " as pp where pp." + Plans.MERGED_PLANS
                                 + " like '%,'||"
-                                + Logs.TABLE + "." + Logs.PLAN_ID + "||'%,'" + " and pp."
+                                + ILogs.TABLE + "." + ILogs.PLAN_ID + "||'%,'" + " and pp."
                                 + Plans.BILLPERIOD_ID
                                 + "=" + Plans.TABLE + "." + Plans.ID + ")))))");
                 groupBy = Plans.TABLE + "." + Plans.ID;
                 if (hideZero || hideNoCost) {
-                    having = Plans.TYPE + " in(" + Type.TYPE_BILLPERIOD + "," + Type.TYPE_SPACING + ","
-                            + Type.TYPE_TITLE + ")";
+                    having = Plans.TYPE + " in(" + Type.TYPE_BILLPERIOD.toInt() + ")";
 
                     if (hideZero) {
                         having += " or " + Plans.SUM_BP_BILLED_AMOUNT + ">0";
@@ -1686,11 +1690,11 @@ public final class DataProvider extends ContentProvider {
         int ret;
         switch (URI_MATCHER.match(uri)) {
             case LOGS:
-                ret = db.update(Logs.TABLE, values, selection, selectionArgs);
+                ret = db.update(ILogs.TABLE, values, selection, selectionArgs);
                 break;
             case LOGS_ID:
-                ret = db.update(Logs.TABLE, values,
-                        DbUtils.sqlAnd(Logs.ID + "=" + ContentUris.parseId(uri), selection),
+                ret = db.update(ILogs.TABLE, values,
+                        DbUtils.sqlAnd(ILogs.ID + "=" + ContentUris.parseId(uri), selection),
                         selectionArgs);
                 break;
             case PLANS:
@@ -1752,163 +1756,25 @@ public final class DataProvider extends ContentProvider {
         return ret;
     }
 
+    private static String getGroupBy() {
+        return mGroupBy;
+    }
+    public static void setGroupBy(String groupBy) {
+        mGroupBy = groupBy;
+    }
+
     /**
      * Logs.
      *
      * @author flx
      */
-    public static final class Logs {
-
-        /**
-         * Table name.
-         */
-        public static final String TABLE = "logs";
-
-        /**
-         * Index in projection: ID.
-         */
-        public static final int INDEX_ID = 0;
-
-        /**
-         * Index in projection: ID of plan this log is billed in.
-         */
-        public static final int INDEX_PLAN_ID = 1;
-
-        /**
-         * Index in projection: Type of log.
-         */
-        public static final int INDEX_TYPE = 3;
-
-        /**
-         * Index in projection: Direction of log.
-         */
-        public static final int INDEX_DIRECTION = 4;
-
-        /**
-         * Index in projection: Date.
-         */
-        public static final int INDEX_DATE = 5;
-
-        /**
-         * Index in projection: Amount.
-         */
-        public static final int INDEX_AMOUNT = 6;
-
-        /**
-         * Index in projection: Billed amount.
-         */
-        public static final int INDEX_BILL_AMOUNT = 7;
-
-        /**
-         * Index in projection: Remote part.
-         */
-        public static final int INDEX_REMOTE = 8;
-
-        /**
-         * Index in projection: Roamed?
-         */
-        public static final int INDEX_ROAMED = 9;
-
-        /**
-         * Index in projection: Cost.
-         */
-        public static final int INDEX_COST = 10;
-
-        /**
-         * Index in projection: Cost (free).
-         */
-        public static final int INDEX_FREE = 11;
-
-        /**
-         * Index in projection: my own number.
-         */
-        public static final int INDEX_MYNUMBER = 12;
-
-        /**
-         * Index in projection: Plan name.
-         */
-        public static final int INDEX_PLAN_NAME = 13;
-
-        /**
-         * Index in projection: Rule name.
-         */
-        public static final int INDEX_RULE_NAME = 14;
-
-        /**
-         * Index in projection: Plan type.
-         */
-        public static final int INDEX_PLAN_TYPE = 15;
-
-        /**
-         * ID.
-         */
-        public static final String ID = "_id";
-
-        /**
-         * ID of plan this log is billed in.
-         */
-        public static final String PLAN_ID = "_plan_id";
-
-        /**
-         * ID of rule this log was matched.
-         */
-        public static final String RULE_ID = "_rule_id";
-
-        /**
-         * Type of log.
-         */
-        public static final String TYPE = "_type";
-
-        /**
-         * Direction of log.
-         */
-        public static final String DIRECTION = "_direction";
-
-        /**
-         * Date of log.
-         */
-        public static final String DATE = "_date";
-
-        /**
-         * Amount.
-         */
-        public static final String AMOUNT = "_amount";
-
-        /**
-         * Billed amount.
-         */
-        public static final String BILL_AMOUNT = "_bill_amount";
-
-        /**
-         * Remote part.
-         */
-        public static final String REMOTE = "_remote";
-
-        /**
-         * Roamed?
-         */
-        public static final String ROAMED = "_roamed";
-
-        /**
-         * Cost.
-         */
-        public static final String COST = "_logs_cost";
-
-        /**
-         * Cost (free).
-         */
-        public static final String FREE = "_logs_cost_free";
-
-        /**
-         * My own number.
-         */
-        public static final String MYNUMBER = "_mynumber";
+    public static final class Logs implements ILogs {
 
         /**
          * Projection used for query.
          */
-        public static final String[] PROJECTION = new String[]{ID, PLAN_ID, RULE_ID, TYPE,
-                DIRECTION, DATE, AMOUNT, BILL_AMOUNT, REMOTE, ROAMED, COST, FREE, MYNUMBER};
+        public static final String[] PROJECTION = new String[]{ILogs.ID, ILogs.PLAN_ID, ILogs.RULE_ID, ILogs.TYPE,
+                ILogs.DIRECTION, ILogs.DATE, ILogs.AMOUNT, ILogs.BILL_AMOUNT, ILogs.REMOTE, ILogs.ROAMED, ILogs.COST, ILogs.FREE, ILogs.MYNUMBER};
 
         /**
          * Projection used for join query.
@@ -1931,10 +1797,10 @@ public final class DataProvider extends ContentProvider {
          * Projection used for query - sum.
          */
         public static final String[] PROJECTION_SUM = new String[]{
-                TYPE,
-                PLAN_ID,
+                TABLE + "." + TYPE + " AS " + TYPE,
                 TABLE + "." + DIRECTION + " AS " + DIRECTION,
                 "sum(" + AMOUNT + ")",
+                "count(" + TYPE + ")",
                 };
         /**
          * Content {@link Uri}.
@@ -2602,94 +2468,71 @@ public final class DataProvider extends ContentProvider {
                 "{" + SUM_NOW + "} AS " + SUM_NOW,
                 "{" + SUM_BILLDAY + "} AS " + SUM_BILLDAY,
                 "{" + SUM_NEXTBILLDAY + "} AS " + SUM_NEXTBILLDAY,
-                "sum(CASE WHEN " + Logs.TABLE + "." + Logs.DATE + " is null or " + Logs.TABLE + "."
-                        + Logs.DATE + "<{" + SUM_TODAY + "} or " + Logs.TABLE + "." + Logs.DATE
+                "sum(CASE WHEN " + ILogs.TABLE + "." + ILogs.DATE + " is null or " + ILogs.TABLE + "."
+                        + ILogs.DATE + "<{" + SUM_TODAY + "} or " + ILogs.TABLE + "." + ILogs.DATE
                         + ">{" + SUM_NOW + "} THEN 0 ELSE 1 END) as " + SUM_TD_COUNT,
-                "sum(CASE WHEN " + Logs.TABLE + "." + Logs.DATE + "<{" + SUM_TODAY + "} or "
-                        + Logs.TABLE + "." + Logs.DATE + ">{" + SUM_NOW + "} THEN 0 WHEN " + TABLE
+                "sum(CASE WHEN " + ILogs.TABLE + "." + ILogs.DATE + "<{" + SUM_TODAY + "} or "
+                        + ILogs.TABLE + "." + ILogs.DATE + ">{" + SUM_NOW + "} THEN 0 WHEN " + TABLE
                         + "." + MERGED_PLANS + " is null or " + TABLE + "." + TYPE + "!="
-                        + Type.TYPE_MIXED + " THEN " + Logs.TABLE + "." + Logs.BILL_AMOUNT + " WHEN  "
-                        + Logs.TABLE + "." + Logs.TYPE + "=" + Type.TYPE_CALL + " THEN " + Logs.TABLE
-                        + "." + Logs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_CALL + "/60"
-                        + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + Type.TYPE_SMS + " THEN "
-                        + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_SMS
-                        + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + Type.TYPE_MMS + " THEN "
-                        + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_MMS
-                        + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + TYPE_DATA_MOBILE + " THEN "
-                        + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "."
-                        + MIXED_UNITS_DATA + "/" + IDefs.kBytesPerMegaByte + " ELSE " + Logs.TABLE + "."
-                        + Logs.BILL_AMOUNT + " END) AS " + SUM_TD_BILLED_AMOUNT,
-                "sum(CASE WHEN " + Logs.TABLE + "." + Logs.DATE + " is null or " + Logs.TABLE + "."
-                        + Logs.DATE + "<={" + SUM_BILLDAY + "} or " + Logs.TABLE + "." + Logs.DATE
+                        + Type.TYPE_MIXED.toInt() + " THEN " + ILogs.TABLE + "." + ILogs.BILL_AMOUNT + " WHEN  "
+                        + ILogs.TABLE + "." + ILogs.TYPE + "=" + Type.TYPE_CALL.toInt() + " THEN " + ILogs.TABLE
+                        + "." + ILogs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_CALL + "/60"
+                        + " WHEN  " + ILogs.TABLE + "." + ILogs.TYPE + "=" + Type.TYPE_SMS.toInt() + " THEN "
+                        + ILogs.TABLE + "." + ILogs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_SMS
+                        + " WHEN  " + ILogs.TABLE + "." + ILogs.TYPE + "=" + Type.TYPE_MMS.toInt() + " THEN "
+                        + ILogs.TABLE + "." + ILogs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_MMS
+                        + " WHEN  " + ILogs.TABLE + "." + ILogs.TYPE + "=" + TYPE_DATA_MOBILE.toInt() + " THEN "
+                        + ILogs.TABLE + "." + ILogs.BILL_AMOUNT + "*" + TABLE + "."
+                        + MIXED_UNITS_DATA + "/" + IDefs.kBytesPerMegaByte + " ELSE " + ILogs.TABLE + "."
+                        + ILogs.BILL_AMOUNT + " END) AS " + SUM_TD_BILLED_AMOUNT,
+                "sum(CASE WHEN " + ILogs.TABLE + "." + ILogs.DATE + " is null or " + ILogs.TABLE + "."
+                        + ILogs.DATE + "<={" + SUM_BILLDAY + "} or " + ILogs.TABLE + "." + ILogs.DATE
                         + ">{" + SUM_NOW + "} THEN 0 ELSE 1 END) as " + SUM_BP_COUNT,
-                "sum(CASE WHEN " + Logs.TABLE + "." + Logs.DATE + "<={" + SUM_BILLDAY + "} or "
-                        + Logs.TABLE + "." + Logs.DATE + ">{" + SUM_NOW + "} THEN 0 WHEN " + TABLE
+                "sum(CASE WHEN " + ILogs.TABLE + "." + ILogs.DATE + "<={" + SUM_BILLDAY + "} or "
+                        + ILogs.TABLE + "." + ILogs.DATE + ">{" + SUM_NOW + "} THEN 0 WHEN " + TABLE
                         + "." + MERGED_PLANS + " is null or " + TABLE + "." + TYPE + "!="
-                        + Type.TYPE_MIXED + " THEN " + Logs.TABLE + "." + Logs.BILL_AMOUNT + " WHEN  "
-                        + Logs.TABLE + "." + Logs.TYPE + "=" + Type.TYPE_CALL + " THEN " + Logs.TABLE
-                        + "." + Logs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_CALL + "/60"
-                        + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + Type.TYPE_SMS + " THEN "
-                        + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_SMS
-                        + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + Type.TYPE_MMS + " THEN "
-                        + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_MMS
-                        + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + TYPE_DATA_MOBILE + " THEN "
-                        + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "."
-                        + MIXED_UNITS_DATA + "/" + IDefs.kBytesPerMegaByte + " ELSE " + Logs.TABLE + "."
-                        + Logs.BILL_AMOUNT + " END) AS " + SUM_BP_BILLED_AMOUNT,
-                "sum(CASE WHEN " + Logs.TABLE + "." + Logs.DATE + " is null or " + Logs.TABLE + "."
-                        + Logs.DATE + ">{" + SUM_NOW + "} THEN 0 ELSE 1 END) as " + SUM_AT_COUNT,
-                "sum(CASE WHEN " + Logs.TABLE + "." + Logs.DATE + ">{" + SUM_NOW + "} THEN 0 WHEN "
+                        + Type.TYPE_MIXED.toInt() + " THEN " + ILogs.TABLE + "." + ILogs.BILL_AMOUNT + " WHEN  "
+                        + ILogs.TABLE + "." + ILogs.TYPE + "=" + Type.TYPE_CALL.toInt() + " THEN " + ILogs.TABLE
+                        + "." + ILogs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_CALL + "/60"
+                        + " WHEN  " + ILogs.TABLE + "." + ILogs.TYPE + "=" + Type.TYPE_SMS.toInt() + " THEN "
+                        + ILogs.TABLE + "." + ILogs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_SMS
+                        + " WHEN  " + ILogs.TABLE + "." + ILogs.TYPE + "=" + Type.TYPE_MMS.toInt() + " THEN "
+                        + ILogs.TABLE + "." + ILogs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_MMS
+                        + " WHEN  " + ILogs.TABLE + "." + ILogs.TYPE + "=" + TYPE_DATA_MOBILE.toInt() + " THEN "
+                        + ILogs.TABLE + "." + ILogs.BILL_AMOUNT + "*" + TABLE + "."
+                        + MIXED_UNITS_DATA + "/" + IDefs.kBytesPerMegaByte + " ELSE " + ILogs.TABLE + "."
+                        + ILogs.BILL_AMOUNT + " END) AS " + SUM_BP_BILLED_AMOUNT,
+                "sum(CASE WHEN " + ILogs.TABLE + "." + ILogs.DATE + " is null or " + ILogs.TABLE + "."
+                        + ILogs.DATE + ">{" + SUM_NOW + "} THEN 0 ELSE 1 END) as " + SUM_AT_COUNT,
+                "sum(CASE WHEN " + ILogs.TABLE + "." + ILogs.DATE + ">{" + SUM_NOW + "} THEN 0 WHEN "
                         + TABLE + "." + MERGED_PLANS + " is null or " + TABLE + "." + TYPE + "!="
-                        + Type.TYPE_MIXED + " THEN " + Logs.TABLE + "." + Logs.BILL_AMOUNT + " WHEN  "
-                        + Logs.TABLE + "." + Logs.TYPE + "=" + Type.TYPE_CALL + " THEN " + Logs.TABLE
-                        + "." + Logs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_CALL + "/60"
-                        + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + Type.TYPE_SMS + " THEN "
-                        + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_SMS
-                        + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + Type.TYPE_MMS + " THEN "
-                        + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_MMS
-                        + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + TYPE_DATA_MOBILE + " THEN "
-                        + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "."
-                        + MIXED_UNITS_DATA + "/" + IDefs.kBytesPerMegaByte + " ELSE " + Logs.TABLE + "."
-                        + Logs.BILL_AMOUNT + " END) AS " + SUM_AT_BILLED_AMOUNT,
-                "(CASE WHEN " + TABLE + "." + TYPE + "=" + Type.TYPE_BILLPERIOD + " THEN (CASE WHEN "
+                        + Type.TYPE_MIXED.toInt() + " THEN " + ILogs.TABLE + "." + ILogs.BILL_AMOUNT + " WHEN  "
+                        + ILogs.TABLE + "." + ILogs.TYPE + "=" + Type.TYPE_CALL.toInt() + " THEN " + ILogs.TABLE
+                        + "." + ILogs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_CALL + "/60"
+                        + " WHEN  " + ILogs.TABLE + "." + ILogs.TYPE + "=" + Type.TYPE_SMS.toInt() + " THEN "
+                        + ILogs.TABLE + "." + ILogs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_SMS
+                        + " WHEN  " + ILogs.TABLE + "." + ILogs.TYPE + "=" + Type.TYPE_MMS.toInt() + " THEN "
+                        + ILogs.TABLE + "." + ILogs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_MMS
+                        + " WHEN  " + ILogs.TABLE + "." + ILogs.TYPE + "=" + TYPE_DATA_MOBILE.toInt() + " THEN "
+                        + ILogs.TABLE + "." + ILogs.BILL_AMOUNT + "*" + TABLE + "."
+                        + MIXED_UNITS_DATA + "/" + IDefs.kBytesPerMegaByte + " ELSE " + ILogs.TABLE + "."
+                        + ILogs.BILL_AMOUNT + " END) AS " + SUM_AT_BILLED_AMOUNT,
+                "(CASE WHEN " + TABLE + "." + TYPE + "=" + Type.TYPE_BILLPERIOD.toInt() + " THEN (CASE WHEN "
                         + TABLE + "." + COST_PER_PLAN + " is null  THEN 0 ELSE " + TABLE + "."
                         + COST_PER_PLAN + " END) + (select sum(CASE WHEN p." + COST_PER_PLAN
                         + " is null THEN 0 ELSE p." + COST_PER_PLAN + " END) from " + TABLE
                         + " as p where p." + BILLPERIOD_ID + "=" + TABLE + "." + ID + ") ELSE "
                         + TABLE + "." + COST_PER_PLAN + " END) as " + SUM_CPP,
-                "sum(CASE WHEN " + Logs.TABLE + "." + Logs.DATE + "<{" + SUM_BILLDAY + "} or "
-                        + Logs.TABLE + "." + Logs.DATE + ">{" + SUM_NOW + "} THEN 0 ELSE "
-                        + Logs.TABLE + "." + Logs.COST + " END) as " + SUM_COST,
-                "sum(CASE WHEN " + Logs.TABLE + "." + Logs.DATE + "<{" + SUM_BILLDAY + "} or "
-                        + Logs.TABLE + "." + Logs.DATE + ">{" + SUM_NOW + "} THEN 0 ELSE "
-                        + Logs.TABLE + "." + Logs.FREE + " END) as " + SUM_FREE,
+                "sum(CASE WHEN " + ILogs.TABLE + "." + ILogs.DATE + "<{" + SUM_BILLDAY + "} or "
+                        + ILogs.TABLE + "." + ILogs.DATE + ">{" + SUM_NOW + "} THEN 0 ELSE "
+                        + ILogs.TABLE + "." + ILogs.COST + " END) as " + SUM_COST,
+                "sum(CASE WHEN " + ILogs.TABLE + "." + ILogs.DATE + "<{" + SUM_BILLDAY + "} or "
+                        + ILogs.TABLE + "." + ILogs.DATE + ">{" + SUM_NOW + "} THEN 0 ELSE "
+                        + ILogs.TABLE + "." + ILogs.FREE + " END) as " + SUM_FREE,
                 TABLE + "." + MIXED_UNITS_CALL + " AS " + MIXED_UNITS_CALL,
                 TABLE + "." + MIXED_UNITS_DATA + " AS " + MIXED_UNITS_DATA,
                 TABLE + "." + MIXED_UNITS_MMS + " AS " + MIXED_UNITS_MMS,
                 TABLE + "." + MIXED_UNITS_SMS + " AS " + MIXED_UNITS_SMS};
-        /**
-         * Projection used for sum query.
-         */
-        public static final String[] PROJECTION_SUM_EX = new String[]{
-                TABLE + "." + ID + " AS " + ID,
-                TABLE + "." + TYPE + " AS " + TYPE,
-                TABLE + "." + SHORTNAME + " AS " + SHORTNAME,
-                "sum(CASE WHEN " + Logs.TABLE + "." + Logs.DATE + " is null or " + Logs.TABLE + "."
-                        + Logs.DATE + ">{" + SUM_NOW + "} THEN 0 ELSE 1 END) as " + SUM_AT_COUNT,
-                "sum(CASE WHEN " + Logs.TABLE + "." + Logs.DATE + ">{" + SUM_NOW + "} THEN 0 WHEN "
-                        + TABLE + "." + MERGED_PLANS + " is null or " + TABLE + "." + TYPE + "!="
-                        + Type.TYPE_MIXED + " THEN " + Logs.TABLE + "." + Logs.BILL_AMOUNT + " WHEN  "
-                        + Logs.TABLE + "." + Logs.TYPE + "=" + Type.TYPE_CALL + " THEN " + Logs.TABLE
-                        + "." + Logs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_CALL + "/60"
-                        + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + Type.TYPE_SMS + " THEN "
-                        + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_SMS
-                        + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + Type.TYPE_MMS + " THEN "
-                        + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "." + MIXED_UNITS_MMS
-                        + " WHEN  " + Logs.TABLE + "." + Logs.TYPE + "=" + TYPE_DATA_MOBILE + " THEN "
-                        + Logs.TABLE + "." + Logs.BILL_AMOUNT + "*" + TABLE + "."
-                        + MIXED_UNITS_DATA + "/" + IDefs.kBytesPerMegaByte + " ELSE " + Logs.TABLE + "."
-                        + Logs.BILL_AMOUNT + " END) AS " + SUM_AT_BILLED_AMOUNT,
-        };
         /**
          * Projection used for query id and (short)name.
          */
@@ -2697,17 +2540,12 @@ public final class DataProvider extends ContentProvider {
         /**
          * Select only real plans.
          */
-        public static final String WHERE_REALPLANS = TYPE + "!=" + Type.TYPE_BILLPERIOD + " and " + TYPE
-                + "!=" + Type.TYPE_SPACING + " and " + TYPE + "!=" + Type.TYPE_TITLE;
+        public static final String WHERE_REALPLANS =
+                TYPE + "!=" + Type.TYPE_BILLPERIOD.toInt();
         /**
          * Select only bill periods.
          */
-        public static final String WHERE_BILLPERIODS = TYPE + " = " + Type.TYPE_BILLPERIOD;
-        /**
-         * Select only real plans and bill periods.
-         */
-        public static final String WHERE_PLANS = TYPE + "!=" + Type.TYPE_SPACING + " and " + TYPE + "!="
-                + Type.TYPE_TITLE;
+        public static final String WHERE_BILLPERIODS = TYPE + " = " + Type.TYPE_BILLPERIOD.toInt();
         /**
          * Default order.
          */
@@ -3174,7 +3012,7 @@ public final class DataProvider extends ContentProvider {
          */
         public static String parseMergerWhere(final long pid, final String merged) {
             if (merged == null) {
-                return DataProvider.Logs.TABLE + "." + DataProvider.Logs.PLAN_ID + " = " + pid;
+                return ILogs.TABLE + "." + ILogs.PLAN_ID + " = " + pid;
             }
 
             StringBuilder sb = new StringBuilder();
@@ -3187,7 +3025,7 @@ public final class DataProvider extends ContentProvider {
                 sb.append(ss);
             }
 
-            return DataProvider.Logs.TABLE + "." + DataProvider.Logs.PLAN_ID + " in ("
+            return ILogs.TABLE + "." + ILogs.PLAN_ID + " in ("
                     + sb.toString() + ")";
         }
 
@@ -3330,68 +3168,49 @@ public final class DataProvider extends ContentProvider {
             public Plan(final Cursor cursor) {
                 Log.d(TAG, "new Plan(" + cursor + ")");
                 id = cursor.getLong(INDEX_ID);
-                type = Type.values()[cursor.getInt(INDEX_TYPE)];
+                type = Type.fromInt(cursor.getInt(INDEX_TYPE));
                 name = cursor.getString(INDEX_NAME);
                 sname = cursor.getString(INDEX_SHORTNAME);
                 billperiod = BillPeriod.fromInt(cursor.getInt(INDEX_BILLPERIOD));
-                if (type == Type.TYPE_SPACING || type == Type.TYPE_TITLE) {
-                    billday = -1;
-                    nextbillday = -1;
+                cost = cursor.getFloat(INDEX_SUM_COST);
+                free = cursor.getFloat(INDEX_SUM_FREE);
+                tdCount = cursor.getInt(INDEX_SUM_TD_COUNT);
+                tdBa = cursor.getFloat(INDEX_SUM_TD_BILLED_AMOUNT);
+                bpCount = cursor.getInt(INDEX_SUM_BP_COUNT);
+                bpBa = cursor.getFloat(INDEX_SUM_BP_BILLED_AMOUNT);
+                atCount = cursor.getInt(INDEX_SUM_AT_COUNT);
+                atBa = cursor.getFloat(INDEX_SUM_AT_BILLED_AMOUNT);
+                now = cursor.getLong(INDEX_SUM_NOW);
+                billday = cursor.getLong(INDEX_SUM_BILLDAY);
+                nextbillday = cursor.getLong(INDEX_SUM_NEXTBILLDAY);
+                cpp = cursor.getFloat(INDEX_SUM_CPP);
+                if (type == Type.TYPE_BILLPERIOD) {
                     limittype = -1;
-                    limit = -1;
-                    limitPos = -1;
-                    cpp = 0;
-                    cost = 0f;
-                    free = 0f;
-                    tdCount = 0;
-                    tdBa = 0f;
-                    bpCount = 0;
-                    bpBa = 0f;
-                    atCount = 0;
-                    atBa = 0f;
-                    now = -1L;
-                    hasBa = false;
-                } else {
-                    cost = cursor.getFloat(INDEX_SUM_COST);
-                    free = cursor.getFloat(INDEX_SUM_FREE);
-                    tdCount = cursor.getInt(INDEX_SUM_TD_COUNT);
-                    tdBa = cursor.getFloat(INDEX_SUM_TD_BILLED_AMOUNT);
-                    bpCount = cursor.getInt(INDEX_SUM_BP_COUNT);
-                    bpBa = cursor.getFloat(INDEX_SUM_BP_BILLED_AMOUNT);
-                    atCount = cursor.getInt(INDEX_SUM_AT_COUNT);
-                    atBa = cursor.getFloat(INDEX_SUM_AT_BILLED_AMOUNT);
-                    now = cursor.getLong(INDEX_SUM_NOW);
-                    billday = cursor.getLong(INDEX_SUM_BILLDAY);
-                    nextbillday = cursor.getLong(INDEX_SUM_NEXTBILLDAY);
-                    cpp = cursor.getFloat(INDEX_SUM_CPP);
-                    if (type == Type.TYPE_BILLPERIOD) {
-                        limittype = -1;
-                        hasBa = true;
-                        if (billperiod == BPINF) {
-                            limitPos = 0;
-                            limit = 0;
-                        } else {
-                            limit = (nextbillday - billday)
-                                    / Utils.MINUTES_IN_MILLIS;
-                            if (nextbillday - now == 1) {
-                                // fix issue: #661, skip last millisecond to
-                                // show 100% of billing period usage
-                                limitPos = limit;
-                            } else {
-                                limitPos = (now - billday) / Utils.MINUTES_IN_MILLIS;
-                            }
-                        }
+                    hasBa = true;
+                    if (billperiod == BPINF) {
+                        limitPos = 0;
+                        limit = 0;
                     } else {
-                        limittype = cursor.getInt(INDEX_LIMIT_TYPE);
-                        limit = getLimit(type, limittype,
-                                cursor.getFloat(INDEX_LIMIT));
-                        limitPos = getUsed(type, limittype, bpBa, cost);
-                        hasBa = type != Type.TYPE_MIXED
-                                || cursor.getInt(INDEX_SUM_MIXED_UNITS_CALL) != 0
-                                || cursor.getInt(INDEX_SUM_MIXED_UNITS_DATA) != 0
-                                || cursor.getInt(INDEX_SUM_MIXED_UNITS_MMS) != 0
-                                || cursor.getInt(INDEX_SUM_MIXED_UNITS_SMS) != 0;
+                        limit = (nextbillday - billday)
+                                / Utils.MINUTES_IN_MILLIS;
+                        if (nextbillday - now == 1) {
+                            // fix issue: #661, skip last millisecond to
+                            // show 100% of billing period usage
+                            limitPos = limit;
+                        } else {
+                            limitPos = (now - billday) / Utils.MINUTES_IN_MILLIS;
+                        }
                     }
+                } else {
+                    limittype = cursor.getInt(INDEX_LIMIT_TYPE);
+                    limit = getLimit(type, limittype,
+                            cursor.getFloat(INDEX_LIMIT));
+                    limitPos = getUsed(type, limittype, bpBa, cost);
+                    hasBa = type != Type.TYPE_MIXED
+                            || cursor.getInt(INDEX_SUM_MIXED_UNITS_CALL) != 0
+                            || cursor.getInt(INDEX_SUM_MIXED_UNITS_DATA) != 0
+                            || cursor.getInt(INDEX_SUM_MIXED_UNITS_MMS) != 0
+                            || cursor.getInt(INDEX_SUM_MIXED_UNITS_SMS) != 0;
                 }
                 if (limitPos <= 0) {
                     usage = 0;
@@ -3417,69 +3236,50 @@ public final class DataProvider extends ContentProvider {
             public Plan(final Cursor cursor, final SharedPreferences p) {
                 Log.d(TAG, "new Plan(" + cursor + ", " + p + ")");
                 id = cursor.getLong(INDEX_ID);
-                type = Type.values()[cursor.getInt(INDEX_TYPE)];
+                type = Type.fromInt(cursor.getInt(INDEX_TYPE));
                 name = cursor.getString(INDEX_NAME);
                 sname = cursor.getString(INDEX_SHORTNAME);
                 billperiod = BillPeriod.fromInt(cursor.getInt(INDEX_BILLPERIOD));
-                if (type == Type.TYPE_SPACING || type == Type.TYPE_TITLE) {
-                    billday = -1;
-                    nextbillday = -1;
-                    limittype = -1;
-                    limit = -1;
-                    limitPos = -1;
-                    cpp = 0;
-                    cost = 0f;
-                    free = 0f;
-                    tdCount = 0;
-                    tdBa = 0f;
-                    bpCount = 0;
-                    bpBa = 0f;
-                    atCount = 0;
-                    atBa = 0f;
-                    now = -1L;
-                    hasBa = false;
-                } else {
-                    cost = p.getFloat(PREF_PREFIX + SUM_COST + id, 0f);
-                    free = p.getFloat(PREF_PREFIX + SUM_FREE + id, 0f);
-                    tdCount = p.getInt(PREF_PREFIX + SUM_TD_COUNT + id, 0);
-                    tdBa = p.getFloat(PREF_PREFIX + SUM_TD_BILLED_AMOUNT + id, 0f);
-                    bpCount = p.getInt(PREF_PREFIX + SUM_BP_COUNT + id, 0);
-                    bpBa = p.getFloat(PREF_PREFIX + SUM_BP_BILLED_AMOUNT + id, 0f);
-                    atCount = p.getInt(PREF_PREFIX + SUM_AT_COUNT + id, 0);
-                    atBa = p.getFloat(PREF_PREFIX + SUM_AT_BILLED_AMOUNT + id, 0f);
-                    now = p.getLong(PREF_PREFIX + SUM_NOW + id, -1L);
-                    billday = p.getLong(PREF_PREFIX + SUM_BILLDAY + id, 0L);
-                    nextbillday = p.getLong(PREF_PREFIX + SUM_NEXTBILLDAY + id, 0L);
-                    cpp = p.getFloat(PREF_PREFIX + SUM_CPP + id, 0f);
+                cost = p.getFloat(PREF_PREFIX + SUM_COST + id, 0f);
+                free = p.getFloat(PREF_PREFIX + SUM_FREE + id, 0f);
+                tdCount = p.getInt(PREF_PREFIX + SUM_TD_COUNT + id, 0);
+                tdBa = p.getFloat(PREF_PREFIX + SUM_TD_BILLED_AMOUNT + id, 0f);
+                bpCount = p.getInt(PREF_PREFIX + SUM_BP_COUNT + id, 0);
+                bpBa = p.getFloat(PREF_PREFIX + SUM_BP_BILLED_AMOUNT + id, 0f);
+                atCount = p.getInt(PREF_PREFIX + SUM_AT_COUNT + id, 0);
+                atBa = p.getFloat(PREF_PREFIX + SUM_AT_BILLED_AMOUNT + id, 0f);
+                now = p.getLong(PREF_PREFIX + SUM_NOW + id, -1L);
+                billday = p.getLong(PREF_PREFIX + SUM_BILLDAY + id, 0L);
+                nextbillday = p.getLong(PREF_PREFIX + SUM_NEXTBILLDAY + id, 0L);
+                cpp = p.getFloat(PREF_PREFIX + SUM_CPP + id, 0f);
 
-                    if (type == Type.TYPE_BILLPERIOD) {
-                        limittype = -1;
-                        hasBa = true;
-                        if (billperiod == BPINF) {
-                            limitPos = 0;
-                            limit = 0;
-                        } else {
-                            limit = (nextbillday - billday)
-                                    / Utils.MINUTES_IN_MILLIS;
-                            if (nextbillday - now == 1) {
-                                // fix issue: #661, skip last millisecond to
-                                // show 100% of billing period usage
-                                limitPos = limit;
-                            } else {
-                                limitPos = (now - billday) / Utils.MINUTES_IN_MILLIS;
-                            }
-                        }
+                if (type == Type.TYPE_BILLPERIOD) {
+                    limittype = -1;
+                    hasBa = true;
+                    if (billperiod == BPINF) {
+                        limitPos = 0;
+                        limit = 0;
                     } else {
-                        limittype = cursor.getInt(INDEX_LIMIT_TYPE);
-                        limit = getLimit(type, limittype,
-                                cursor.getFloat(INDEX_LIMIT));
-                        limitPos = getUsed(type, limittype, bpBa, cost);
-                        hasBa = type != Type.TYPE_MIXED
-                                || cursor.getInt(INDEX_BASIC_MIXED_UNITS_CALL) != 0
-                                || cursor.getInt(INDEX_BASIC_MIXED_UNITS_DATA) != 0
-                                || cursor.getInt(INDEX_BASIC_MIXED_UNITS_MMS) != 0
-                                || cursor.getInt(INDEX_BASIC_MIXED_UNITS_SMS) != 0;
+                        limit = (nextbillday - billday)
+                                / Utils.MINUTES_IN_MILLIS;
+                        if (nextbillday - now == 1) {
+                            // fix issue: #661, skip last millisecond to
+                            // show 100% of billing period usage
+                            limitPos = limit;
+                        } else {
+                            limitPos = (now - billday) / Utils.MINUTES_IN_MILLIS;
+                        }
                     }
+                } else {
+                    limittype = cursor.getInt(INDEX_LIMIT_TYPE);
+                    limit = getLimit(type, limittype,
+                            cursor.getFloat(INDEX_LIMIT));
+                    limitPos = getUsed(type, limittype, bpBa, cost);
+                    hasBa = type != Type.TYPE_MIXED
+                            || cursor.getInt(INDEX_BASIC_MIXED_UNITS_CALL) != 0
+                            || cursor.getInt(INDEX_BASIC_MIXED_UNITS_DATA) != 0
+                            || cursor.getInt(INDEX_BASIC_MIXED_UNITS_MMS) != 0
+                            || cursor.getInt(INDEX_BASIC_MIXED_UNITS_SMS) != 0;
                 }
                 if (limitPos <= 0) {
                     usage = 0;
@@ -4351,7 +4151,7 @@ public final class DataProvider extends ContentProvider {
                 case 32:
                 case 33:
                     try {
-                        db.execSQL("ALTER TABLE " + Logs.TABLE + " ADD COLUMN " + Logs.MYNUMBER
+                        db.execSQL("ALTER TABLE " + ILogs.TABLE + " ADD COLUMN " + ILogs.MYNUMBER
                                 + " TEXT");
                         db.execSQL("ALTER TABLE " + Rules.TABLE + " ADD COLUMN " + Rules.MYNUMBER
                                 + " TEXT");

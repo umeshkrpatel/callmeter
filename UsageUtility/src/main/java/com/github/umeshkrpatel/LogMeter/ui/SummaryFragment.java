@@ -17,15 +17,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
 
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.github.umeshkrpatel.LogMeter.IDataDefs;
 import com.github.umeshkrpatel.LogMeter.R;
 import com.github.umeshkrpatel.LogMeter.data.DataProvider;
-import com.github.umeshkrpatel.LogMeter.IDataDefs;
 import com.github.umeshkrpatel.LogMeter.ui.prefs.Preferences;
 
 import java.util.ArrayList;
@@ -47,6 +48,8 @@ public final class SummaryFragment extends ListFragment implements OnClickListen
      * Selected plan id.
      */
     private long planId = -1;
+    private Animation viewAnimation;
+    PieChart pcCallDuration;
 
     /**
      * {@inheritDoc}
@@ -55,6 +58,7 @@ public final class SummaryFragment extends ListFragment implements OnClickListen
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+        viewAnimation = AnimationUtils.loadAnimation(this.getContext(), R.anim.chart_move);
     }
 
     /**
@@ -79,94 +83,61 @@ public final class SummaryFragment extends ListFragment implements OnClickListen
             setPlanId(planId);
         }
 
+        DataProvider.setGroupBy(DataProvider.Logs.TYPE + ", " + DataProvider.Logs.DIRECTION);
         Cursor cursor = getActivity().getContentResolver().query(DataProvider.Logs.SUM_URI,
                         DataProvider.Logs.PROJECTION_SUM, null, null, null);
 
-        PieChart pcCallDuration = (PieChart) v.findViewById(R.id.callDurationChart);
+        v.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pcCallDuration.setAnimation(viewAnimation);
+            }
+        });
+        pcCallDuration = (PieChart) v.findViewById(R.id.callDurationChart);
         PieChart pcCallCount = (PieChart) v.findViewById(R.id.callCountChart);
         PieChart pcSmsMms = (PieChart) v.findViewById(R.id.smsMmsChart);
         PieChart pcData = (PieChart) v.findViewById(R.id.dataChart);
+        pcCallDuration.setOnChartGestureListener(new ChartGestureHandler(pcCallDuration, viewAnimation));
+        pcCallCount.setOnChartGestureListener(new ChartGestureHandler(pcCallCount, viewAnimation));
+        pcSmsMms.setOnChartGestureListener(new ChartGestureHandler(pcSmsMms, viewAnimation));
+        pcData.setOnChartGestureListener(new ChartGestureHandler(pcData, viewAnimation));
 
         ArrayList<Entry> entriesCallDuration = new ArrayList<>();
         ArrayList<Entry> entriesCallCount = new ArrayList<>();
         ArrayList<Entry> entriesSmsMms = new ArrayList<>();
         ArrayList<Entry> entriesData = new ArrayList<>();
 
-        int calli = 0, smsi = 0, mmsi = 0, datai = 0;
+        ArrayList<String> legendText = new ArrayList<>();
+
+        int smsi = 0, mmsi = 0, datai = 0;
         if (cursor != null) {
             while (cursor.moveToNext()) {
-//                DataProvider.Plans.Plan plan =
-//                        new DataProvider.Plans.Plan(cursor);
-//                if (plan.name.contains("2") || plan.type < 4 || plan.type > 6 || plan.atBa <= 0) {
-//                    Log.d(TAG, "No data");
-//                } else if (plan.type == 4) {
-//                    entriesCallDuration.add(new Entry(plan.atBa, calli));
-//                    entriesCallCount.add(new Entry(plan.atCount, calli));
-//                    calli++;
-//                } else if (plan.type == 5) {
-//                    entriesSmsMms.add(new Entry(plan.atBa, smsi));
-//                    smsi++;
-//                } else if (plan.type == 6) {
-//                    entriesSmsMms.set(mmsi,
-//                            new Entry(plan.atBa + entriesSmsMms.get(mmsi).getVal(), mmsi));
-//                    mmsi++;
-//                } else if (plan.type == 7) {
-//                    entriesData.add(new Entry(plan.atBa, datai));
-//                    datai++;
-//                }
-//                if (type == null)
-//                    continue;
-//                switch (type) {
-//                    case "CallsIn":
-//                    //case "CallsIn2":
-//                    case "CallsOut":
-//                    //case "CallsOut2":
-//                        entriesCallDuration.add(new Entry(cursor.getLong(4), calli));
-//                        entriesCallCount.add(new Entry(cursor.getLong(3), calli));
-//                        calli++;
-//                        break;
-//                    case "SMSIn":
-//                    //case "SMSIn2":
-//                    case "SMSOut":
-//                    //case "SMSOut2":
-//                        entriesSmsMms.add(new Entry(cursor.getLong(3), smsi));
-//                        smsi++;
-//                        break;
-//                    case "MMSIn":
-//                    case "MMSOut":
-//                        //entriesSmsMms.set(mmsi,
-//                        //    new Entry(cursor.getLong(3) + entriesSmsMms.get(mmsi).getVal(), mmsi));
-//                        //mmsi++;
-//                        break;
-//                    case "DataInOut":
-//                        entriesData.add(new Entry(cursor.getLong(3), datai));
-//                        datai++;
-//                        break;
-//                }
                 if (cursor.getInt(0) == IDataDefs.Type.TYPE_CALL.toInt()) {
-                    entriesCallDuration.add(new Entry(cursor.getLong(3), calli));
-                    entriesCallCount.add(new Entry(cursor.getLong(2), calli));
-                    calli++;
+                    entriesCallDuration.add(new Entry(cursor.getLong(2), cursor.getInt(1)));
+                    entriesCallCount.add(new Entry(cursor.getLong(3), cursor.getInt(1)));
+                    if (cursor.getInt(1) == IDataDefs.DIRECTION_IN) {
+                        legendText.add("Incoming \n" + new ChartFormat.TimeFormatter().getFormattedValue(cursor.getLong(2)));
+                    } else {
+                        legendText.add("Outgoinf \n" + new ChartFormat.TimeFormatter().getFormattedValue(cursor.getLong(2)));
+                    }
                 } else if (cursor.getInt(0) == IDataDefs.Type.TYPE_SMS.toInt()) {
-                    entriesSmsMms.add(new Entry(cursor.getLong(3), smsi));
-                    smsi++;
+                    entriesSmsMms.add(new Entry(cursor.getLong(2), cursor.getInt(1)));
                 } else if (cursor.getInt(0) == IDataDefs.Type.TYPE_MMS.toInt()) {
-                    entriesSmsMms.set(mmsi,
-                            new Entry(cursor.getLong(3) + entriesSmsMms.get(mmsi).getVal(), mmsi));
-                    mmsi++;
+                    entriesSmsMms.add(new Entry(cursor.getLong(2), cursor.getInt(1) + 2));
+                } else if (cursor.getInt(0) == IDataDefs.Type.TYPE_DATA_WIFI.toInt()) {
+                    entriesData.add(new Entry(cursor.getLong(2), cursor.getInt(1) + 2));
                 } else if (cursor.getInt(0) == IDataDefs.Type.TYPE_DATA_MOBILE.toInt()) {
-                    entriesData.add(new Entry(cursor.getLong(3), datai));
-                    datai++;
+                    entriesData.add(new Entry(cursor.getLong(2), cursor.getInt(1)));
                 }
             }
             cursor.close();
         }
 
-        ValueFormatter formatter = new ChartFormat.CountFormatter();
-        ChartFormat.SetupPieChart(pcCallDuration, entriesCallDuration, "Call Duration", new ChartFormat.TimeFormatter());
-        ChartFormat.SetupPieChart(pcCallCount, entriesCallCount, "Call Count", formatter);
-        ChartFormat.SetupPieChart(pcSmsMms, entriesSmsMms, "SMS/MMSs", formatter);
-        ChartFormat.SetupPieChart(pcData, entriesData, "Data", new ChartFormat.ByteFormatter());
+        ChartFormat.SetupPieChart(pcCallDuration, entriesCallDuration, "Call Duration",
+                null, true, legendText);
+        ChartFormat.SetupPieChart(pcCallCount, entriesCallCount, "Call Count", null);
+        ChartFormat.SetupPieChart(pcSmsMms, entriesSmsMms, "SMS/MMSs", null);
+        ChartFormat.SetupPieChart(pcData, entriesData, "Data", null);
 
         pcCallDuration.invalidate();
         pcCallCount.invalidate();

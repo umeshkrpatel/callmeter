@@ -120,6 +120,9 @@ public final class Preferences extends PreferenceActivity implements
      * Preference's name: beginning of record.
      */
     public static final String PREFS_DATE_BEGIN = "date_begin";
+    public static final String PREFS_DATE_BEGIN_SMS = "date_begin_sms";
+    public static final String PREFS_DATE_BEGIN_MMS = "date_begin_mms";
+    public static final String PREFS_DATE_BEGIN_CALL = "date_begin_call";
     /**
      * Preference's name: delete old logs before x days.
      */
@@ -662,22 +665,22 @@ public final class Preferences extends PreferenceActivity implements
                     if (c.moveToFirst()) {
                         do {
                             w.append(DateFormat.format("yyyyMMddkkmmss;",
-                                    c.getLong(DataProvider.Logs.INDEX_DATE)));
-                            int t = c.getInt(DataProvider.Logs.INDEX_TYPE);
+                                    c.getLong(IDataDefs.ILogs.INDEX_DATE)));
+                            int t = c.getInt(IDataDefs.ILogs.INDEX_TYPE);
                             w.append(types[t]).append(";");
-                            int dir = c.getInt(DataProvider.Logs.INDEX_DIRECTION);
+                            int dir = c.getInt(IDataDefs.ILogs.INDEX_DIRECTION);
                             w.append(directions[dir]).append(";");
-                            w.append(c.getString(DataProvider.Logs.INDEX_MYNUMBER)).append(";");
-                            w.append(c.getString(DataProvider.Logs.INDEX_ROAMED)).append(";");
-                            w.append(c.getString(DataProvider.Logs.INDEX_REMOTE)).append(";");
-                            long a = c.getLong(DataProvider.Logs.INDEX_AMOUNT);
-                            float ba = c.getFloat(DataProvider.Logs.INDEX_BILL_AMOUNT);
-                            float cost = c.getFloat(DataProvider.Logs.INDEX_COST);
+                            w.append(c.getString(IDataDefs.ILogs.INDEX_MYNUMBER)).append(";");
+                            w.append(c.getString(IDataDefs.ILogs.INDEX_ROAMED)).append(";");
+                            w.append(c.getString(IDataDefs.ILogs.INDEX_REMOTE)).append(";");
+                            long a = c.getLong(IDataDefs.ILogs.INDEX_AMOUNT);
+                            float ba = c.getFloat(IDataDefs.ILogs.INDEX_BILL_AMOUNT);
+                            float cost = c.getFloat(IDataDefs.ILogs.INDEX_COST);
                             w.append(Common.formatAmount(IDataDefs.Type.fromInt(t), a, true)).append(";");
                             w.append(Common.formatAmount(IDataDefs.Type.fromInt(t), ba, true)).append(";");
                             w.append(String.format(cFormat, cost)).append(";");
-                            w.append(c.getString(DataProvider.Logs.INDEX_PLAN_NAME)).append(";");
-                            w.append(c.getString(DataProvider.Logs.INDEX_RULE_NAME)).append("\n");
+                            w.append(c.getString(IDataDefs.ILogs.INDEX_PLAN_NAME)).append(";");
+                            w.append(c.getString(IDataDefs.ILogs.INDEX_RULE_NAME)).append("\n");
                         } while (c.moveToNext());
                     }
 
@@ -726,7 +729,7 @@ public final class Preferences extends PreferenceActivity implements
             getContentResolver().delete(DataProvider.Logs.CONTENT_URI, null, null);
         } else {
             getContentResolver().delete(DataProvider.Logs.CONTENT_URI,
-                    DataProvider.Logs.TYPE + " = " + type, null);
+                    IDataDefs.ILogs.TYPE + " = " + type, null);
         }
         RuleMatcher.resetAlert(this);
     }

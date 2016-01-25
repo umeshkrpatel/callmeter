@@ -75,7 +75,7 @@ public final class RuleMatcher {
     /**
      * Internal ar for matchLog().
      */
-    private static final String WHERE = DataProvider.Logs.ID + " = ?";
+    private static final String WHERE = IDataDefs.ILogs.ID + " = ?";
     /**
      * Strip leading zeros.
      */
@@ -172,13 +172,13 @@ public final class RuleMatcher {
         Log.d(TAG, "unmatch()");
         ContentValues cv = new ContentValues();
         final ContentResolver cr = context.getContentResolver();
-        cv.put(DataProvider.Logs.PLAN_ID, IDataDefs.NO_ID);
-        cv.put(DataProvider.Logs.RULE_ID, IDataDefs.NO_ID);
+        cv.put(IDataDefs.ILogs.PLAN_ID, IDataDefs.NO_ID);
+        cv.put(IDataDefs.ILogs.RULE_ID, IDataDefs.NO_ID);
         // reset all but manually set plans
-        cr.update(DataProvider.Logs.CONTENT_URI, cv, DataProvider.Logs.RULE_ID
-                        + " is null or NOT (" + DataProvider.Logs.RULE_ID + " = "
+        cr.update(DataProvider.Logs.CONTENT_URI, cv, IDataDefs.ILogs.RULE_ID
+                        + " is null or NOT (" + IDataDefs.ILogs.RULE_ID + " = "
                         + IDataDefs.NOT_FOUND
-                        + " AND " + DataProvider.Logs.PLAN_ID + " != " + IDataDefs.NOT_FOUND
+                        + " AND " + IDataDefs.ILogs.PLAN_ID + " != " + IDataDefs.NOT_FOUND
                         + ")",
                 null
         );
@@ -212,8 +212,8 @@ public final class RuleMatcher {
             Log.e(TAG, "matchLog(cr, ops, null)");
             return false;
         }
-        final long lid = log.getLong(DataProvider.Logs.INDEX_ID);
-        final int t = log.getInt(DataProvider.Logs.INDEX_TYPE);
+        final long lid = log.getLong(IDataDefs.ILogs.INDEX_ID);
+        final int t = log.getInt(IDataDefs.ILogs.INDEX_TYPE);
         Log.d(TAG, "matchLog(cr, " + lid + ")");
         boolean matched = false;
         if (rules == null) {
@@ -239,14 +239,14 @@ public final class RuleMatcher {
                 final float bc = p.getCost(log, ba);
                 ContentProviderOperation op = ContentProviderOperation
                         .newUpdate(DataProvider.Logs.CONTENT_URI)
-                        .withValue(DataProvider.Logs.PLAN_ID, pid)
-                        .withValue(DataProvider.Logs.RULE_ID, rid)
-                        .withValue(DataProvider.Logs.BILL_AMOUNT, ba)
-                        .withValue(DataProvider.Logs.COST, bc)
-                        .withValue(DataProvider.Logs.FREE, p.getFree(log, bc))
+                        .withValue(IDataDefs.ILogs.PLAN_ID, pid)
+                        .withValue(IDataDefs.ILogs.RULE_ID, rid)
+                        .withValue(IDataDefs.ILogs.BILL_AMOUNT, ba)
+                        .withValue(IDataDefs.ILogs.COST, bc)
+                        .withValue(IDataDefs.ILogs.FREE, p.getFree(log, bc))
                         .withSelection(WHERE, new String[]{String.valueOf(lid)})
                         .build();
-                p.updatePlan(ba, bc, IDataDefs.Type.values()[t]);
+                p.updatePlan(ba, bc, IDataDefs.Type.fromInt(t));
                 ops.add(op);
                 matched = true;
                 break;
@@ -255,8 +255,8 @@ public final class RuleMatcher {
         if (!matched) {
             ContentProviderOperation op = ContentProviderOperation
                     .newUpdate(DataProvider.Logs.CONTENT_URI)
-                    .withValue(DataProvider.Logs.PLAN_ID, IDataDefs.NOT_FOUND)
-                    .withValue(DataProvider.Logs.RULE_ID, IDataDefs.NOT_FOUND)
+                    .withValue(IDataDefs.ILogs.PLAN_ID, IDataDefs.NOT_FOUND)
+                    .withValue(IDataDefs.ILogs.RULE_ID, IDataDefs.NOT_FOUND)
                     .withSelection(WHERE, new String[]{String.valueOf(lid)})
                     .build();
             ops.add(op);
@@ -292,7 +292,7 @@ public final class RuleMatcher {
             return;
         }
         final Cursor log = cr.query(DataProvider.Logs.CONTENT_URI, DataProvider.Logs.PROJECTION,
-                DataProvider.Logs.ID + " = ?", new String[]{String.valueOf(lid)}, null);
+                IDataDefs.ILogs.ID + " = ?", new String[]{String.valueOf(lid)}, null);
         if (log == null) {
             return;
         }
@@ -301,17 +301,17 @@ public final class RuleMatcher {
             log.close();
             return;
         }
-        final int t = log.getInt(DataProvider.Logs.INDEX_TYPE);
+        final int t = log.getInt(IDataDefs.ILogs.INDEX_TYPE);
         p.checkBillday(log);
         final ContentValues cv = new ContentValues();
-        cv.put(DataProvider.Logs.PLAN_ID, pid);
+        cv.put(IDataDefs.ILogs.PLAN_ID, pid);
         final float ba = p.getBilledAmount(log);
-        cv.put(DataProvider.Logs.BILL_AMOUNT, ba);
+        cv.put(IDataDefs.ILogs.BILL_AMOUNT, ba);
         final float bc = p.getCost(log, ba);
-        cv.put(DataProvider.Logs.COST, bc);
-        cv.put(DataProvider.Logs.FREE, p.getFree(log, bc));
-        p.updatePlan(ba, bc, IDataDefs.Type.values()[t]);
-        cr.update(DataProvider.Logs.CONTENT_URI, cv, DataProvider.Logs.ID + " = ?",
+        cv.put(IDataDefs.ILogs.COST, bc);
+        cv.put(IDataDefs.ILogs.FREE, p.getFree(log, bc));
+        p.updatePlan(ba, bc, IDataDefs.Type.fromInt(t));
+        cr.update(DataProvider.Logs.CONTENT_URI, cv, IDataDefs.ILogs.ID + " = ?",
                 new String[]{String.valueOf(lid)});
         log.close();
     }
@@ -330,8 +330,8 @@ public final class RuleMatcher {
         load(context);
         final ContentResolver cr = context.getContentResolver();
         final Cursor cursor = cr.query(DataProvider.Logs.CONTENT_URI, DataProvider.Logs.PROJECTION,
-                DataProvider.Logs.PLAN_ID + " = " + IDataDefs.NO_ID, null,
-                DataProvider.Logs.DATE + " ASC");
+                IDataDefs.ILogs.PLAN_ID + " = " + IDataDefs.NO_ID, null,
+                IDataDefs.ILogs.DATE + " ASC");
         if (cursor != null && cursor.moveToFirst()) {
             final int l = cursor.getCount();
             Handler h;
@@ -657,7 +657,7 @@ public final class RuleMatcher {
         boolean match(final ContentResolver cr, final Cursor log) {
             Log.d(TAG, "what: " + what);
             final IDataDefs.Type t =
-                    IDataDefs.Type.values()[log.getInt(DataProvider.Logs.INDEX_TYPE)];
+                    IDataDefs.Type.fromInt(log.getInt(IDataDefs.ILogs.INDEX_TYPE));
             Log.d(TAG, "type: " + t);
             boolean ret = false;
 
@@ -666,7 +666,7 @@ public final class RuleMatcher {
                 // rule.roamed=1: no
                 // log.roamed=0: not roamed
                 // log.roamed=1: roamed
-                ret = log.getInt(DataProvider.Logs.INDEX_ROAMED) != roamed;
+                ret = log.getInt(IDataDefs.ILogs.INDEX_ROAMED) != roamed;
                 Log.d(TAG, "ret after romaing: " + ret);
                 if (!ret) {
                     return false;
@@ -674,7 +674,7 @@ public final class RuleMatcher {
             }
 
             if (direction >= 0 && direction != DataProvider.Rules.NO_MATTER) {
-                ret = log.getInt(DataProvider.Logs.INDEX_DIRECTION) == direction;
+                ret = log.getInt(IDataDefs.ILogs.INDEX_DIRECTION) == direction;
                 Log.d(TAG, "ret after direction: " + ret);
                 if (!ret) {
                     return false;
@@ -685,7 +685,7 @@ public final class RuleMatcher {
                 case DataProvider.Rules.WHAT_CALL:
                     ret = (t == IDataDefs.Type.TYPE_CALL);
                     if (ret && issipcall != DataProvider.Rules.NO_MATTER) {
-                        final long d = log.getLong(DataProvider.Logs.INDEX_DATE);
+                        final long d = log.getLong(IDataDefs.ILogs.INDEX_DATE);
                         Log.d(TAG, "match sipcall: " + issipcall);
                         S1[0] = String.valueOf(d);
                         if (issipcall == 1) {
@@ -721,7 +721,7 @@ public final class RuleMatcher {
                 case DataProvider.Rules.WHAT_SMS:
                     ret = (t == IDataDefs.Type.TYPE_SMS);
                     if (ret && iswebsms != DataProvider.Rules.NO_MATTER) {
-                        final long d = log.getLong(DataProvider.Logs.INDEX_DATE);
+                        final long d = log.getLong(IDataDefs.ILogs.INDEX_DATE);
                         Log.d(TAG, "match websms: " + iswebsms);
                         S1[0] = String.valueOf(d);
                         if (iswebsms == 1) {
@@ -775,7 +775,7 @@ public final class RuleMatcher {
 
             if (myNumber != null) {
                 // FIXME: do equals?
-                ret = myNumber.equals(log.getString(DataProvider.Logs.INDEX_MYNUMBER));
+                ret = myNumber.equals(log.getString(IDataDefs.ILogs.INDEX_MYNUMBER));
                 Log.d(TAG, "ret after mynumber: " + ret);
                 if (!ret) {
                     return false;
@@ -911,7 +911,7 @@ public final class RuleMatcher {
              * @return true if log matches
              */
             boolean match(final Cursor log) {
-                String number = log.getString(DataProvider.Logs.INDEX_REMOTE);
+                String number = log.getString(IDataDefs.ILogs.INDEX_REMOTE);
                 if (number == null || number.length() == 0) {
                     return false;
                 }
@@ -1048,7 +1048,7 @@ public final class RuleMatcher {
              * @return true if log matches
              */
             boolean match(final Cursor log) {
-                long date = log.getLong(DataProvider.Logs.INDEX_DATE);
+                long date = log.getLong(IDataDefs.ILogs.INDEX_DATE);
                 CAL.setTimeInMillis(date);
                 final int d = (CAL.get(Calendar.DAY_OF_WEEK) - Calendar.SUNDAY) % SUN;
                 final int h = CAL.get(Calendar.HOUR_OF_DAY) + 1;
@@ -1193,7 +1193,7 @@ public final class RuleMatcher {
             cResolver = cr;
             id = cursor.getInt(DataProvider.Plans.INDEX_ID);
             name = cursor.getString(DataProvider.Plans.INDEX_NAME);
-            type = IDataDefs.Type.values()[cursor.getInt(DataProvider.Plans.INDEX_TYPE)];
+            type = IDataDefs.Type.fromInt(cursor.getInt(DataProvider.Plans.INDEX_TYPE));
             limitType = cursor.getInt(DataProvider.Plans.INDEX_LIMIT_TYPE);
             final long l = DataProvider.Plans.getLimit(type, limitType,
                     cursor.getFloat(DataProvider.Plans.INDEX_LIMIT));
@@ -1297,7 +1297,7 @@ public final class RuleMatcher {
             }
 
             // check whether date is in current bill period
-            final long d = log.getLong(DataProvider.Logs.INDEX_DATE);
+            final long d = log.getLong(IDataDefs.ILogs.INDEX_DATE);
             if (currentBillday == null || nextBillday < d
                     || d < currentBillday.getTimeInMillis()) {
                 final Calendar now = Calendar.getInstance();
@@ -1423,9 +1423,9 @@ public final class RuleMatcher {
          * @return billed amount.
          */
         float getBilledAmount(final Cursor log) {
-            long amount = log.getLong(DataProvider.Logs.INDEX_AMOUNT);
+            long amount = log.getLong(IDataDefs.ILogs.INDEX_AMOUNT);
             final IDataDefs.Type t =
-                    IDataDefs.Type.values()[log.getInt(DataProvider.Logs.INDEX_TYPE)];
+                    IDataDefs.Type.fromInt(log.getInt(IDataDefs.ILogs.INDEX_TYPE));
             float ret;
             switch (t) {
                 case TYPE_CALL:
@@ -1474,7 +1474,7 @@ public final class RuleMatcher {
          */
         float getCost(final Cursor log, final float bAmount) {
             final IDataDefs.Type t =
-                    IDataDefs.Type.values()[log.getInt(DataProvider.Logs.INDEX_TYPE)];
+                    IDataDefs.Type.fromInt(log.getInt(IDataDefs.ILogs.INDEX_TYPE));
             final IDataDefs.Type pt = type;
 
             float ret = 0f;

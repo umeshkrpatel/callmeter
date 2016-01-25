@@ -165,7 +165,7 @@ public final class SimplePreferences extends PreferenceActivity implements
         Cursor c = cr
                 .query(DataProvider.Plans.CONTENT_URI, DataProvider.Plans.PROJECTION,
                         SELECTION_TYPE,
-                        new String[]{String.valueOf(IDataDefs.Type.TYPE_BILLPERIOD)}, null);
+                        new String[]{String.valueOf(IDataDefs.Type.TYPE_BILLPERIOD.toInt())}, null);
         if (c == null)
             return;
 
@@ -207,7 +207,7 @@ public final class SimplePreferences extends PreferenceActivity implements
 
         // data
         c = cr.query(DataProvider.Plans.CONTENT_URI, DataProvider.Plans.PROJECTION, SELECTION_TYPE,
-                new String[]{String.valueOf(IDataDefs.Type.TYPE_DATA_MOBILE)}, null);
+                new String[]{String.valueOf(IDataDefs.Type.TYPE_DATA_MOBILE.toInt())}, null);
         if (c == null)
             return;
 
@@ -295,7 +295,7 @@ public final class SimplePreferences extends PreferenceActivity implements
         cv.put(DataProvider.Plans.BILLDAY, c.getTimeInMillis());
         cv.put(DataProvider.Plans.BILLPERIOD, IDataDefs.BillPeriod.MONTH01.toInt());
         cr.update(DataProvider.Plans.CONTENT_URI, cv, SELECTION_TYPE,
-                new String[]{String.valueOf(IDataDefs.Type.TYPE_BILLPERIOD)});
+                new String[]{String.valueOf(IDataDefs.Type.TYPE_BILLPERIOD.toInt())});
 
         // calls
         savePrefsCall(p, cr, 16, "");
@@ -335,7 +335,7 @@ public final class SimplePreferences extends PreferenceActivity implements
         cv.put(DataProvider.Plans.COST_PER_AMOUNT1, f);
         cv.put(DataProvider.Plans.COST_PER_AMOUNT2, f);
         cr.update(DataProvider.Plans.CONTENT_URI, cv, SELECTION_TYPE,
-                new String[]{String.valueOf(IDataDefs.Type.TYPE_DATA_MOBILE)});
+                new String[]{String.valueOf(IDataDefs.Type.TYPE_DATA_MOBILE.toInt())});
     }
 
     @SuppressWarnings("deprecation")

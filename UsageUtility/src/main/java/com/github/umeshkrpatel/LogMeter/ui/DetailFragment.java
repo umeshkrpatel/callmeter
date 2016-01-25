@@ -125,7 +125,7 @@ public class DetailFragment extends Fragment {
                     getActivity().getContentResolver().query(
                             DataProvider.Logs.SUM_URI,
                             DataProvider.Logs.PROJECTION_SUM,
-                            DataProvider.Logs.REMOTE + " LIKE ? ", new String[]{mNumber}, null);
+                            IDataDefs.ILogs.REMOTE + " LIKE ? ", new String[]{mNumber}, null);
             if (cursor == null)
                 return;
 
@@ -154,8 +154,8 @@ public class DetailFragment extends Fragment {
                     getActivity().getContentResolver().query(
                             DataProvider.Logs.CONTENT_URI,
                             DataProvider.Logs.PROJECTION_DETAILS,
-                            DataProvider.Logs.REMOTE + " LIKE ? ", new String[]{mNumber},
-                            DataProvider.Logs.DATE + " DESC");
+                            IDataDefs.ILogs.REMOTE + " LIKE ? ", new String[]{mNumber},
+                            IDataDefs.ILogs.DATE + " DESC");
             ArrayList<BarEntry> barCallsIn = new ArrayList<>();
             ArrayList<BarEntry> barSmsIn = new ArrayList<>();
             ArrayList<BarEntry> barCallsOut = new ArrayList<>();
